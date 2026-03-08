@@ -13,17 +13,6 @@
 #
 ---
 include:
-on: 
-  workflow_dispatch:
-  push:
-    paths:
-      - config/**
-      - boards/**
-      - build.yaml
- 
-jobs:
-  build:
-    uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@v0.3 
   - board: nice_nano_v2
     shield: corne_left nice_oled
     snippet: studio-rpc-usb-uart
