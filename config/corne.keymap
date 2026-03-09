@@ -108,7 +108,7 @@
                 <&macro_press>,
                 <&lt 6 LEFT>,
                 <&macro_tap>,
-                <&rgb_ug RGB_COLOR_HSB(116,100,15)>,
+                <&rgb_ug RGB_COLOR_HSB(116,100,5)>,
                 <&macro_pause_for_release>,
                 <&macro_release>,
                 <&lt 6 LEFT>,
@@ -126,7 +126,7 @@
                 <&lt 1 SPACE>,
                 <&macro_wait_time 50>,
                 <&macro_tap>,
-                <&rgb_ug RGB_COLOR_HSB(183,100,12)>,
+                <&rgb_ug RGB_COLOR_HSB(183,75,12)>,
                 <&macro_pause_for_release>,
                 <&macro_release>,
                 <&lt 1 SPACE>,
@@ -149,7 +149,7 @@
                 <&macro_release>,
                 <&lt 2 ENTER>,
                 <&macro_tap>,
-                <&rgb_ug RGB_COLOR_HSB(19,100,27)>;
+                <&rgb_ug RGB_COLOR_HSB(19,75,27)>;
 
             label = "KPAD_LED";
         };
@@ -170,7 +170,7 @@
                 <&rgb_ug RGB_COLOR_HSB(19,100,27)>;
 
             label = "XTRA_LED";
-        };
+        };  
 
         tgame_led: tgame_led {
             compatible = "zmk,behavior-macro";
@@ -184,7 +184,7 @@
                 <&macro_release>,
                 <&mo 6>,
                 <&macro_tap>,
-                <&rgb_ug RGB_COLOR_HSB(19,100,23)>;
+                <&rgb_ug RGB_COLOR_HSB(0,100,50)>;
 
             label = "TGAME_LED";
         };
