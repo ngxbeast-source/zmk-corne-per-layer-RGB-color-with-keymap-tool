@@ -124,7 +124,6 @@
             bindings =
                 <&macro_press>,
                 <&lt 1 SPACE>,
-                <&macro_wait_time 50>,
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(183,75,12)>,
                 <&macro_pause_for_release>,
@@ -142,7 +141,6 @@
             bindings =
                 <&macro_press>,
                 <&lt 2 ENTER>,
-                <&macro_wait_time 50>,
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(237,100,13)>,
                 <&macro_pause_for_release>,
@@ -160,7 +158,6 @@
             bindings =
                 <&macro_press>,
                 <&lt 3 DEL>,
-                <&macro_wait_time 50>,
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(273,67,19)>,
                 <&macro_pause_for_release>,
