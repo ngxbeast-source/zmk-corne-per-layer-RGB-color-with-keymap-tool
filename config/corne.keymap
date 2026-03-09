@@ -150,7 +150,7 @@
                 <&macro_release>,
                 <&lt 2 ENTER>,
                 <&macro_tap>,
-                <&rgb_ug RGB_COLOR_HSB(19,75,27)>;
+                <&rgb_ug RGB_COLOR_HSB(19,100,27)>;
 
             label = "KPAD_LED";
         };
