@@ -92,7 +92,7 @@
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
             bindings =
-                <&macro_wait_time 750>,
+                <&macro_wait_time 250>,
                 <&macro_press>,
                 <&tog 4 &rgb_ug RGB_COLOR_HSB(0,100,50)>,
                 <&macro_press>,
@@ -111,8 +111,9 @@
                 <&rgb_ug RGB_COLOR_HSB(116,100,50)>,
                 <&macro_pause_for_release>,
                 <&macro_release>,
-                <&mo 6 &rgb_ug RGB_COLOR_HSB(32,100,50)>,
-                <&macro_tap>;
+                <&mo 6>,
+                <&macro_tap>,
+                <&rgb_ug RGB_COLOR_HSB(19,100,23)>;
 
             label = "TOGL_LED";
         };
