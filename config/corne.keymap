@@ -52,7 +52,7 @@
             bindings = <&macro_to_test_hold_tap>, <&kp>;
 
             #binding-cells = <2>;
-            tapping-term-ms = <25>;
+            tapping-term-ms = <100>;
         };
     };
 
