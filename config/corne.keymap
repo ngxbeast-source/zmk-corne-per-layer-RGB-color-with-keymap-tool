@@ -95,7 +95,7 @@
                 <&macro_wait_time 50>,
                 <&macro_press>,
                 <&tog 4>,
-                <&macro_wait_time 50>,
+                <&macro_tap_time 10>,
                 <&macro_press>,
                 <&rgb_ug RGB_COLOR_HSB(0,100,50)>;
 
