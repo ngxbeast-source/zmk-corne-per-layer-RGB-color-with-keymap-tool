@@ -111,6 +111,7 @@
                 <&rgb_ug RGB_COLOR_HSB(116,100,5)>,
                 <&macro_pause_for_release>,
                 <&macro_release>,
+                <&macro_tap_time 25>,
                 <&lt 6 LEFT>,
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(19,100,27)>;
