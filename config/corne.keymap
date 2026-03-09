@@ -157,12 +157,12 @@
             #binding-cells = <0>;
             bindings =
                 <&macro_press>,
-                <&lt 2 DEL>,
+                <&lt 3 DEL>,
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(273,67,26)>,
                 <&macro_pause_for_release>,
                 <&macro_release>,
-                <&lt 2 DEL>,
+                <&lt 3 DEL>,
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(32,100,50)>;
 
