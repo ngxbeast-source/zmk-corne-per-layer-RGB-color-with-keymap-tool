@@ -96,6 +96,7 @@
                 <&macro_press>,
                 <&tog 4 &rgb_ug RGB_COLOR_HSB(0,100,50)>,
                 <&macro_release>;
+                <&tog 4 &rgb_ug RGB_COLOR_HSB(0,100,50)>,              
 
             label = "TO_GAME";
         };
@@ -112,7 +113,7 @@
                 <&macro_release>,
                 <&mo 6>,
                 <&macro_tap>,
-                <&rgb_ug RGB_COLOR_HSB(30,100,50)>;
+                <&rgb_ug RGB_COLOR_HSB(32,100,50)>;
 
             label = "TOGL_LED";
         };
