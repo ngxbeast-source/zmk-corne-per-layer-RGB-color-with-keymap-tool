@@ -92,10 +92,11 @@
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
             bindings =
-                <&macro_wait_time 250>,
+                <&macro_wait_time 50>,
                 <&macro_press>,
+                <&macro_wait_time 50>,
                 <&tog 4 &rgb_ug RGB_COLOR_HSB(0,100,50)>,
-                <&macro_press>,
+                <&macro_release>,
                 <&rgb_ug RGB_COLOR_HSB(0,100,50)>;
 
             label = "TO_GAME";
