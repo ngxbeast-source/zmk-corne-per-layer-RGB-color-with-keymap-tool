@@ -98,7 +98,7 @@
             #binding-cells = <0>;
             bindings =
                 <&macro_pause_for_release>,
-                <&macro_wait_time 100>,
+                <&macro_wait_time 550>,
                 <&macro_tap_time 150>,
                 <&macro_press>,
                 <&tog 4 &rgb_ug RGB_COLOR_HSB(0,100,50)>;
