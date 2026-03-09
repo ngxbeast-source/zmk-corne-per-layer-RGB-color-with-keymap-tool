@@ -191,7 +191,7 @@
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(19,100,27)>;
 
-            label = "Toggle Layer, LEDs";
+            label = "Toggle Layer LEDs";
         };
 
         nmrw_led_x: nmrw_led_x {
@@ -225,7 +225,7 @@
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(19,100,27)>;
 
-            label = "Key Pad Layer, LEDs";
+            label = "Key Pad Layer LEDs";
         };
 
         xtra_led: xtra_led {
@@ -242,7 +242,7 @@
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(19,100,27)>;
 
-            label = "Extra Layer, LEDs";
+            label = "Extra Layer LEDs";
         };
 
         tgame_led: tgame_led {
@@ -259,7 +259,7 @@
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(0,100,50)>;
 
-            label = "Toggle Layer, From Game LayerLED";
+            label = "Toggle Layer From Game LayerLED";
         };
 
         nmrw_led: nmrw_led {
@@ -276,7 +276,7 @@
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(19,100,27)>;
 
-            label = "NumberRow Layer, LEDs";
+            label = "NumberRow Layer LEDs";
         };
 
         gfun_led: gfun_led {
