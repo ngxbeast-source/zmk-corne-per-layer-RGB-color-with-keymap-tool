@@ -91,7 +91,7 @@
         to_game: to_game {
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
-            bindings = <&tog 4 &rgb_ug RGB_COLOR_HSB(35,100,50)>;
+            bindings = <&tog 4 &rgb_ug RGB_COLOR_HSB(0,100,50)>;
             label = "TO_GAME";
         };
 
@@ -99,10 +99,9 @@
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
             bindings =
-                <&macro_press>,
                 <&mo 6 &rgb_ug RGB_COLOR_HSB(116,100,35)>,
-                <&macro_tap>,
-                <&kp LEFT>;
+                <&macro_release>,
+                <&rgb_ug RGB_COLOR_HSB(58,100,37)>;
 
             label = "TGL_LED";
         };
