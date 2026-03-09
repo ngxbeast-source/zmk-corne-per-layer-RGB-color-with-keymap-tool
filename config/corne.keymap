@@ -119,80 +119,73 @@
         compatible = "zmk,keymap";
 
         abc {
+        display-name = "ABC";
             bindings = <
 &kp ESC         &kp Q  &kp W           &kp E        &kp R             &kp T          &kp Y      &kp U         &kp I          &kp O            &kp P               &kp BSPC
 &kp LEFT_SHIFT  &kp A  &hm LEFT_ALT S  &hm LCTRL D  &hm LEFT_SHIFT F  &kp G          &kp H      &hm RSHIFT J  &hm RCTRL K    &hm RIGHT_ALT L  &hm RGUI SEMICOLON  &kp SQT
 &kp LCTRL       &kp Z  &kp X           &kp C        &kp V             &kp B          &kp N      &kp M         &kp COMMA      &kp DOT          &kp FSLH            &kp ESC
                                        &kp TAB      &lt 1 SPACE       &lt 2 ENTER    &lt 3 DEL  &tgl_led      &hm F11 RIGHT
             >;
-
-            label = "ABC";
         };
 
         nmrw {
+        display-name = "NMRW";
             bindings = <
 &kp ESC  &kp N1  &kp N2         &kp N3    &kp N4       &kp N5    &kp N6     &kp N7        &kp N8         &kp N9         &kp N0    &kp BSPC
 &trans   &trans  &kp PAGE_DOWN  &kp UP    &kp PAGE_UP  &kp F5    &kp MINUS  &kp EQUAL     &trans         &trans         &kp SQT   &kp GRAVE
 &trans   &trans  &kp LEFT       &kp DOWN  &kp RIGHT    &trans    &kp LBKT   &kp RBKT      &kp LS(PG_UP)  &kp LS(PG_DN)  &kp BSLH  &kp DEL
                                 &trans    &trans       &trans    &trans     &kp LC(LEFT)  &kp LC(RIGHT)
             >;
-
-            label = "NMRW";
         };
 
         k_pd {
+        display-name = "KPAD";
             bindings = <
 &kp ESCAPE  &trans  &trans        &trans    &trans         &trans           &kp KP_N7       &kp KP_N8  &kp KP_N9  &trans    &trans    &kp BSPC
 &kp CAPS    &trans  &kp HOME      &kp UP    &kp END        &kp PG_UP        &kp KP_N4       &kp KP_N5  &kp KP_N6  &trans    &kp UP    &trans
 &trans      &trans  &kp LC(LEFT)  &kp DOWN  &kp LC(RIGHT)  &kp PAGE_DOWN    &kp KP_N1       &kp KP_N2  &kp KP_N3  &kp LEFT  &kp DOWN  &kp RIGHT
                                   &trans    &trans         &trans           &kp KP_NUMLOCK  &trans     &kp KP_N0
             >;
-
-            label = "KPAD";
         };
 
         xtra {
+        display-name = "XTRA";
             bindings = <
 &bt BT_CLR          &bt BT_SEL 0     &bt BT_SEL 1      &bt BT_SEL 2  &bt BT_SEL 3    &trans            &rgb_ug RGB_EFF  &trans           &hm C_PLAY_PAUSE C_REWIND  &kp C_FAST_FORWARD  &trans    &rgb_ug RGB_TOG
 &out OUT_TOG        &trans           &kp LS(LA(DOWN))  &kp UP        &kp LS(LA(UP))  &trans            &rgb_ug RGB_HUI  &rgb_ug RGB_HUD  &hm K_MUTE C_VOL_DN        &kp C_VOLUME_UP     &kp UP    &trans
 &kp LA(LC(ESCAPE))  &kp LA(LC(DEL))  &kp LEFT          &kp DOWN      &kp RIGHT       &trans            &rgb_ug RGB_SAD  &rgb_ug RGB_SAI  &trans                     &kp LEFT            &kp DOWN  &kp RIGHT
                                                        &trans        &trans          &studio_unlock    &trans           &rgb_ug RGB_BRD  &rgb_ug RGB_BRI
             >;
-
-            label = "XTRA";
         };
 
         game {
+        display-name = "GAME";
             bindings = <
 &kp TAB    &kp Q  &kp W  &kp E         &kp R      &kp T          &kp Y    &kp U  &kp I          &kp O          &kp P     &kp BSPC
 &kp LSHFT  &kp A  &kp S  &kp D         &kp F      &kp G          &kp H    &kp J  &kp K          &kp L          &kp SEMI  &kp SQT
 &kp LCTRL  &kp Z  &kp X  &kp C         &kp V      &kp B          &kp N    &kp M  &kp LS(PG_DN)  &kp LS(PG_UP)  &kp FSLH  &kp ESC
                          &kp LEFT_ALT  &kp SPACE  &lt 5 ENTER    &kp DEL  &mo 6  &trans
             >;
-
-            label = "GAME";
         };
 
         gfun {
+        display-name = "GFUN";
             bindings = <
 &kp ESCAPE  &kp N1  &kp W   &kp N2  &kp N3  &none    &kp KP_N7   &kp KP_N8  &kp KP_N9     &kp KP_DIVIDE  &kp KP_MULTIPLY  &kp KP_MINUS
 &none       &kp A   &kp S   &kp D   &kp N4  &none    &kp KP_N4   &kp KP_N5  &kp KP_N6     &none          &none            &kp KP_PLUS
 &none       &kp F1  &kp F2  &kp F3  &kp F4  &none    &kp KP_N1   &kp KP_N2  &none         &none          &none            &kp PAGE_UP
                             &none   &none   &none    &kp KP_DOT  &kp KP_N3  &kp KP_ENTER
             >;
-
-            label = "GFUN";
         };
 
         togl {
+        display-name = "TOGL";
             bindings = <
 &to_game  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
 &none     &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
 &none     &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
                         &none  &none  &none    &none  &none  &none
             >;
-
-            label = "TOGL";
         };
 
         extra1 { status = "reserved"; };
