@@ -35,6 +35,25 @@
             global-quick-tap;
             quick-tap-ms = <400>;
         };
+
+        macro_hold_tap_test: macro_hold_tap_test {
+            compatible = "zmk,behavior-hold-tap";
+            label = "MACRO_HOLD_TAP_TEST";
+            bindings = <&layer_led_test>, <&kp>;
+
+            #binding-cells = <2>;
+            flavor = "balanced";
+            tapping-term-ms = <20>;
+        };
+
+        hold_tap_test2: hold_tap_test2 {
+            compatible = "zmk,behavior-hold-tap";
+            label = "HOLD_TAP_TEST2";
+            bindings = <&macro_to_test_hold_tap>, <&kp>;
+
+            #binding-cells = <2>;
+            tapping-term-ms = <25>;
+        };
     };
 
     combos {
@@ -89,6 +108,16 @@
         game_combo {
             bindings = <&to_game>;
             key-positions = <0 11>;
+        };
+
+        bootload_L {
+            bindings = <&bootloader>;
+            key-positions = <0 5>;
+        };
+
+        bootload_R {
+            bindings = <&bootloader>;
+            key-positions = <6 11>;
         };
     };
 
@@ -191,6 +220,30 @@
 
             label = "TGAME_LED";
         };
+
+        layer_led_test: layer_led_test {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&mo 1 &rgb_ug RGB_COLOR_HSB(0,100,48)>;
+            label = "LAYER_LED_TEST";
+        };
+
+        macro_to_test_hold_tap: macro_to_test_hold_tap {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings =
+                <&macro_press>,
+                <&mo 1>,
+                <&macro_tap>,
+                <&rgb_ug RGB_COLOR_HSB(183,75,12)>,
+                <&macro_pause_for_release>,
+                <&macro_release>,
+                <&mo 1>,
+                <&macro_tap>,
+                <&rgb_ug RGB_COLOR_HSB(19,100,27)>;
+
+            label = "MACRO_TO_TEST_HOLD_TAP";
+        };
     };
 
     keymap {
@@ -199,10 +252,10 @@
         abc {
             display-name = "ABC";
             bindings = <
-&kp ESC         &kp Q  &kp W           &kp E        &kp R             &kp T        &kp Y      &kp U         &kp I          &kp O            &kp P               &kp BSPC
-&kp LEFT_SHIFT  &kp A  &hm LEFT_ALT S  &hm LCTRL D  &hm LEFT_SHIFT F  &kp G        &kp H      &hm RSHIFT J  &hm RCTRL K    &hm RIGHT_ALT L  &hm RGUI SEMICOLON  &kp SQT
-&kp LCTRL       &kp Z  &kp X           &kp C        &kp V             &kp B        &kp N      &kp M         &kp COMMA      &kp DOT          &kp FSLH            &kp ESC
-                                       &kp TAB      &nmrw_led         &kpad_led    &xtra_led  &hm F12 LEFT  &hm F11 RIGHT
+&kp ESC         &kp Q  &kp W           &kp E        &kp R                    &kp T        &kp Y      &kp U         &kp I          &kp O            &kp P               &kp BSPC
+&kp LEFT_SHIFT  &kp A  &hm LEFT_ALT S  &hm LCTRL D  &hm LEFT_SHIFT F         &kp G        &kp H      &hm RSHIFT J  &hm RCTRL K    &hm RIGHT_ALT L  &hm RGUI SEMICOLON  &kp SQT
+&kp LCTRL       &kp Z  &kp X           &kp C        &kp V                    &kp B        &kp N      &kp M         &kp COMMA      &kp DOT          &kp FSLH            &kp ESC
+                                       &kp TAB      &hold_tap_test2 0 SPACE  &kpad_led    &xtra_led  &hm F12 LEFT  &hm F11 RIGHT
             >;
         };
 
