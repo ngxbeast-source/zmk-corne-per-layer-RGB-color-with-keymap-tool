@@ -95,10 +95,9 @@
                 <&macro_pause_for_release>,
                 <&macro_tap_time 50>,
                 <&macro_press>,
-                <&tog 4>,
+                <&tog 4 &rgb_ug RGB_COLOR_HSB(0,100,50)>,
                 <&macro_tap_time 150>,
-                <&macro_press>,
-                <&rgb_ug RGB_COLOR_HSB(0,100,50)>;
+                <&macro_press>;
 
             label = "TO_GAME";
         };
@@ -108,12 +107,12 @@
             #binding-cells = <0>;
             bindings =
                 <&macro_press>,
-                <&mo 6>,
+                <&lt 6 LEFT>,
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(116,100,50)>,
                 <&macro_pause_for_release>,
                 <&macro_release>,
-                <&mo 6>,
+                <&lt 6 LEFT>,
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(19,100,23)>;
 
@@ -181,10 +180,10 @@
         abc {
             display-name = "ABC";
             bindings = <
-&kp ESC         &kp Q  &kp W           &kp E        &kp R             &kp T          &kp Y      &kp U         &kp I          &kp O            &kp P               &kp BSPC
-&kp LEFT_SHIFT  &kp A  &hm LEFT_ALT S  &hm LCTRL D  &hm LEFT_SHIFT F  &kp G          &kp H      &hm RSHIFT J  &hm RCTRL K    &hm RIGHT_ALT L  &hm RGUI SEMICOLON  &kp SQT
-&kp LCTRL       &kp Z  &kp X           &kp C        &kp V             &kp B          &kp N      &kp M         &kp COMMA      &kp DOT          &kp FSLH            &kp ESC
-                                       &kp TAB      &lt 1 SPACE       &lt 2 ENTER    &lt 3 DEL  &lt 6 LEFT    &hm F11 RIGHT
+&kp ESC         &kp Q  &kp W           &kp E        &kp R             &kp T        &kp Y      &kp U         &kp I          &kp O            &kp P               &kp BSPC
+&kp LEFT_SHIFT  &kp A  &hm LEFT_ALT S  &hm LCTRL D  &hm LEFT_SHIFT F  &kp G        &kp H      &hm RSHIFT J  &hm RCTRL K    &hm RIGHT_ALT L  &hm RGUI SEMICOLON  &kp SQT
+&kp LCTRL       &kp Z  &kp X           &kp C        &kp V             &kp B        &kp N      &kp M         &kp COMMA      &kp DOT          &kp FSLH            &kp ESC
+                                       &kp TAB      &nmrw_led         &kpad_led    &xtra_led  &togl_led     &hm F11 RIGHT
             >;
         };
 
