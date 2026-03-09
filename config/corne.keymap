@@ -91,7 +91,10 @@
         to_game: to_game {
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
-            bindings = <&tog 4 &rgb_ug RGB_COLOR_HSB(0,100,50)>;
+            bindings =
+                <&macro_wait_time 500>,
+                <&tog 4 &rgb_ug RGB_COLOR_HSB(0,100,50)>;
+
             label = "TO_GAME";
         };
 
@@ -107,7 +110,7 @@
                 <&macro_release>,
                 <&mo 6>,
                 <&macro_tap>,
-                <&rgb_ug RGB_COLOR_HSB(0,23,43)>;
+                <&rgb_ug RGB_COLOR_HSB(41,100,36)>;
 
             label = "TOGL_LED";
         };
