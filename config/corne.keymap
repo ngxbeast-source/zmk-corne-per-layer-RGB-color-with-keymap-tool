@@ -94,9 +94,9 @@
             bindings =
                 <&macro_wait_time 50>,
                 <&macro_press>,
+                <&tog 4>,
                 <&macro_wait_time 50>,
-                <&tog 4 &rgb_ug RGB_COLOR_HSB(0,100,50)>,
-                <&macro_release>,
+                <&macro_press>,
                 <&rgb_ug RGB_COLOR_HSB(0,100,50)>;
 
             label = "TO_GAME";
@@ -131,7 +131,7 @@
                 <&macro_release>,
                 <&lt 1 SPACE>,
                 <&macro_tap>,
-                <&rgb_ug RGB_COLOR_HSB(19,100,23)>;
+                <&rgb_ug RGB_COLOR_HSB(32,100,50)>;
 
             label = "NMRW_LED";
         };
@@ -148,7 +148,7 @@
                 <&macro_release>,
                 <&lt 2 ENTER>,
                 <&macro_tap>,
-                <&rgb_ug RGB_COLOR_HSB(19,100,23)>;
+                <&rgb_ug RGB_COLOR_HSB(32,100,50)>;
 
             label = "KPAD_LED";
         };
@@ -165,7 +165,7 @@
                 <&macro_release>,
                 <&lt 3 DEL>,
                 <&macro_tap>,
-                <&rgb_ug RGB_COLOR_HSB(19,100,23)>;
+                <&rgb_ug RGB_COLOR_HSB(32,100,50)>;
 
             label = "XTRA_LED";
         };
