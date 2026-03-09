@@ -104,7 +104,8 @@
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(116,100,50)>,
                 <&macro_pause_for_release>,
-                <&macro_press>,
+                <&macro_release>,
+                <&mo 6>,
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(0,23,43)>;
 
