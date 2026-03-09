@@ -96,7 +96,8 @@
                 <&macro_pause_for_release>,
                 <&macro_tap_time 150>,
                 <&macro_press>,
-                <&tog 4 &rgb_ug RGB_COLOR_HSB(0,100,50)>;
+                <&tog 4 &rgb_ug RGB_COLOR_HSB(0,100,50)>,
+                <&macro_wait_time 50>;
 
             label = "TO_GAME";
         };
@@ -149,7 +150,7 @@
                 <&macro_release>,
                 <&lt 2 ENTER>,
                 <&macro_tap>,
-                <&rgb_ug RGB_COLOR_HSB(19,100,27)>;
+                <&rgb_ug RGB_COLOR_HSB(19,75,27)>;
 
             label = "KPAD_LED";
         };
