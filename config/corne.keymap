@@ -36,16 +36,6 @@
             quick-tap-ms = <400>;
         };
 
-        macro_hold_tap_test: macro_hold_tap_test {
-            compatible = "zmk,behavior-hold-tap";
-            label = "MACRO_HOLD_TAP_TEST";
-            bindings = <&layer_led_test>, <&kp>;
-
-            #binding-cells = <2>;
-            flavor = "balanced";
-            tapping-term-ms = <20>;
-        };
-
         hold_tap_nmrw_led: hold_tap_nmrw_led {
             compatible = "zmk,behavior-hold-tap";
             label = "HOLD_TAP_NMRW_LED";
