@@ -92,6 +92,7 @@
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
             bindings =
+                <&rgb_ug RGB_COLOR_HSB(0,100,50)>,
                 <&macro_wait_time 50>,
                 <&macro_press>,
                 <&tog 4>,
