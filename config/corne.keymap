@@ -94,9 +94,7 @@
             bindings =
                 <&macro_wait_time 250>,
                 <&macro_press>,
-                <&tog 4 &rgb_ug RGB_COLOR_HSB(0,100,50)>,
-                <&macro_release>,
-                <&tog 4 &rgb_ug RGB_COLOR_HSB(0,100,50)>;              
+                <&tog 4 &rgb_ug RGB_COLOR_HSB(0,100,50)>;
 
             label = "TO_GAME";
         };
