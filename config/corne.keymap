@@ -153,7 +153,7 @@
         ZMK_MACRO(to_game,
         bindings =
             <&macro_tap>,
-            <&to 4 &rgb_ug>,
+            <&to 4>,
             <&macro_tap>,
             <&rgb_ug RGB_COLOR_HSB(0,100,25)>;
         label = "GameLayer LED Macro";
