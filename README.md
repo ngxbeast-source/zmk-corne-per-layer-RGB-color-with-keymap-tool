@@ -19,7 +19,7 @@ Used https://nickcoutsos.github.io/keymap-editor/ for all of the macros and hold
 ## Game Layer
 &nbsp;&nbsp;&nbsp;&nbsp;Activate the layer pressing this combo: the top left key, on the left keyboard, and the top right key, on the right keyboard, AT THE SAME TIME. This then changes the layer to the "gaming" layer and it's chosen corresponding color. To deactivate this layer, simply press the left most thumb key on the right keyboard and it will go back to the base layer and switch to it's corresponding color. 
 - The game layer features a "functions" layer within itself to access the most common top row keys, F and number keys, I found it challenging to play some FPS games with this board; but for some casual play it did well. (It was mostly just a muscle memory issue.)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;If deciding to play game with this it's recommended to plug it in via USB to negate/avoid any input lag. I`ll probably put toggle output to USB when switching to the game layer somewhere in the macro.
+&nbsp;&nbsp;&nbsp;&nbsp;If deciding to play games with this it's recommended to plug it in via USB to negate/avoid any input lag AND to switch the output to USB on the keyboard. I`ll probably put toggle output to USB when switching to the game layer somewhere in the macro.
 <br>
 <br>
 *Baby's first "program"*
