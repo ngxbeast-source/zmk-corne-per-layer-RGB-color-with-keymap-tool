@@ -151,13 +151,12 @@
 
     macros {
         ZMK_MACRO(to_game,
-
         bindings =
-            <&macro_pause_for_release>,
-            <&macro_press>,
-            <&to 4 &rgb_ug RGB_COLOR_HSB(0,100,25)>;
-
-        label = "Macro for GAMELayer LEDs";
+            <&macro_tap>,
+            <&to 4 &rgb_ug>,
+            <&macro_tap>,
+            <&rgb_ug RGB_COLOR_HSB(0,100,25)>;
+        label = "GameLayer LED Macro";
 
         )
 
@@ -175,7 +174,7 @@
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(19,100,27)>;
 
-            label = "macro for ToggleLayer LEDs";
+            label = "ToggleLayer LED Macro";
         };
 
         nmrw_led_x: nmrw_led_x {
@@ -209,7 +208,7 @@
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(19,100,27)>;
 
-            label = "KeyPadLayer LEDs";
+            label = "KeyPadLayer LED Macro";
         };
 
         xtra_led: xtra_led {
@@ -226,7 +225,7 @@
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(19,100,27)>;
 
-            label = "ExtraLayer LEDs";
+            label = "ExtraLayer LED Macro";
         };
 
         tgame_led: tgame_led {
@@ -243,7 +242,7 @@
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(0,100,25)>;
 
-            label = "Toggle Layer From Game LayerLED";
+            label = "ToggleLayer From GameLayer LED Macro";
         };
 
         nmrw_led: nmrw_led {
@@ -260,7 +259,7 @@
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(19,100,17)>;
 
-            label = "NumberRow Layer LEDs";
+            label = "NumberRowLayer LED Macro";
         };
 
         gfun_led: gfun_led {
@@ -277,15 +276,17 @@
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(0,100,25)>;
 
-            label = "GameLayerFunctionLEDs";
+            label = "GameLayerFunction LED Macro";
         };
 
         default_led: default_led {
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
             bindings =
-                <&macro_press>,
-                <&tog 0 &rgb_ug RGB_COLOR_HSB(19,100,27)>;
+                <&macro_tap>,
+                <&tog 0>,
+                <&macro_tap>,
+                <&rgb_ug RGB_COLOR_HSB(19,100,27)>;
 
             label = "DEFAULT_LED goes back to default colors";
         };
