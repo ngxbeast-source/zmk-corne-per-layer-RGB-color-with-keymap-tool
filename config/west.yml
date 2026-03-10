@@ -26,18 +26,18 @@ manifest:
       revision: main
     - name: zmk-nice-oled
       remote: mctechnology17
-      revision: main
+      revision: v0.3.0
     - name: nice-view-elemental
       remote: kevinpastor
-      revision: main
+      revision: v0.3.0         
     - name: nice-view-gem
       remote: m165437
-      revision: main
+      revision: v0.3.0
     - name: zmk-shield-nice-view-cats
       remote: s6t
-      revision: main
+      revision: v0.3.0
     - name: nice-view-battery
       remote: infely
-      revision: main
+      revision: v0.3.0
   self:
     path: config
