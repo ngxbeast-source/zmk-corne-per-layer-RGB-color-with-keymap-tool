@@ -153,13 +153,13 @@
     };
 
     macros {
-        ZMK_MACRO(to_game
+        ZMK_MACRO(to_game,
             bindings =
                 <&macro_pause_for_release>,
                 <&macro_press>,
                 <&tog 4 &rgb_ug RGB_COLOR_HSB(0,100,50)>;
 
-            label = "TO_GAME";
+            label = "Macro for GAMELayer LEDs";
         )
 
         togl_led: togl_led {
@@ -176,7 +176,7 @@
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(19,100,27)>;
 
-            label = "Toggle Layer LEDs";
+            label = "macro for ToggleLayer LEDs";
         };
 
         nmrw_led_x: nmrw_led_x {
@@ -210,7 +210,7 @@
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(19,100,27)>;
 
-            label = "Key Pad Layer LEDs";
+            label = "KeyPadLayer LEDs";
         };
 
         xtra_led: xtra_led {
@@ -227,7 +227,7 @@
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(19,100,27)>;
 
-            label = "Extra Layer LEDs";
+            label = "ExtraLayer LEDs";
         };
 
         tgame_led: tgame_led {
@@ -286,7 +286,7 @@
             #binding-cells = <0>;
             bindings = <&macro_press>, <&to 0 &rgb_ug RGB_COLOR_HSB(19,100,27)>;
 
-            label = "DEFAULT_LED";
+            label = "DEFAULT_LED goes back to default colors";
         };
     };
 
