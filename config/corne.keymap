@@ -139,6 +139,7 @@
         game_combo {
             bindings = <&to_game>;
             key-positions = <0 11>;
+            layers = <0>;
         };
 
         base_default_layer_led {
@@ -282,7 +283,9 @@
         default_led: default_led {
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
-            bindings = <&macro_press>, <&tog 0 &rgb_ug RGB_COLOR_HSB(19,100,27)>;
+            bindings =
+                <&macro_press>,
+                <&tog 0 &rgb_ug RGB_COLOR_HSB(19,100,27)>;
 
             label = "DEFAULT_LED goes back to default colors";
         };
