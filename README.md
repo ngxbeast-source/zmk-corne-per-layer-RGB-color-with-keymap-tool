@@ -1,0 +1,9 @@
+# PandaKB Corne v3 RGB BLE (Per-Layer RGB)
+&nbsp;&nbsp;&nbsp;&nbsp;This is a **VERY AMATURE** attempt at implementing "Per-layer RGB colors into the firmware". There were a couple of roadblocks, but after much further reading, and thought, I came up with my own, albeit very messy, firmware utilizing macros and hold-taps to get this effect. This was just a small weekend project to help me understand ZMK a little bit more and to have a little "fun" with my build. I have the macros and hold-taps the way I like it, you're free to change the code if you wish, I'm sure there are ways I could simplify this code even more; but for now it functions.<br>
+## Breakdown of My Project
+Used https://nickcoutsos.github.io/keymap-editor/ for all of the macros and hold-taps
+- 5 Layers with their own color setting (the default layer color is a warm orange/yellow)
+- Implemented a "gaming" layer combo (so that way there are no accidental presses)<br>
+<p>The layers behave the same way "home-row mods" work but since we cant put macros on home-rows we have to use "hold-tap"(or so I assume). This way we avoid triggering the LED change when the layer isn't "activated".<br>
+I made a silly mistake when I was first attempting this where I just put the layertap behavior IN the macro, so it would run the whole macro whenever I just wanted a simple tap key. (It would be a nice little light show when I would type lol)</p>
+&nbsp;&nbsp;&nbsp;&nbsp;Enjoy this was just a small project to help me understand ZMK a little bit better, and to give my RGBs something to do. Thanks a lot to nickcoutsos, his program really helped with this project!
