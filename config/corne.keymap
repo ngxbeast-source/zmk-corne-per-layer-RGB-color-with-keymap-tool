@@ -154,12 +154,14 @@
 
     macros {
         ZMK_MACRO(to_game,
-            bindings =
-                <&macro_pause_for_release>,
-                <&macro_press>,
-                <&tog 4 &rgb_ug RGB_COLOR_HSB(0,100,25)>;
 
-            label = "Macro for GAMELayer LEDs";
+        bindings =
+            <&macro_pause_for_release>,
+            <&macro_press>,
+            <&tog 4 &rgb_ug RGB_COLOR_HSB(0,100,25)>;
+
+        label = "Macro for GAMELayer LEDs";
+
         )
 
         togl_led: togl_led {
@@ -316,10 +318,10 @@
         k_pd {
             display-name = "KPAD";
             bindings = <
-&kp ESCAPE  &trans  &trans            &trans    &trans             &trans           &kp KP_N7       &kp KP_N8  &kp KP_N9  &trans    &trans    &kp BSPC
-&kp CAPS    &trans  &kp HOME          &kp UP    &kp END            &kp PG_UP        &kp KP_N4       &kp KP_N5  &kp KP_N6  &trans    &kp UP    &trans
-&trans      &trans  &kp LC(LS(LEFT))  &kp DOWN  &kp LC(LS(RIGHT))  &kp PAGE_DOWN    &kp KP_N1       &kp KP_N2  &kp KP_N3  &kp LEFT  &kp DOWN  &kp RIGHT
-                                      &trans    &trans             &trans           &kp KP_NUMLOCK  &trans     &kp KP_N0
+&kp ESCAPE  &trans  &trans            &trans       &trans             &trans           &kp KP_N7       &kp KP_N8  &kp KP_N9  &trans    &trans    &kp BSPC
+&kp CAPS    &trans  &kp HOME          &kp UP       &kp END            &kp PG_UP        &kp KP_N4       &kp KP_N5  &kp KP_N6  &trans    &kp UP    &trans
+&trans      &trans  &kp LC(LS(LEFT))  &kp DOWN     &kp LC(LS(RIGHT))  &kp PAGE_DOWN    &kp KP_N1       &kp KP_N2  &kp KP_N3  &kp LEFT  &kp DOWN  &kp RIGHT
+                                      &bootloader  &trans             &trans           &kp KP_NUMLOCK  &trans     &kp KP_N0
             >;
         };
 
@@ -353,14 +355,16 @@
             >;
         };
 
-        togl {
+        xtr2 {
             display-name = "TOGL";
             bindings = <
-&to_game  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
-&none     &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
-&none     &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
-                        &none  &none  &none    &none  &none  &none
+&none  &none  &none  &none  &none  &none    &none  &none  &none        &none  &none  &none
+&none  &none  &none  &none  &none  &none    &none  &none  &none        &none  &none  &none
+&none  &none  &none  &none  &none  &none    &none  &none  &none        &none  &none  &none
+                     &none  &none  &none    &none  &none  &bootloader
             >;
+
+            label = "xtr2";
         };
 
         extra1 { status = "reserved"; };
