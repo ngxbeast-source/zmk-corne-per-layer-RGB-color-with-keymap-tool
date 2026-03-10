@@ -140,6 +140,12 @@
             bindings = <&to_game>;
             key-positions = <0 11>;
         };
+
+        base_default_layer_led {
+            bindings = <&default_led>;
+            key-positions = <0 11>;
+            layers = <4>;
+        };
     };
 
     macros {
