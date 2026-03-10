@@ -1,4 +1,4 @@
-# PandaKB Corne v3 RGB BLE (Per-Layer RGB)
+# PandaKB ZMK Corne v3 RGB BLE (Per-Layer RGB)
 &nbsp;&nbsp;&nbsp;&nbsp;This is a **VERY AMATURE** attempt at implementing "Per-layer RGB colors into the firmware". There were a couple of roadblocks, but after much further reading, and thought, I came up with my own, albeit very messy, firmware utilizing macros and hold-taps to get this effect. This was just a small weekend project to help me understand ZMK a little bit more and to have a little "fun" with my build. I have the macros and hold-taps the way I like it, you're free to change the code if you wish, I'm sure there are ways I could simplify this code even more; but for now it functions.<br>
 ## Breakdown of My Project
 Used https://nickcoutsos.github.io/keymap-editor/ for all of the macros and hold-taps
