@@ -155,7 +155,7 @@
         bindings =
             <&macro_pause_for_release>,
             <&macro_press>,
-            <&tog 4 &rgb_ug RGB_COLOR_HSB(0,100,25)>;
+            <&to 4 &rgb_ug RGB_COLOR_HSB(0,100,25)>;
 
         label = "Macro for GAMELayer LEDs";
 
