@@ -7,7 +7,7 @@ manifest:
     - name: mctechnology17
       url-base: https://github.com/mctechnology17
 
-
+  projects:
     - name: zmk
       remote: zmkfirmware
       revision: v0.3
