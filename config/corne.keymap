@@ -151,11 +151,13 @@
 
     macros {
         ZMK_MACRO(to_game,
+
         bindings =
             <&macro_tap>,
             <&to 4>,
             <&macro_tap>,
             <&rgb_ug RGB_COLOR_HSB(0,100,25)>;
+
         label = "GameLayer LED Macro";
 
         )
@@ -338,10 +340,10 @@
         game {
             display-name = "GAME";
             bindings = <
-&kp TAB    &kp Q  &kp W  &kp E         &kp R      &kp T                     &kp Y         &kp U         &kp I            &kp O              &kp P     &kp BSPC
-&kp LSHFT  &kp A  &kp S  &kp D         &kp F      &kp G                     &kp H         &kp J         &kp K            &kp L              &kp SEMI  &kp SQT
-&kp LCTRL  &kp Z  &kp X  &kp C         &kp V      &kp B                     &kp N         &kp M         &kp RS(PAGE_UP)  &kp RS(PAGE_DOWN)  &kp FSLH  &kp ESC
-                         &kp LEFT_ALT  &kp SPACE  &hold_tap_gfun 0 ENTER    &default_led  &default_led  &none
+&kp TAB    &kp Q  &kp W  &kp E         &kp R      &kp T                     &kp Y  &kp U  &kp I            &kp O              &kp P     &kp BSPC
+&kp LSHFT  &kp A  &kp S  &kp D         &kp F      &kp G                     &kp H  &kp J  &kp K            &kp L              &kp SEMI  &kp SQT
+&kp LCTRL  &kp Z  &kp X  &kp C         &kp V      &kp B                     &kp N  &kp M  &kp RS(PAGE_UP)  &kp RS(PAGE_DOWN)  &kp FSLH  &kp ESC
+                         &kp LEFT_ALT  &kp SPACE  &hold_tap_gfun 0 ENTER    &none  &none  &none
             >;
         };
 
