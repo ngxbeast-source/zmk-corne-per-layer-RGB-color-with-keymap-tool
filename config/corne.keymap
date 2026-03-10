@@ -153,16 +153,14 @@
     };
 
     macros {
-        to_game: to_game {
-            compatible = "zmk,behavior-macro";
-            #binding-cells = <0>;
+        ZMK_MACEO(to_game
             bindings =
                 <&macro_pause_for_release>,
                 <&macro_press>,
                 <&tog 4 &rgb_ug RGB_COLOR_HSB(0,100,50)>;
 
             label = "TO_GAME";
-        };
+        )
 
         togl_led: togl_led {
             compatible = "zmk,behavior-macro";
