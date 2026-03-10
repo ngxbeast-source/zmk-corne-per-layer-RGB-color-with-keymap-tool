@@ -17,9 +17,9 @@ Used https://nickcoutsos.github.io/keymap-editor/ for all of the macros and hold
 &nbsp;&nbsp;&nbsp;&nbsp;Enjoy, this was just a small project to help me understand ZMK a little bit better, and to give my RGBs something to do. Thanks a lot to nickcoutsos, his program really helped with this project! I still need to figure a way to change the LEDs back to default when coming off the gaming layer. Originally I wanted to put it on the Toggle/xtra2 layer but there was an issue, I believe to be with the macro inputs overlapping each other, the LED would go back to the "default" color unless you pressed the layer quickly (I might revisit this at some point it might just be a timing issue).
 
 ## Game Layer
-&nbsp;&nbsp;&nbsp;&nbsp;Activate the layer pressing this combo: the top left key, on the left keyboard, and the top right key, on the right keyboard, AT THE SAME TIME. This then changes the layer to the "gaming" layer and it's chosen corresponding color. To deactivate this layer, simply press the left most thumb key on the right keyboard and it will go back to the base layer and switch back to it's corresponding color. 
+&nbsp;&nbsp;&nbsp;&nbsp;Activate the layer pressing this combo: the top left key, on the left keyboard, and the top right key, on the right keyboard, AT THE SAME TIME. This then changes the layer to the "gaming" layer and it's chosen corresponding color. To deactivate this layer, simply press the left most thumb key on the right keyboard and it will go back to the base layer and switch to it's corresponding color. 
 - The game layer features a "functions" layer within itself to access the most common top row keys, F and number keys, I found it challenging to play some FPS games with this board; but for some casual play it did well. (It was mostly just a muscle memory issue.)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;If deciding to play game with this it's recommended to plug it in via USB to negate/avoid any input lag. I`ll probably put toggle output to USB when switching to the game layer somewhere in the macro.
+&nbsp;&nbsp;&nbsp;&nbsp;If deciding to play games with this it's recommended to plug it in via USB to negate/avoid any input lag AND to switch the output to USB on the keyboard. I`ll probably put toggle output to USB when switching to the game layer somewhere in the macro.
 <br>
 <br>
 *Baby's first "program"*
