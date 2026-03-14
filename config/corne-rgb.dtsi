@@ -18,7 +18,7 @@
 #define RGB_GFUN RGB_COLOR_HSB(116,100,50) // Bright Yellow
 #define RGB_XTRA2 RGB_COLOR_HSB(116,100,50) // Bright Green
 #define RGB_TOGGLE RGB_COLOR_HSB(251,100,50) // Bright Indigo
-#define RGB_TOGGLE_1 RGB_COLOR_HSB(23,100,12) //
+#define RGB_TOGGLE_1 RGB_COLOR_HSB(50,100,12) //
 #define RGB_TOGGLE_2 RGB_COLOR_HSB(85,100,15) // Dim Green
 #define RGB_TOGGLE_2_SUBLAYER_1 RGB_COLOR_HSB(82,100,35) // Bright Green
 
