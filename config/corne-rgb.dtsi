@@ -16,7 +16,7 @@
 
 #define RGB_ABC RGB_COLOR_HSB(19,100,17) // Dim Yellow BASE COLOR
 #define RGB_NMRW RGB_COLOR_HSB(183,67,18) // Teal
-#define RGB_KPAD RGB_COLOR_HSB(237,67,26) // Dim Dark Blue 
+#define RGB_KPAD RGB_COLOR_HSB(23O,67,26) // Dim Dark Blue 
 #define RGB_XTRA RGB_COLOR_HSB(273,67,23) // Light Purple
 #define RGB_GAME RGB_COLOR_HSB(0,100,25) // Red
 #define RGB_GFUN RGB_COLOR_HSB(116,67,50) // Bright Yellow
