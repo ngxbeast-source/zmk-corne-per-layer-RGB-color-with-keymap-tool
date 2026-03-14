@@ -2,10 +2,11 @@
 *ANY new Layers get defined in here along with an assigned color. Format for each macro is defined below, we no longer have to use the "standard" ZMK formatting and can add to our code much easier using these new syntaxs and variables.
 Just #define a layer
 then #define the color for the layer
-Build your macros, THEN build your hold-tap behavior if needed
+Build your macros, THEN build your hold-tap behavior if needed.
+Then you can use these new behaviors in ZMK Studio
 
-New modular structuring
-    Used for layers that are press activated, this is used in conjunction with the new definition below
+New modular structuring-
+    Use for layers that are press activated, this is used in conjunction with the new definition below
         #define DEFINE_MOMENTARY_RGB_MACRO(node_name, node_label, layer, active_color, release_color)
         #define DEFINE_RGB_HOLD_TAP(node_name, node_label, macro_ref)
 
