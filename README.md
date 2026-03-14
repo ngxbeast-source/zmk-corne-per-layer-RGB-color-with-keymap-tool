@@ -23,4 +23,4 @@ can put "conditional layer" combos.
 &nbsp;&nbsp;&nbsp;&nbsp;If deciding to play games with this it's recommended to plug it in via USB to negate/avoid any input lag AND to switch the output to USB on the keyboard. I`ll probably put toggle output to USB when switching to the game layer somewhere in the macro.
 <br>
 <br>
-*Baby's first "program"*
+*Baby's first "program" for a stupid visual learner*
