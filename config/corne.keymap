@@ -147,6 +147,18 @@
             key-positions = <0 11>;
             layers = <4>;
         };
+
+        tog_layers_c {
+            bindings = <&to_tog_layers>;
+            key-positions = <38 39>;
+            layers = <0 8>;
+        };
+
+        tog_2_default {
+            bindings = <&default_led>;
+            key-positions = <39>;
+            layers = <7>;
+        };
     };
 
     macros {
@@ -292,6 +304,30 @@
 
             label = "DEFAULT_LED goes back to default colors";
         };
+
+        to_tog_layers: to_tog_layers {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings =
+                <&macro_tap>,
+                <&to 7>,
+                <&macro_tap>,
+                <&rgb_ug RGB_COLOR_HSB(251,100,50)>;
+
+            label = "TO_TOG_LAYERS";
+        };
+
+        to_toglayer1_led: to_toglayer1_led {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings =
+                <&macro_tap>,
+                <&to 8>,
+                <&macro_tap>,
+                <&rgb_ug RGB_COLOR_HSB(23,100,12)>;
+
+            label = "TO_TOGLAYER1_LED";
+        };
     };
 
     keymap {
@@ -368,17 +404,35 @@
 
             label = "xtr2";
         };
-        extra1 {
-                status = "reserved";
+
+        Toggle_Layers {
+            bindings = <
+&none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
+&none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
+&none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
+                     &none  &none  &none    &none  &none  &none
+            >;
+
+            label = "LTOG";
         };
-        extra2 {
-                status = "reserved";
+
+        Toggel_1 {
+            bindings = <
+&none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
+&none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
+&none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
+                     &none  &none  &none    &none  &none  &none
+            >;
+
+            label = "TOG1";
         };
-        extra3 {
-                status = "reserved";
-        };
-        extra4 {
-                status = "reserved";
-        };
+
+        extra1 { status = "reserved"; };
+
+        extra2 { status = "reserved"; };
+
+        extra3 { status = "reserved"; };
+
+        extra4 { status = "reserved"; };
     };
 };
