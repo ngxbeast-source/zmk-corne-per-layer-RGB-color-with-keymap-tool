@@ -36,7 +36,7 @@ Just like that it's became easier to maintain this code hahaha, enjoy, and I hop
 #define RGB_GAME RGB_COLOR_HSB(0,100,25) // Red
 #define RGB_GFUN RGB_COLOR_HSB(116,67,50) // Bright Yellow
 #define RGB_XTRA2 RGB_COLOR_HSB(116,67,26) // Bright Green
-#define RGB_TGLLR RGB_COLOR_HSB(251,67,50) // Bright Indigo
+#define RGB_TGL RGB_COLOR_HSB(251,67,50) // Bright Indigo
 #define RGB_TGLLR_1 RGB_COLOR_HSB(50,100,12) // Pale Yellow TGL1 BASE COLOR
 #define RGB_TGLLR_2 RGB_COLOR_HSB(85,100,15) // Dim Green TGLLR2 BASE COLOR
 #define RGB_TGLLR_2_SUBLLR_1 RGB_COLOR_HSB(82,100,50) // Bright Green
@@ -212,7 +212,7 @@ Just like that it's became easier to maintain this code hahaha, enjoy, and I hop
 
         DEFINE_TO_RGB_MACRO(toglayers_leds, "brings to ToggleLayer", LAYER_TGL, RGB_TGLLR)
 
-        DEFINE_TO_RGB_MACRO(t1_led, "Bring to toggle_layer1 and changes led", LAYER_TGL_1, RGB_TGLLR_1)
+        DEFINE_TO_RGB_MACRO(t1_led, "Bring to toggle_layer1 and changes led", LAYER_TGL_1, RGB_TGL_1)
 
         DEFINE_TO_RGB_PRESS_MACRO(to_t2_led, "ToggleLayer Led", LAYER_TGLLR_2, RGB_TGLLR_2)
 
