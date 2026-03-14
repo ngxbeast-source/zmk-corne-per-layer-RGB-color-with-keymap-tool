@@ -163,7 +163,7 @@
         base_defaultLayer_led {
             bindings = <&default_led>;
             key-positions = <0 11>;
-            layers = <LAYER_GAME>;
+            layers = <LAYER_GAME LAYER_TOGGLE>;
         };
 
         tog_layers_c {
