@@ -1,0 +1,207 @@
+#define LAYER_ABC 0
+#define LAYER_NMRW 1
+#define LAYER_KPAD 2
+#define LAYER_XTRA 3
+#define LAYER_GAME 4
+#define LAYER_GFUN 5
+#define LAYER_XTR2 6
+#define LAYER_TOGGLE 7
+#define LAYER_TOGGLE_1 8
+#define LAYER_TOGGLE_2 9
+#define LAYER_TOGGLE_2_SUBLAYER_1 10
+
+#define RGB_ABC RGB_COLOR_HSB(19,100,27)
+#define RGB_NMRW RGB_COLOR_HSB(183,75,12)
+#define RGB_NMRW_RETURN RGB_COLOR_HSB(19,100,17)
+#define RGB_KPAD RGB_COLOR_HSB(237,100,13)
+#define RGB_XTRA RGB_COLOR_HSB(273,67,19)
+#define RGB_GAME RGB_COLOR_HSB(0,100,25)
+#define RGB_GFUN RGB_COLOR_HSB(48,100,50)
+#define RGB_XTRA2 RGB_COLOR_HSB(116,100,5)
+#define RGB_TGAME RGB_COLOR_HSB(116,100,50)
+#define RGB_TOGGLE RGB_COLOR_HSB(251,100,50)
+#define RGB_TOGGLE_1 RGB_COLOR_HSB(23,100,12)
+#define RGB_TOGGLE_2 RGB_COLOR_HSB(82,100,15)
+#define RGB_TOGGLE_2_SUBLAYER_1 RGB_COLOR_HSB(82,100,35)
+
+#define DEFINE_MOMENTARY_RGB_MACRO(node_name, node_label, layer, active_color, release_color) \
+        ZMK_MACRO(node_name, \
+            bindings = \
+                <&macro_press>, \
+                <&mo layer>, \
+                <&macro_tap>, \
+                <&rgb_ug active_color>, \
+                <&macro_pause_for_release>, \
+                <&macro_release>, \
+                <&mo layer>, \
+                <&macro_tap>, \
+                <&rgb_ug release_color>; \
+            label = node_label; \
+        )
+
+#define DEFINE_RGB_HOLD_TAP(node_name, node_label, macro_ref) \
+        node_name: node_name { \
+            compatible = "zmk,behavior-hold-tap"; \
+            label = node_label; \
+            bindings = <&macro_ref>, <&kp>; \
+            #binding-cells = <2>; \
+            tapping-term-ms = <180>; \
+            flavor = "tap-preferred"; \
+        };
+
+#define DEFINE_TO_RGB_MACRO(node_name, node_label, layer, color) \
+        ZMK_MACRO(node_name, \
+            bindings = \
+                <&macro_tap>, \
+                <&to layer>, \
+                <&macro_tap>, \
+                <&rgb_ug color>; \
+            label = node_label; \
+        )
+
+#define DEFINE_TO_RGB_PRESS_MACRO(node_name, node_label, layer, color) \
+        ZMK_MACRO(node_name, \
+            bindings = \
+                <&macro_tap>, \
+                <&to layer>, \
+                <&macro_press>, \
+                <&rgb_ug color>; \
+            label = node_label; \
+        )
+
+/ {
+    behaviors {
+        hm: homerow_mods {
+            compatible = "zmk,behavior-hold-tap";
+            label = "HOMEROW_MODS";
+            #binding-cells = <2>;
+            tapping-term-ms = <200>;
+            quick_tap_ms = <0>;
+            flavor = "tap-preferred";
+            bindings = <&kp>, <&kp>;
+
+            quick-tap-ms = <180>;
+            global-quick-tap;
+        };
+
+        ltq: ltq {
+            compatible = "zmk,behavior-hold-tap";
+            label = "LTQ";
+            bindings = <&mo>, <&kp>;
+
+            #binding-cells = <2>;
+            tapping-term-ms = <600>;
+            global-quick-tap;
+            quick-tap-ms = <400>;
+        };
+
+        DEFINE_RGB_HOLD_TAP(hold_tap_nmrw_led, "HOLD_TAP_NMRW_LED", nmrw_led)
+        DEFINE_RGB_HOLD_TAP(hold_tap_xtra2_led, "HOLD_TAP_XTRA2_LED", xtra2_led)
+        DEFINE_RGB_HOLD_TAP(hold_tap_kpad_led, "HOLD_TAP_KPAD_LED", kpad_led)
+        DEFINE_RGB_HOLD_TAP(hold_tap_xtra_led, "HOLD_TAP_XTRA_LED", xtra_led)
+        DEFINE_RGB_HOLD_TAP(hold_tap_gfun_led, "HOLD_TAP_GFUN_LED", gfun_led)
+        DEFINE_RGB_HOLD_TAP(hold_tap_t2_s1, "layer2 sublayer 1", t2_s1_led)
+    };
+
+    combos {
+        compatible = "zmk,combos";
+
+        left_bkt {
+            bindings = <&kp LEFT_BRACKET>;
+            key-positions = <4 3>;
+            timeout-ms = <50>;
+        };
+
+        right_bkt {
+            bindings = <&kp RBKT>;
+            key-positions = <7 8>;
+            timeout-ms = <50>;
+        };
+
+        left_par {
+            bindings = <&kp LEFT_PARENTHESIS>;
+            key-positions = <15 16>;
+            timeout-ms = <50>;
+        };
+
+        right_par {
+            bindings = <&kp RIGHT_PARENTHESIS>;
+            key-positions = <19 20>;
+            timeout-ms = <50>;
+        };
+
+        left_brace {
+            bindings = <&kp LEFT_BRACE>;
+            key-positions = <27 28>;
+            timeout-ms = <50>;
+        };
+
+        right_brace {
+            bindings = <&kp RIGHT_BRACE>;
+            key-positions = <32 31>;
+            timeout-ms = <50>;
+        };
+
+        bac {
+            bindings = <&kp BACKSLASH>;
+            key-positions = <5 6>;
+        };
+
+        pipe {
+            bindings = <&kp PIPE>;
+            key-positions = <17 18>;
+        };
+
+        game_combo {
+            bindings = <&to_game>;
+            key-positions = <0 11>;
+            layers = <LAYER_ABC>;
+        };
+
+        base_defaultLayer_led {
+            bindings = <&default_led>;
+            key-positions = <0 11>;
+            layers = <LAYER_GAME>;
+        };
+
+        tog_layers_c {
+            bindings = <&tog_layers_leds>;
+            key-positions = <38 39>;
+            layers = <LAYER_ABC LAYER_TOGGLE_1 LAYER_TOGGLE_2>;
+        };
+
+        togglelayer_2_defaultLayer {
+            bindings = <&default_led>;
+            key-positions = <39 38>;
+            layers = <LAYER_TOGGLE>;
+        };
+    };
+
+    macros {
+        DEFINE_TO_RGB_MACRO(to_game, "GameLayer LED Macro", LAYER_GAME, RGB_GAME)
+
+        DEFINE_MOMENTARY_RGB_MACRO(xtra2_led, "xtra2Layer momentary LED Macro", LAYER_XTR2, RGB_XTRA2, RGB_ABC)
+
+        DEFINE_MOMENTARY_RGB_MACRO(nmrw_led_x, "DONTUSE", LAYER_NMRW, RGB_NMRW, RGB_ABC)
+
+        DEFINE_MOMENTARY_RGB_MACRO(kpad_led, "KeyPadLayer momentary LED Macro", LAYER_KPAD, RGB_KPAD, RGB_ABC)
+
+        DEFINE_MOMENTARY_RGB_MACRO(xtra_led, "ExtraLayer momentary LED Macro", LAYER_XTRA, RGB_XTRA, RGB_ABC)
+
+        DEFINE_MOMENTARY_RGB_MACRO(tgame_led, "No longer used", LAYER_XTR2, RGB_TGAME, RGB_GAME)
+
+        DEFINE_MOMENTARY_RGB_MACRO(nmrw_led, "NumberRowLayer momentary LED Macro", LAYER_NMRW, RGB_NMRW, RGB_NMRW_RETURN)
+
+        DEFINE_MOMENTARY_RGB_MACRO(gfun_led, "GameLayer Sublayer momentary LED Macro", LAYER_GFUN, RGB_GFUN, RGB_GAME)
+
+        DEFINE_TO_RGB_MACRO(default_led, "goes back to default colors and ABC layer", LAYER_ABC, RGB_ABC)
+
+        DEFINE_TO_RGB_MACRO(tog_layers_leds, "brings to ToggleLayer", LAYER_TOGGLE, RGB_TOGGLE)
+
+        DEFINE_TO_RGB_MACRO(t1_led, "Bring to toggle_layer1 and changes led", LAYER_TOGGLE_1, RGB_TOGGLE_1)
+
+        DEFINE_TO_RGB_PRESS_MACRO(to_t2_led, "ToggleLayer Led", LAYER_TOGGLE_2, RGB_TOGGLE_2)
+
+        DEFINE_MOMENTARY_RGB_MACRO(t2_s1_led, "TOGLAYER2 sublayer1 momentary LED Macro", LAYER_TOGGLE_2_SUBLAYER_1, RGB_TOGGLE_2_SUBLAYER_1, RGB_TOGGLE_2)
+    };
+};

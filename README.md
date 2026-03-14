@@ -11,6 +11,8 @@
 Used https://nickcoutsos.github.io/keymap-editor/ for all of the macros and hold-taps
 - 5 Layers with their own color setting (the default layer color is a warm orange/yellow)
 - Implemented a "gaming" layer combo (so that way there are no accidental presses)<br>
+- The active `config/corne.keymap` now stays focused on layer bindings, while the RGB macros/combos live in `config/corne-rgb.dtsi` so the per-layer colors are easier to maintain.<br>
+- The zero-parameter RGB macros in `config/corne-rgb.dtsi` now use ZMK's `ZMK_MACRO(...)` convenience C macro, so the macro definitions stay shorter without changing the RGB behavior.<br>
 - The layers/macros behave the same way "home-row mods" work but since we cant put macros on home-rows we have to use "hold-tap"(or so I assume). This way we avoid triggering the LED change when the layer isn't "activated" and we just want a simple key tap; with NO LED change.<br>
 <p>&nbsp;&nbsp;&nbsp;&nbsp;I made a silly mistake when I was first attempting this, I put the layertap behavior IN the macro, so it would run the whole macro whenever I just wanted a simple key tap. In theory it was working, it changed my colors when I pressed the correct layer key, but it did this <b>EVERYTIME</b> the layer key was pressed, and since I was using layer-tap before this I was frequently pressing these keys in my normal use. I figured I had to "separate" the layer-tap from the macro and just leave the layer in.<br> (It would give a nice little light show when I would type lol, before this fix.)</p><br>
 
