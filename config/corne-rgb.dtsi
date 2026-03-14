@@ -10,19 +10,17 @@
 #define LAYER_TOGGLE_2 9
 #define LAYER_TOGGLE_2_SUBLAYER_1 10
 
-#define RGB_ABC RGB_COLOR_HSB(19,100,27)
-#define RGB_NMRW RGB_COLOR_HSB(183,75,12)
-#define RGB_NMRW_RETURN RGB_COLOR_HSB(19,100,17)
-#define RGB_KPAD RGB_COLOR_HSB(237,100,13)
-#define RGB_XTRA RGB_COLOR_HSB(273,67,19)
-#define RGB_GAME RGB_COLOR_HSB(0,100,25)
-#define RGB_GFUN RGB_COLOR_HSB(48,100,50)
-#define RGB_XTRA2 RGB_COLOR_HSB(116,100,5)
-#define RGB_TGAME RGB_COLOR_HSB(116,100,50)
-#define RGB_TOGGLE RGB_COLOR_HSB(251,100,50)
-#define RGB_TOGGLE_1 RGB_COLOR_HSB(23,100,12)
-#define RGB_TOGGLE_2 RGB_COLOR_HSB(82,100,15)
-#define RGB_TOGGLE_2_SUBLAYER_1 RGB_COLOR_HSB(82,100,35)
+#define RGB_ABC RGB_COLOR_HSB(19,100,17) // Dim Yellow
+#define RGB_NMRW RGB_COLOR_HSB(183,75,12) // Teal
+#define RGB_KPAD RGB_COLOR_HSB(237,100,13) // Dim Dark Blue 
+#define RGB_XTRA RGB_COLOR_HSB(273,67,19) // Light Purple
+#define RGB_GAME RGB_COLOR_HSB(0,100,25) // Red
+#define RGB_GFUN RGB_COLOR_HSB(116,100,50) // Bright Yellow
+#define RGB_XTRA2 RGB_COLOR_HSB(116,100,50) // Bright Green
+#define RGB_TOGGLE RGB_COLOR_HSB(251,100,50) // Bright Indigo
+#define RGB_TOGGLE_1 RGB_COLOR_HSB(23,100,12) //
+#define RGB_TOGGLE_2 RGB_COLOR_HSB(85,100,15) // Dim Green
+#define RGB_TOGGLE_2_SUBLAYER_1 RGB_COLOR_HSB(82,100,35) // Bright Green
 
 #define DEFINE_MOMENTARY_RGB_MACRO(node_name, node_label, layer, active_color, release_color) \
         ZMK_MACRO(node_name, \
@@ -182,15 +180,11 @@
 
         DEFINE_MOMENTARY_RGB_MACRO(xtra2_led, "xtra2Layer momentary LED Macro", LAYER_XTR2, RGB_XTRA2, RGB_ABC)
 
-        DEFINE_MOMENTARY_RGB_MACRO(nmrw_led_x, "DONTUSE", LAYER_NMRW, RGB_NMRW, RGB_ABC)
-
         DEFINE_MOMENTARY_RGB_MACRO(kpad_led, "KeyPadLayer momentary LED Macro", LAYER_KPAD, RGB_KPAD, RGB_ABC)
 
         DEFINE_MOMENTARY_RGB_MACRO(xtra_led, "ExtraLayer momentary LED Macro", LAYER_XTRA, RGB_XTRA, RGB_ABC)
 
-        DEFINE_MOMENTARY_RGB_MACRO(tgame_led, "No longer used", LAYER_XTR2, RGB_TGAME, RGB_GAME)
-
-        DEFINE_MOMENTARY_RGB_MACRO(nmrw_led, "NumberRowLayer momentary LED Macro", LAYER_NMRW, RGB_NMRW, RGB_NMRW_RETURN)
+        DEFINE_MOMENTARY_RGB_MACRO(nmrw_led, "NumberRowLayer momentary LED Macro", LAYER_NMRW, RGB_NMRW, RGB_ABC)
 
         DEFINE_MOMENTARY_RGB_MACRO(gfun_led, "GameLayer Sublayer momentary LED Macro", LAYER_GFUN, RGB_GFUN, RGB_GAME)
 
