@@ -1,3 +1,7 @@
+/*
+*ANY new Layers get defined in here along with an assigned color. Format for each macro is defined below, we no longer have to use the "standard" ZMK formatting and can add to our code much easier.
+*/
+
 #define LAYER_ABC 0
 #define LAYER_NMRW 1
 #define LAYER_KPAD 2
@@ -10,7 +14,7 @@
 #define LAYER_TOGGLE_2 9
 #define LAYER_TOGGLE_2_SUBLAYER_1 10
 
-#define RGB_ABC RGB_COLOR_HSB(19,100,17) // Dim Yellow
+#define RGB_ABC RGB_COLOR_HSB(19,100,17) // Dim Yellow BASE COLOR
 #define RGB_NMRW RGB_COLOR_HSB(183,75,12) // Teal
 #define RGB_KPAD RGB_COLOR_HSB(237,100,13) // Dim Dark Blue 
 #define RGB_XTRA RGB_COLOR_HSB(273,67,19) // Light Purple
@@ -18,8 +22,8 @@
 #define RGB_GFUN RGB_COLOR_HSB(116,100,50) // Bright Yellow
 #define RGB_XTRA2 RGB_COLOR_HSB(116,100,50) // Bright Green
 #define RGB_TOGGLE RGB_COLOR_HSB(251,100,50) // Bright Indigo
-#define RGB_TOGGLE_1 RGB_COLOR_HSB(50,100,12) //
-#define RGB_TOGGLE_2 RGB_COLOR_HSB(85,100,15) // Dim Green
+#define RGB_TOGGLE_1 RGB_COLOR_HSB(50,100,12) // TOGGLE1 BASE COLOR
+#define RGB_TOGGLE_2 RGB_COLOR_HSB(85,100,15) // Dim Green TOGGLE2 BASE COLOR
 #define RGB_TOGGLE_2_SUBLAYER_1 RGB_COLOR_HSB(82,100,35) // Bright Green
 
 #define DEFINE_MOMENTARY_RGB_MACRO(node_name, node_label, layer, active_color, release_color) \
