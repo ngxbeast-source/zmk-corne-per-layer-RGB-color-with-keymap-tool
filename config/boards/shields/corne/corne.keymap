@@ -52,5 +52,18 @@
                              &kp LGUI &trans   &kp SPACE   &kp RET   &trans    &kp RALT
                         >;
                 };
+                extra1 {
+                        status = "reserved";
+                };
+                extra2 {
+                        status = "reserved";
+                };
+                extra3 {
+                        status = "reserved";
+                };
+                extra4 {
+                        status = "reserved";
+        };
+
         };
 };
