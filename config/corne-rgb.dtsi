@@ -24,8 +24,8 @@ Just like that it's became easier to maintain this code hahaha, enjoy, and I hop
 #define LAYER_GFUN 5
 #define LAYER_XTR2 6
 #define LAYER_TGL 7
-#define LAYER_TGL_1 8
-#define LAYER_TGL_2 9
+#define LAYER_TGLLR_1 8
+#define LAYER_TGLLR_2 9
 #define LAYER_TGL_2_SUBLLR_1 10
 
 // Dedicated Layer Colors, this defines a color using variables instead of the code RGB_COLOR_HSB().
@@ -112,7 +112,7 @@ Just like that it's became easier to maintain this code hahaha, enjoy, and I hop
             global-quick-tap;
             quick-tap-ms = <400>;
         };
-// These create a behavior for the momentary LEDs, macros should be made FIRST; prior to making these behaviors! These are mostly used for layer-tapping you can just make a macro and bind it to a key. Like what was done for my toggle layer when I bound it to a combo, no momentary activation was needed.  
+// These create a behavior for the momentary LEDs, macros should be made FIRST; prior to making these behaviors! These are mostly used for layer-tapping.
         DEFINE_RGB_HOLD_TAP(hold_tap_nmrw_led, "HOLD_TAP_NMRW_LED", nmrw_led)
         DEFINE_RGB_HOLD_TAP(hold_tap_xtra2_led, "HOLD_TAP_XTRA2_LED", xtra2_led)
         DEFINE_RGB_HOLD_TAP(hold_tap_kpad_led, "HOLD_TAP_KPAD_LED", kpad_led)
@@ -185,7 +185,7 @@ Just like that it's became easier to maintain this code hahaha, enjoy, and I hop
         tog_layers_c {
             bindings = <&toglayers_leds>;
             key-positions = <38 39>;
-            layers = <LAYER_ABC LAYER_TGL_1 LAYER_TGL_2>;
+            layers = <LAYER_ABC LAYER_TGLLR_1 LAYER_TGLLR_2>;
         };
 
         togglelayer_2_defaultLayer {
@@ -210,9 +210,9 @@ Just like that it's became easier to maintain this code hahaha, enjoy, and I hop
 
         DEFINE_TO_RGB_MACRO(default_led, "goes back to default colors and ABC layer", LAYER_ABC, RGB_ABC)
 
-        DEFINE_TO_RGB_MACRO(toglayers_leds, "brings to ToggleLayer", LAYER_TGL, RGB_TGLLR)
+        DEFINE_TO_RGB_MACRO(toglayers_leds, "brings to ToggleLayer", LAYER_TGL, RGB_TGL)
 
-        DEFINE_TO_RGB_MACRO(t1_led, "Bring to toggle_layer1 and changes led", LAYER_TGL_1, RGB_TGL_1)
+        DEFINE_TO_RGB_MACRO(t1_led, "Bring to toggle_layer1 and changes led", LAYER_TGLLR_1, RGB_TGL_1)
 
         DEFINE_TO_RGB_PRESS_MACRO(to_t2_led, "ToggleLayer Led", LAYER_TGLLR_2, RGB_TGLLR_2)
 
