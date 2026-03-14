@@ -39,7 +39,7 @@ Just like that it's became easier to maintain this code hahaha, enjoy, and I hop
 #define RGB_TGLLR RGB_COLOR_HSB(251,67,50) // Bright Indigo
 #define RGB_TGLLR_1 RGB_COLOR_HSB(50,100,12) // Pale Yellow TGL1 BASE COLOR
 #define RGB_TGLLR_2 RGB_COLOR_HSB(85,100,15) // Dim Green TGLLR2 BASE COLOR
-#define RGB_TGLLR_2 SUBLLR_1 RGB_COLOR_HSB(82,100,50) // Bright Green
+#define RGB_TGLLR_2_SUBLLR_1 RGB_COLOR_HSB(82,100,50) // Bright Green
 
 // Restructured Macros, here we redefined the macros to a new 'layout', we can use the above definitons to create a macro below. This give more modularity since we only have to define our variables now for the layers.
 #define DEFINE_MOMENTARY_RGB_MACRO(node_name, node_label, layer, active_color, release_color) \
