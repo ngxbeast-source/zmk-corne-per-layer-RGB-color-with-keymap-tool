@@ -86,10 +86,10 @@
             tapping-term-ms = <180>;
         };
 
-        hold_tap_toglayer2_sublayer1: hold_tap_toglayer2_sublayer1 {
+        hold_tap_t2_s1: hold_tap_t2_s1 {
             compatible = "zmk,behavior-hold-tap";
-            label = "Hold Tap function for toggle layer2 sublayer 1";
-            bindings = <&toglayer2_sublayer1_led>, <&kp>;
+            label = "layer2 sublayer 1";
+            bindings = <&t2_s1_led>, <&kp>;
 
             #binding-cells = <2>;
             tapping-term-ms = <180>;
@@ -199,8 +199,9 @@
                 <&rgb_ug RGB_COLOR_HSB(19,100,27)>;
 
             label = "xtra2Layer momentary LED Macro";
-                    //the first color should be what you want the changed layer to switch to, 
-                    //the second one is whatever you decided to be your base color.
+
+            //the first color should be what you want the changed layer to switch to, 
+            //the second one is whatever you decided to be your base color.
         };
 
         nmrw_led_x: nmrw_led_x {
@@ -329,7 +330,7 @@
             label = "brings to ToggleLayer";
         };
 
-        toglayer1_led: toglayer1_led {
+        t1_led: t1_led {
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
             bindings =
@@ -341,7 +342,7 @@
             label = "Bring to toggle_layer1 and changes led";
         };
 
-        to_toglayer2_led: to_toglayer2_led {
+        to_t2_led: to_t2_led {
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
             bindings =
@@ -350,10 +351,10 @@
                 <&macro_press>,
                 <&rgb_ug RGB_COLOR_HSB(82,100,15)>;
 
-            label = "TO_TOGLAYER2_LED";
+            label = "ToggleLayer Led";
         };
 
-        toglayer2_sublayer1_led: toglayer2_sublayer1_led {
+        t2_s1_led: t2_s1_led {
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
             bindings =
@@ -367,7 +368,7 @@
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(82,100,15)>;
 
-            label = "TOGLAYER2 to sublayer1 momentary LED Macro";
+            label = "TOGLAYER2 sublayer1 momentary LED Macro";
         };
     };
 
@@ -448,10 +449,10 @@
 
         Toggle_Layers {
             bindings = <
-&toglayer1_led  &to_toglayer2_led  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
-&none           &none              &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
-&none           &none              &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
-                                          &none  &none  &none    &none  &none  &none
+&t1_led  &to_t2_led  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
+&none    &none       &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
+&none    &none       &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
+                            &none  &none  &none    &none  &none  &none
             >;
 
             label = "TOG";
@@ -470,10 +471,10 @@
 
         toggle_2 {
             bindings = <
-&none  &none  &none  &none  &none  &none                                    &none  &none  &none  &none  &none  &none
-&none  &none  &none  &none  &none  &none                                    &none  &none  &none  &none  &none  &none
-&none  &none  &none  &none  &none  &none                                    &none  &none  &none  &none  &none  &none
-                     &none  &none  &hold_tap_toglayer2_sublayer1 0 SPACE    &none  &none  &none
+&none  &none  &none  &none  &none  &none                      &none  &none  &none  &none  &none  &none
+&none  &none  &none  &none  &none  &none                      &none  &none  &none  &none  &none  &none
+&none  &none  &none  &none  &none  &none                      &none  &none  &none  &none  &none  &none
+                     &none  &none  &hold_tap_t2_s1 0 SPACE    &none  &none  &none
             >;
 
             label = "T2";
