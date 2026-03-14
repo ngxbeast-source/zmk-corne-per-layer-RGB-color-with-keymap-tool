@@ -30,18 +30,17 @@ Just like that it's became easier to maintain this code hahaha, enjoy, and I hop
 #define LAYER_TGL_2_SUBLLR_1 10
 
 // Dedicated Layer Colors, this defines a color using variables instead of the code RGB_COLOR_HSB().
-#define RGB_ABC 19 100 17 // Dim Yellow BASE COLOR
-#define RGB_NMRW 183 67 18 // Teal
-#define RGB_KPAD 230 67 26 // Dark Blue 
-#define RGB_XTRA 273 67 23 // Light Purple
-#define RGB_GAME 0 100 25 // Red
-#define RGB_GFUN 116 67 50  // Bright Yellow
-#define RGB_XTRA2 116 67 26 // Bright Green
-#define RGB_TGL 251 67 50 // Bright Indigo
-#define RGB_TGLLR_1 50 100 12 // Pale Yellow TGL1 BASE COLOR
-#define RGB_TGLLR_2 85 100 15 // Dim Green TGLLR2 BASE COLOR
-#define RGB_TGLLR_2_SUBLLR_1 82 100 50 // Bright Green
-
+#define RGB_ABC RGB_COLOR_HSB(19,100,17) // Dim Yellow BASE COLOR
+#define RGB_NMRW RGB_COLOR_HSB(183,67,18) // Teal
+#define RGB_KPAD RGB_COLOR_HSB(230,67,26) // Dark Blue 
+#define RGB_XTRA RGB_COLOR_HSB(273,67,23) // Light Purple
+#define RGB_GAME RGB_COLOR_HSB(0,100,25) // Red
+#define RGB_GFUN RGB_COLOR_HSB(116,67,50) // Bright Yellow
+#define RGB_XTRA2 RGB_COLOR_HSB(116,67,26) // Bright Green
+#define RGB_TGL RGB_COLOR_HSB(251,67,50) // Bright Indigo
+#define RGB_TGLLR_1 RGB_COLOR_HSB(50,100,12) // Pale Yellow TGL1 BASE COLOR
+#define RGB_TGLLR_2 RGB_COLOR_HSB(85,100,15) // Dim Green TGLLR2 BASE COLOR
+#define RGB_TGLLR_2_SUBLLR_1 RGB_COLOR_HSB(82,100,50) // Bright Green
 
 // Restructured Macros, here we redefined the macros to a new 'layout', we can use the above definitons to create a macro below. This give more modularity since we only have to define our variables now for the layers.
 #define DEFINE_MOMENTARY_RGB_MACRO(node_name, node_label, layer, active_color, release_color) \
