@@ -157,13 +157,13 @@
         game_combo {
             bindings = <&to_game>;
             key-positions = <0 11>;
-            layers = <LAYER_ABC>;
+            layers = <LAYER_ABC LAYER_TOGGLE;
         };
 
         base_defaultLayer_led {
             bindings = <&default_led>;
             key-positions = <0 11>;
-            layers = <LAYER_GAME LAYER_TOGGLE>;
+            layers = <LAYER_GAME>;
         };
 
         tog_layers_c {
