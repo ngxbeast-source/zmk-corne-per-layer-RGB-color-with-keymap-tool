@@ -18,7 +18,7 @@ Used https://nickcoutsos.github.io/keymap-editor/ for all of the macros and hold
 <br>
 <br>
 
-### NEW AI Implemented RGB config!
+### NEW MODULAR AI Implemented RGB config! (Can be copied easily)
 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;Got super lazy and had copilot refine the code and it did a really surpringly well job. All of the combos and macros have been modularized, now adding a new layer color/macro has been made easier. Layouts for the new code format/structure can be found in corne-rgb.dtsi. Anyone can easily add this to their own builds now just be sure to add `#include corne-rgb.dtsi` to your .keymap file. Obviously change corne to whatever.
 <br>
