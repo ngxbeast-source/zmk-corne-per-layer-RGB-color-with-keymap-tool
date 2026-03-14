@@ -15,12 +15,12 @@
 #define LAYER_TOGGLE_2_SUBLAYER_1 10
 
 #define RGB_ABC RGB_COLOR_HSB(19,100,17) // Dim Yellow BASE COLOR
-#define RGB_NMRW RGB_COLOR_HSB(183,67,12) // Teal
-#define RGB_KPAD RGB_COLOR_HSB(237,67,13) // Dim Dark Blue 
-#define RGB_XTRA RGB_COLOR_HSB(273,67,19) // Light Purple
+#define RGB_NMRW RGB_COLOR_HSB(183,67,18) // Teal
+#define RGB_KPAD RGB_COLOR_HSB(237,67,26) // Dim Dark Blue 
+#define RGB_XTRA RGB_COLOR_HSB(273,67,23) // Light Purple
 #define RGB_GAME RGB_COLOR_HSB(0,100,25) // Red
 #define RGB_GFUN RGB_COLOR_HSB(116,67,50) // Bright Yellow
-#define RGB_XTRA2 RGB_COLOR_HSB(116,67,50) // Bright Green
+#define RGB_XTRA2 RGB_COLOR_HSB(116,67,26) // Bright Green
 #define RGB_TOGGLE RGB_COLOR_HSB(251,67,50) // Bright Indigo
 #define RGB_TOGGLE_1 RGB_COLOR_HSB(50,100,12) // Pale Yellow TOGGLE1 BASE COLOR
 #define RGB_TOGGLE_2 RGB_COLOR_HSB(85,100,15) // Dim Green TOGGLE2 BASE COLOR
