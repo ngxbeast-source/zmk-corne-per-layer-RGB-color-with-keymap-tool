@@ -25,9 +25,7 @@
 #define RGB_TOGGLE_2_SUBLAYER_1 RGB_COLOR_HSB(82,100,35)
 
 #define DEFINE_MOMENTARY_RGB_MACRO(node_name, node_label, layer, active_color, release_color) \
-        node_name: node_name { \
-            compatible = "zmk,behavior-macro"; \
-            #binding-cells = <0>; \
+        ZMK_MACRO(node_name, \
             bindings = \
                 <&macro_press>, \
                 <&mo layer>, \
@@ -39,7 +37,7 @@
                 <&macro_tap>, \
                 <&rgb_ug release_color>; \
             label = node_label; \
-        };
+        )
 
 #define DEFINE_RGB_HOLD_TAP(node_name, node_label, macro_ref) \
         node_name: node_name { \
@@ -52,16 +50,24 @@
         };
 
 #define DEFINE_TO_RGB_MACRO(node_name, node_label, layer, color) \
-        node_name: node_name { \
-            compatible = "zmk,behavior-macro"; \
-            #binding-cells = <0>; \
+        ZMK_MACRO(node_name, \
             bindings = \
                 <&macro_tap>, \
                 <&to layer>, \
                 <&macro_tap>, \
                 <&rgb_ug color>; \
             label = node_label; \
-        };
+        )
+
+#define DEFINE_TO_RGB_PRESS_MACRO(node_name, node_label, layer, color) \
+        ZMK_MACRO(node_name, \
+            bindings = \
+                <&macro_tap>, \
+                <&to layer>, \
+                <&macro_press>, \
+                <&rgb_ug color>; \
+            label = node_label; \
+        )
 
 / {
     behaviors {
@@ -194,17 +200,7 @@
 
         DEFINE_TO_RGB_MACRO(t1_led, "Bring to toggle_layer1 and changes led", LAYER_TOGGLE_1, RGB_TOGGLE_1)
 
-        to_t2_led: to_t2_led {
-            compatible = "zmk,behavior-macro";
-            #binding-cells = <0>;
-            bindings =
-                <&macro_tap>,
-                <&to LAYER_TOGGLE_2>,
-                <&macro_press>,
-                <&rgb_ug RGB_TOGGLE_2>;
-
-            label = "ToggleLayer Led";
-        };
+        DEFINE_TO_RGB_PRESS_MACRO(to_t2_led, "ToggleLayer Led", LAYER_TOGGLE_2, RGB_TOGGLE_2)
 
         DEFINE_MOMENTARY_RGB_MACRO(t2_s1_led, "TOGLAYER2 sublayer1 momentary LED Macro", LAYER_TOGGLE_2_SUBLAYER_1, RGB_TOGGLE_2_SUBLAYER_1, RGB_TOGGLE_2)
     };
