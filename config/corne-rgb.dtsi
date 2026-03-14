@@ -98,7 +98,7 @@
         DEFINE_RGB_HOLD_TAP(hold_tap_kpad_led, "HOLD_TAP_KPAD_LED", kpad_led)
         DEFINE_RGB_HOLD_TAP(hold_tap_xtra_led, "HOLD_TAP_XTRA_LED", xtra_led)
         DEFINE_RGB_HOLD_TAP(hold_tap_gfun_led, "HOLD_TAP_GFUN_LED", gfun_led)
-        DEFINE_RGB_HOLD_TAP(hold_tap_t2_s1, "layer2 sublayer 1", t2_s1_led)
+        DEFINE_RGB_HOLD_TAP(hold_tap_t2_s1, "layer2_sublayer1_LED", t2_s1_led)
     };
 
     combos {
