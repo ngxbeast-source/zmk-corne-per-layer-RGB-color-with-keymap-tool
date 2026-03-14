@@ -42,17 +42,17 @@
             bindings = <&nmrw_led>, <&kp>;
 
             #binding-cells = <2>;
-            tapping-term-ms = <200>;
+            tapping-term-ms = <180>;
             flavor = "tap-preferred";
         };
 
-        hold_tap_togl_led: hold_tap_togl_led {
+        hold_tap_xtra2_led: hold_tap_xtra2_led {
             compatible = "zmk,behavior-hold-tap";
-            label = "HOLD_TAP_TOGL_LED";
-            bindings = <&togl_led>, <&kp>;
+            label = "HOLD_TAP_XTRA2_LED";
+            bindings = <&xtra2_led>, <&kp>;
 
             #binding-cells = <2>;
-            tapping-term-ms = <200>;
+            tapping-term-ms = <180>;
             flavor = "tap-preferred";
         };
 
@@ -62,7 +62,7 @@
             bindings = <&kpad_led>, <&kp>;
 
             #binding-cells = <2>;
-            tapping-term-ms = <200>;
+            tapping-term-ms = <180>;
             flavor = "tap-preferred";
         };
 
@@ -72,18 +72,28 @@
             bindings = <&xtra_led>, <&kp>;
 
             #binding-cells = <2>;
-            tapping-term-ms = <200>;
+            tapping-term-ms = <180>;
             flavor = "tap-preferred";
         };
 
-        hold_tap_gfun: hold_tap_gfun {
+        hold_tap_gfun_led: hold_tap_gfun_led {
             compatible = "zmk,behavior-hold-tap";
-            label = "HOLD_TAP_GFUN";
+            label = "HOLD_TAP_GFUN_LED";
             bindings = <&gfun_led>, <&kp>;
 
             #binding-cells = <2>;
             flavor = "tap-preferred";
-            tapping-term-ms = <200>;
+            tapping-term-ms = <180>;
+        };
+
+        hold_tap_toglayer2_sublayer1: hold_tap_toglayer2_sublayer1 {
+            compatible = "zmk,behavior-hold-tap";
+            label = "Hold Tap function for toggle layer2 sublayer 1";
+            bindings = <&toglayer2_sublayer1_led>, <&kp>;
+
+            #binding-cells = <2>;
+            tapping-term-ms = <180>;
+            flavor = "tap-preferred";
         };
     };
 
@@ -142,21 +152,21 @@
             layers = <0>;
         };
 
-        base_default_layer_led {
+        base_defaultLayer_led {
             bindings = <&default_led>;
             key-positions = <0 11>;
             layers = <4>;
         };
 
         tog_layers_c {
-            bindings = <&to_tog_layers>;
+            bindings = <&tog_layers_leds>;
             key-positions = <38 39>;
-            layers = <0 8>;
+            layers = <0 8 9>;
         };
 
-        tog_2_default {
+        togglelayer_2_defaultLayer {
             bindings = <&default_led>;
-            key-positions = <39>;
+            key-positions = <39 38>;
             layers = <7>;
         };
     };
@@ -174,7 +184,7 @@
 
         )
 
-        togl_led: togl_led {
+        xtra2_led: xtra2_led {
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
             bindings =
@@ -188,7 +198,9 @@
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(19,100,27)>;
 
-            label = "ToggleLayer LED Macro";
+            label = "xtra2Layer momentary LED Macro";
+                    //the first color should be what you want the changed layer to switch to, 
+                    //the second one is whatever you decided to be your base color.
         };
 
         nmrw_led_x: nmrw_led_x {
@@ -222,7 +234,7 @@
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(19,100,27)>;
 
-            label = "KeyPadLayer LED Macro";
+            label = "KeyPadLayer momentary LED Macro";
         };
 
         xtra_led: xtra_led {
@@ -239,7 +251,7 @@
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(19,100,27)>;
 
-            label = "ExtraLayer LED Macro";
+            label = "ExtraLayer momentary LED Macro";
         };
 
         tgame_led: tgame_led {
@@ -256,7 +268,7 @@
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(0,100,25)>;
 
-            label = "ToggleLayer From GameLayer LED Macro";
+            label = "No longer used";
         };
 
         nmrw_led: nmrw_led {
@@ -273,7 +285,7 @@
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(19,100,17)>;
 
-            label = "NumberRowLayer LED Macro";
+            label = "NumberRowLayer momentary LED Macro";
         };
 
         gfun_led: gfun_led {
@@ -290,7 +302,7 @@
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(0,100,25)>;
 
-            label = "GameLayerFunction LED Macro";
+            label = "GameLayer Sublayer momentary LED Macro";
         };
 
         default_led: default_led {
@@ -302,10 +314,10 @@
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(19,100,27)>;
 
-            label = "DEFAULT_LED goes back to default colors";
+            label = "goes back to default colors and ABC layer";
         };
 
-        to_tog_layers: to_tog_layers {
+        tog_layers_leds: tog_layers_leds {
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
             bindings =
@@ -314,10 +326,10 @@
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(251,100,50)>;
 
-            label = "TO_TOG_LAYERS";
+            label = "brings to ToggleLayer";
         };
 
-        to_toglayer1_led: to_toglayer1_led {
+        toglayer1_led: toglayer1_led {
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
             bindings =
@@ -326,7 +338,36 @@
                 <&macro_tap>,
                 <&rgb_ug RGB_COLOR_HSB(23,100,12)>;
 
-            label = "TO_TOGLAYER1_LED";
+            label = "Bring to toggle_layer1 and changes led";
+        };
+
+        to_toglayer2_led: to_toglayer2_led {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings =
+                <&macro_tap>,
+                <&to 9>,
+                <&macro_press>,
+                <&rgb_ug RGB_COLOR_HSB(82,100,15)>;
+
+            label = "TO_TOGLAYER2_LED";
+        };
+
+        toglayer2_sublayer1_led: toglayer2_sublayer1_led {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings =
+                <&macro_press>,
+                <&mo 10>,
+                <&macro_tap>,
+                <&rgb_ug RGB_COLOR_HSB(82,100,35)>,
+                <&macro_pause_for_release>,
+                <&macro_release>,
+                <&mo 10>,
+                <&macro_tap>,
+                <&rgb_ug RGB_COLOR_HSB(82,100,15)>;
+
+            label = "TOGLAYER2 to sublayer1 momentary LED Macro";
         };
     };
 
@@ -336,10 +377,10 @@
         abc {
             display-name = "ABC";
             bindings = <
-&kp ESC         &kp Q  &kp W           &kp E        &kp R                       &kp T                         &kp Y                     &kp U                      &kp I          &kp O            &kp P               &kp BSPC
-&kp LEFT_SHIFT  &kp A  &hm LEFT_ALT S  &hm LCTRL D  &hm LEFT_SHIFT F            &kp G                         &kp H                     &hm RSHIFT J               &hm RCTRL K    &hm RIGHT_ALT L  &hm RGUI SEMICOLON  &kp SQT
-&kp LCTRL       &kp Z  &kp X           &kp C        &kp V                       &kp B                         &kp N                     &kp M                      &kp COMMA      &kp DOT          &kp FSLH            &kp ESC
-                                       &kp TAB      &hold_tap_nmrw_led 0 SPACE  &hold_tap_kpad_led 0 ENTER    &hold_tap_xtra_led 0 DEL  &hold_tap_togl_led 0 LEFT  &hm F11 RIGHT
+&kp ESC         &kp Q  &kp W           &kp E        &kp R                       &kp T                         &kp Y                     &kp U                       &kp I          &kp O            &kp P               &kp BSPC
+&kp LEFT_SHIFT  &kp A  &hm LEFT_ALT S  &hm LCTRL D  &hm LEFT_SHIFT F            &kp G                         &kp H                     &hm RSHIFT J                &hm RCTRL K    &hm RIGHT_ALT L  &hm RGUI SEMICOLON  &kp SQT
+&kp LCTRL       &kp Z  &kp X           &kp C        &kp V                       &kp B                         &kp N                     &kp M                       &kp COMMA      &kp DOT          &kp FSLH            &kp ESC
+                                       &kp TAB      &hold_tap_nmrw_led 0 SPACE  &hold_tap_kpad_led 0 ENTER    &hold_tap_xtra_led 0 DEL  &hold_tap_xtra2_led 0 LEFT  &hm F11 RIGHT
             >;
         };
 
@@ -356,10 +397,10 @@
         k_pd {
             display-name = "KPAD";
             bindings = <
-&kp ESCAPE  &trans  &trans            &trans      &trans             &kp F5           &kp KP_N7       &kp KP_N8  &kp KP_N9  &trans    &trans    &kp BSPC
-&kp CAPS    &trans  &kp HOME          &kp UP      &kp END            &kp PG_UP        &kp KP_N4       &kp KP_N5  &kp KP_N6  &trans    &kp UP    &trans
-&trans      &trans  &kp LC(LS(LEFT))  &kp DOWN    &kp LC(LS(RIGHT))  &kp PAGE_DOWN    &kp KP_N1       &kp KP_N2  &kp KP_N3  &kp LEFT  &kp DOWN  &kp RIGHT
-                                      &kp LA(F4)  &trans             &trans           &kp KP_NUMLOCK  &trans     &kp KP_N0
+&kp ESCAPE         &trans     &trans            &trans      &trans             &kp F5           &kp KP_N7       &kp KP_N8  &kp KP_N9  &trans    &trans    &kp BSPC
+&kp CAPS           &trans     &kp HOME          &kp UP      &kp END            &kp BACKSPACE    &kp KP_N4       &kp KP_N5  &kp KP_N6  &trans    &kp UP    &trans
+&hm (LC(X)) LC(C)  &kp LC(V)  &kp LC(LS(LEFT))  &kp DOWN    &kp LC(LS(RIGHT))  &kp RET          &kp KP_N1       &kp KP_N2  &kp KP_N3  &kp LEFT  &kp DOWN  &kp RIGHT
+                                                &kp LA(F4)  &trans             &trans           &kp KP_NUMLOCK  &trans     &kp KP_N0
             >;
         };
 
@@ -369,17 +410,17 @@
 &bt BT_CLR          &bt BT_SEL 0     &bt BT_SEL 1      &bt BT_SEL 2  &bt BT_SEL 3    &trans            &rgb_ug RGB_EFF  &trans           &hm C_PLAY_PAUSE C_REWIND  &kp C_FAST_FORWARD  &trans    &rgb_ug RGB_TOG
 &out OUT_TOG        &trans           &kp LS(LA(DOWN))  &kp UP        &kp LS(LA(UP))  &trans            &rgb_ug RGB_HUI  &rgb_ug RGB_HUD  &hm C_MUTE C_VOL_DN        &kp C_VOLUME_UP     &kp UP    &kp ENTER
 &kp LA(LC(ESCAPE))  &kp LA(LC(DEL))  &kp LEFT          &kp DOWN      &kp RIGHT       &trans            &rgb_ug RGB_SAD  &rgb_ug RGB_SAI  &trans                     &kp LEFT            &kp DOWN  &kp RIGHT
-                                                       &trans        &trans          &studio_unlock    &trans           &rgb_ug RGB_BRD  &rgb_ug RGB_BRI
+                                                       &kp LA(END)   &trans          &studio_unlock    &trans           &rgb_ug RGB_BRD  &rgb_ug RGB_BRI
             >;
         };
 
         game {
             display-name = "GAME";
             bindings = <
-&kp TAB    &kp Q  &kp W  &kp E         &kp R      &kp T                     &kp Y  &kp U  &kp I            &kp O              &kp P     &kp BSPC
-&kp LSHFT  &kp A  &kp S  &kp D         &kp F      &kp G                     &kp H  &kp J  &kp K            &kp L              &kp SEMI  &kp SQT
-&kp LCTRL  &kp Z  &kp X  &kp C         &kp V      &kp B                     &kp N  &kp M  &kp RS(PAGE_UP)  &kp RS(PAGE_DOWN)  &kp FSLH  &kp ESC
-                         &kp LEFT_ALT  &kp SPACE  &hold_tap_gfun 0 ENTER    &none  &none  &none
+&kp TAB    &kp Q  &kp W  &kp E         &kp R      &kp T                         &kp Y  &kp U  &kp I            &kp O              &kp P     &kp BSPC
+&kp LSHFT  &kp A  &kp S  &kp D         &kp F      &kp G                         &kp H  &kp J  &kp K            &kp L              &kp SEMI  &kp SQT
+&kp LCTRL  &kp Z  &kp X  &kp C         &kp V      &kp B                         &kp N  &kp M  &kp RS(PAGE_UP)  &kp RS(PAGE_DOWN)  &kp FSLH  &kp ESC
+                         &kp LEFT_ALT  &kp SPACE  &hold_tap_gfun_led 0 ENTER    &none  &none  &none
             >;
         };
 
@@ -407,16 +448,16 @@
 
         Toggle_Layers {
             bindings = <
-&none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
-&none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
-&none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
-                     &none  &none  &none    &none  &none  &none
+&toglayer1_led  &to_toglayer2_led  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
+&none           &none              &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
+&none           &none              &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
+                                          &none  &none  &none    &none  &none  &none
             >;
 
-            label = "LTOG";
+            label = "TOG";
         };
 
-        Toggel_1 {
+        toggle_1 {
             bindings = <
 &none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
 &none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
@@ -424,7 +465,29 @@
                      &none  &none  &none    &none  &none  &none
             >;
 
-            label = "TOG1";
+            label = "T1";
+        };
+
+        toggle_2 {
+            bindings = <
+&none  &none  &none  &none  &none  &none                                    &none  &none  &none  &none  &none  &none
+&none  &none  &none  &none  &none  &none                                    &none  &none  &none  &none  &none  &none
+&none  &none  &none  &none  &none  &none                                    &none  &none  &none  &none  &none  &none
+                     &none  &none  &hold_tap_toglayer2_sublayer1 0 SPACE    &none  &none  &none
+            >;
+
+            label = "T2";
+        };
+
+        toggle2_sublayer1 {
+            bindings = <
+&trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans
+&trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans
+&trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans
+                        &trans  &trans  &trans    &trans  &trans  &trans
+            >;
+
+            label = "T2.1";
         };
 
         extra1 { status = "reserved"; };
