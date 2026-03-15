@@ -105,6 +105,15 @@ Just like that it's became easier to update this code hahaha, enjoy, and I hope 
                 <&rgb_ug color>; \
             label = node_label; \
         )
+#define TO_RGB_PRESS_MACRO(node_name, node_label, layer, color) \
+        ZMK_MACRO(node_name, \
+            bindings = \
+                <&macro_tap>, \
+                <&to layer>, \
+                <&macro_press>, \
+                <&rgb_ug color>; \
+            label = node_label; \
+        )
 
 / {
     behaviors {
@@ -260,7 +269,7 @@ Just like that it's became easier to update this code hahaha, enjoy, and I hope 
 
         TO_RGB_MACRO(t1_led, "ToggleLayer1 LED", LAYER_TGLLR_1, RGB_TGLLR_1)
 
-        TO_RGB_MACRO(to_t2_led, "ToggleLayer2 LED", LAYER_TGLLR_2, RGB_TGLLR_2)
+        TO_RGB_PRESS_MACRO(to_t2_led, "ToggleLayer LED", LAYER_TGLLR_2, RGB_TGLLR_2)
 
         MOMENTARY_RGB_MACRO(t2_s1_led, "ToggleLayer2 SubLayer1 Momentary LED Macro", LAYER_TGLLR_2_SUBLLR_1, RGB_TGLLR_2_SUBLLR_1, RGB_TGLLR_2)
 
