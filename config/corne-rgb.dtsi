@@ -40,7 +40,7 @@ Just like that it's became easier to update this code hahaha, enjoy, and I hope 
 #define LAYER_GAME 5
 #define LAYER_GFUN 6
 #define LAYER_GAMETGL 7 
-#define LAYER_GAME2 4
+#define LAYER_GAME2 8
 #define LAYER_TGL 9
 #define LAYER_TGLLR_1 10
 #define LAYER_TGLLR_2 11
@@ -274,7 +274,7 @@ Just like that it's became easier to update this code hahaha, enjoy, and I hope 
 
         TO_RGB_MACRO(t1_led, "ToggleLayer1 LED", LAYER_TGLLR_1, RGB_TGLLR_1)
 
-        TO_RGB_PRESS_MACRO(to_t2_led, "ToggleLayer LED", LAYER_TGLLR_2, RGB_TGLLR_2)
+        TO_RGB_PRESS_MACRO(to_t2_led, "ToggleLayer2 LED", LAYER_TGLLR_2, RGB_TGLLR_2)
 
         MOMENTARY_RGB_MACRO(t2_s1_led, "ToggleLayer2 SubLayer1 Momentary LED Macro", LAYER_TGLLR_2_SUBLLR_1, RGB_TGLLR_2_SUBLLR_1, RGB_TGLLR_2)
 
