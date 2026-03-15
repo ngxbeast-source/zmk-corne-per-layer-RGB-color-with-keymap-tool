@@ -279,7 +279,7 @@ Just like that it's became easier to update this code hahaha, enjoy, and I hope 
 
         MOMENTARY_RGB_MACRO(t2_s1_led, "ToggleLayer2 SubLayer1 Momentary LED Macro", LAYER_TGLLR_2_SUBLLR_1, RGB_TGLLR_2_SUBLLR_1, RGB_TGLLR_2)
 
-        TO_RGB_PRESS_MACRO(gtgl_led, "gametoggle LED Macro", LAYER_GAMETGL, RGB_GAMETGL, RGB_GAME)
+        TO_RGB_PRESS_MACRO(gtgl_led, "gametoggle LED Macro", LAYER_GAMETGL, RGB_GAMETGL)
 
         TO_RGB_MACRO(g2_led, "Game2 LED Macro", LAYER_GAME2, RGB_G2)
 
