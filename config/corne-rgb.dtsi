@@ -80,6 +80,15 @@ So now we can think about our layers in 3 ways: Is it a BaseLayer? (a layer that
 #define RGB_TGLLR_2 RGB_COLOR_HSB(85,100,15) // Dim  Lime TGLLR2 BASE COLOR
 #define RGB_TGLLR_2_SUBLLR_1 RGB_COLOR_HSB(82,100,50) // Bright Lime  
 
+//TEST
+// Back Blink
+#define RGB_BLINK1 RGB_COLOR_HSB(273,67,23) //XTRA Layer COLOR
+// Blink Colors
+//#define RGB_BLINK2 RGB_COLOR_HSB(273,67,23)
+//#define RGB_BLINK3 RGB_COLOR_HSB(273,67,23) 
+//#define RGB_BLINK4 RGB_COLOR_HSB(273,67,23)
+//#define RGB_BLINK5 RGB_COLOR_HSB(273,67,23)
+
 // NEW MACRO FORMAT:
 // Restructured Macros, here we redefined the macros to a new 'layout', we can use the above definitons to create a macro below. This give more modularity since we only have to define our variables now for the layers. There is no need to build this code anymore since our variables are now handling it.
 #define MOMENTARY_RGB_MACRO(node_name, node_label, layer, active_color, release_color) \
@@ -124,7 +133,17 @@ So now we can think about our layers in 3 ways: Is it a BaseLayer? (a layer that
                 <&macro_press>, \
                 <&rgb_ug color>; \
             label = node_label; \
-        )
+        )   
+// #define BLINK_MACRO(node_name, node_label, KP, blink_color, back_color) \
+//           ZMK_MACRO(node_name
+//                bindings = \
+//                <&macro_tap>, \
+//                <&kp>, \
+//                <&rgb_ug blink_color>, \
+//                <&macro_pause_for_release>, \
+//                <&rgb_ug back_color>; \
+//              label = node_label;
+//        )
 
 / {
     behaviors {
@@ -293,6 +312,20 @@ So now we can think about our layers in 3 ways: Is it a BaseLayer? (a layer that
         TO_RGB_PRESS_MACRO(toglayers_leds, "ToggleLayer LED", LAYER_TGL, RGB_TGL)
 
         TO_RGB_PRESS_MACRO(gtgl_led, "gametoggle LED Macro", LAYER_GAMETGL, RGB_GAMETGL)
+
+        // TEST
+                TO_RGB_MACRO(fluxled 
+            compatible = "zmk,behavior-macro";
+            bindings =
+                <&macro_tap>,
+                <&kp LA(END)>,
+                <&macro_press>,
+                <&rgb_ug RGB_COLOR_HSB(39,100,50)>,
+                <&macro_pause_for_release>,
+                <&rgb_ug RGB_COLOR_HSB(273,67,23)>;
+
+            label = "FLUX";
+            )
 
     };
 };
