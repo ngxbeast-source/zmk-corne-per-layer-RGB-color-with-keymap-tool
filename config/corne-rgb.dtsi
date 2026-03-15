@@ -52,7 +52,7 @@ Just like that it's became easier to maintain this code hahaha, enjoy, and I hop
 #define RGB_TGLLR_2_SUBLLR_1 RGB_COLOR_HSB(82,100,50) // Bright Lime  
 
 // Restructured Macros, here we redefined the macros to a new 'layout', we can use the above definitons to create a macro below. This give more modularity since we only have to define our variables now for the layers.
-#define DEFINE_MOMENTARY_RGB_MACRO(node_name, node_label, layer, active_color, release_color) \
+#define MOMENTARY_RGB_MACRO(node_name, node_label, layer, active_color, release_color) \
         ZMK_MACRO(node_name, \
             bindings = \
                 <&macro_press>, \
@@ -77,7 +77,7 @@ Just like that it's became easier to maintain this code hahaha, enjoy, and I hop
             flavor = "tap-preferred"; \
         };
 
-#define DEFINE_TO_RGB_MACRO(node_name, node_label, layer, color) \
+#define TO_RGB_MACRO(node_name, node_label, layer, color) \
         ZMK_MACRO(node_name, \
             bindings = \
                 <&macro_tap>, \
@@ -87,7 +87,7 @@ Just like that it's became easier to maintain this code hahaha, enjoy, and I hop
             label = node_label; \
         )
 
-#define DEFINE_TO_RGB_PRESS_MACRO(node_name, node_label, layer, color) \
+#define TO_RGB_PRESS_MACRO(node_name, node_label, layer, color) \
         ZMK_MACRO(node_name, \
             bindings = \
                 <&macro_tap>, \
