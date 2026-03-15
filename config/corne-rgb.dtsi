@@ -36,11 +36,11 @@ Just like that it's became easier to update this code hahaha, enjoy, and I hope 
 #define LAYER_NMRW 1
 #define LAYER_KPAD 2
 #define LAYER_XTRA 3
-#define LAYER_XTR2 8
+#define LAYER_GAME2 4
 #define LAYER_GAME 5
 #define LAYER_GFUN 6
 #define LAYER_GAMETGL 7 
-#define LAYER_GAME2 4
+#define LAYER_XTR2 8
 #define LAYER_TGL 9
 #define LAYER_TGLLR_1 10
 #define LAYER_TGLLR_2 11
