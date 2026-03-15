@@ -54,6 +54,17 @@
                                                        &kp LA(END)   &trans          &studio_unlock    &trans           &rgb_ug RGB_BRD  &rgb_ug RGB_BRI
             >;
         };
+        xtr2 {
+            display-name = "XTR2";
+            bindings = <
+&none  &none  &none  &none  &none  &none    &none  &none  &none        &none  &none  &none
+&none  &none  &none  &none  &none  &none    &none  &none  &none        &none  &none  &none
+&none  &none  &none  &none  &none  &none    &none  &none  &none        &none  &none  &none
+                     &none  &none  &none    &none  &none  &bootloader
+            >;
+
+            label = "xtr2";
+        };
 
         game {
             display-name = "GAME";
@@ -98,17 +109,7 @@
 
             label = "GAME2";
         };
-        xtr2 {
-            display-name = "XTR2";
-            bindings = <
-&none  &none  &none  &none  &none  &none    &none  &none  &none        &none  &none  &none
-&none  &none  &none  &none  &none  &none    &none  &none  &none        &none  &none  &none
-&none  &none  &none  &none  &none  &none    &none  &none  &none        &none  &none  &none
-                     &none  &none  &none    &none  &none  &bootloader
-            >;
 
-            label = "xtr2";
-        };
 
         Toggle_Layers {
             bindings = <
