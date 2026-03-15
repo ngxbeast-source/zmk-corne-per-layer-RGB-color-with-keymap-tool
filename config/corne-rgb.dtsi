@@ -120,11 +120,11 @@ Just like that it's became easier to maintain this code hahaha, enjoy, and I hop
             quick-tap-ms = <400>;
         };
 // These create a behavior for the momentary LEDs, macros should be made FIRST; prior to making these behaviors! These are mostly used for layer-tapping.
-        DEFINE_RGB_HOLD_TAP(hold_tap_nmrw_led, "HOLD_TAP_NMRW", nmrw_led)
-        DEFINE_RGB_HOLD_TAP(hold_tap_xtra2_led, "HOLD_TAP_XTRA2", xtra2_led)
-        DEFINE_RGB_HOLD_TAP(hold_tap_kpad_led, "HOLD_TAP_KPAD", kpad_led)
-        DEFINE_RGB_HOLD_TAP(hold_tap_xtra_led, "HOLD_TAP_XTRA", xtra_led)
-        DEFINE_RGB_HOLD_TAP(hold_tap_gfun_led, "HOLD_TAP_GFUN", gfun_led)
+        DEFINE_RGB_HOLD_TAP(hold_tap_nmrw, "HOLD_TAP_NMRW", nmrw_led)
+        DEFINE_RGB_HOLD_TAP(hold_tap_xtra2, "HOLD_TAP_XTRA2", xtra2_led)
+        DEFINE_RGB_HOLD_TAP(hold_tap_kpad, "HOLD_TAP_KPAD", kpad_led)
+        DEFINE_RGB_HOLD_TAP(hold_tap_xtra, "HOLD_TAP_XTRA", xtra_led)
+        DEFINE_RGB_HOLD_TAP(hold_tap_gfun, "HOLD_TAP_GFUN", gfun_led)
         DEFINE_RGB_HOLD_TAP(hold_tap_t2_s1, "HOLD_TAP_layer2_sublayer1", t2_s1_led)
     };
 
