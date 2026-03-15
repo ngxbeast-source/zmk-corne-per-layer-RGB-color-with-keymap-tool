@@ -36,7 +36,7 @@ Activate the layer pressing this combo: the top left key, on the left keyboard, 
 If deciding to play games with this it's recommended to plug it in via USB to negate/avoid any input lag AND to switch the output to USB on the keyboard. I'll probably put toggle output to USB when switching to the game layer somewhere in the macro.
 
 #### NEW
-There is now a separate LayerToggle in the Game Layer to switch to a new layout for certain games, at some point I'll add a sub layer and 5 more layers (2 more toggle layers and 3 sub layers for each) to give at least 4 areas to configure for games.   
+There is now a separate LayerToggle in the Game Layer to switch to a new layout for certain games, just press the same combo as the LayerToggle when you are on the game layer (the inward thumb keys on both the left and right halves. At some point I'll add a sub layer and 5 more layers (2 more toggle layers and 3 sub layers for each) to give at least 4 areas to configure for games.   
 
 ---
 
@@ -44,7 +44,7 @@ There is now a separate LayerToggle in the Game Layer to switch to a new layout 
 
 Implemented a "new" system to the keyboard where we use combos to access a "hidden" layer. Similar to the game layer it's "out of the way" from other keys, reducing the risk of accidental activation. It requires a more deliberate press but it's not as "inaccessible" as the game combo, which is designed to be a "deliberate" combo. To enable this layer press both of the most inward thumb buttons to access the "Toggle Layer", then starting from the top row press a key to change your layer to a new toggled one. To leave these layers simply press the combo again to be brought back to the "Toggle Layer" then press it a second time to go back to the "Base Layer" (similar to the game layer).
 
-The "Toggle Layer" layer is represented with a much brighter sharper LED color to bring awareness to your eyes, much like the "design" I chose for the LEDs where the LEDs are brighter if being used on a "sub layer" and dims when on the base layer(s).
+The "Toggle Layer" layer is represented with a much brighter sharper LED color to bring awareness to your eyes, much like the "design" I chose for the LEDs. Where the LEDs are brighter if being used on a "sub layer" and dims when on the base layer(s).
 
 In theory you can now add as many layers as you want as each "Toggle Layer" can have its own set of "sub-layers". 1 "Toggle Layer" can have as many "sub-layers" as you can fit/work with. I'm sure there are more creative ways to use layers but for someone like me who uses only the thumb keys for my layers I become limited to only 4 extra layers, and with the scope of the utility I get from my PC, 4 layers sometimes still isn't enough.
 
@@ -54,6 +54,6 @@ In theory you can now add as many layers as you want as each "Toggle Layer" can 
 
 ---
 
-**UPDATE:**
+**AI UPDATE:**
 
 I got lazy and let AI refine the code, honestly for the better while maintaining the initial idea. There is now fully functioning per-layer RGB — I even went ahead and added "toggle layers". In theory this is for when you're working on another program and you need a different set of layers and don't want to complicate your layouts, or if you are like me and just have a slow brain that can't process all the layer combos to get certain functions/hotkeys — it becomes easier to have "dedicated layers". It essentially just gives your keyboard access to be fully modular for whatever your tasks may be. Work in Photoshop? Then you can switch to your Photoshop layer and have all your Photoshop macros in a more accessible/memorable layout.
