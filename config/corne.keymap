@@ -75,6 +75,30 @@
             >;
         };
 
+        game_toggle {
+            display-name = "GTGL";
+            bindings = <
+&none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
+&none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
+&none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
+                     &none  &none  &none    &none  &none  &none
+            >;
+
+            label = "GTGL";
+        };
+        
+        game2 {
+            display-name = "GME2";
+            bindings = <
+&none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
+&none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
+&none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
+                     &none  &none  &none    &none  &none  &none
+            >;
+
+            label = "GAME2";
+        };
+
         xtr2 {
             display-name = "TOGL";
             bindings = <

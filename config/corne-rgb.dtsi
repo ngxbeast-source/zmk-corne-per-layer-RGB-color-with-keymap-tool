@@ -8,44 +8,62 @@ Then you can use these new behaviors in ZMK Studio
 
 New modular structuring-
     This macro defines the layer color
-        #define DEFINE_MOMENTARY_RGB_MACRO(node_name, node_label, layer, active_color, release_color)
+        #define MOMENTARY_RGB_MACRO(node_name, node_label, layer, active_color, release_color)
     This behavior defines the momentary layer function, usually used in conjunction with the above to get momentary LEDs
-        #define DEFINE_RGB_HOLD_TAP(node_name, node_label, macro_ref)
+        #define RGB_HOLD_TAP(node_name, node_label, macro_ref)
+            Making a momentary layer:
+                    1. Define the layer
+                    1a. Define the RGB color
+                    2. Build the macro using 
+                        MOMENTARY_RGB_MACRO(node_name, "ZMK_Studio_Description", LAYER_, COLOR, DEFAULT_COLOR)
+                    3. Build the behavior using
+                        RGB_HOLD_TAP(node_name, node_label, macro_ref)
+                    4. Map the new behavior node_name into your .keymap
 
-    This is only used for our "toggleLayer"
-        #define DEFINE_TO_RGB_MACRO(node_name, node_label, layer, color)
-    And this is used in conjunction with above for the layers that are associated with the toggleLayer
-        #define DEFINE_TO_RGB_PRESS_MACRO(node_name, node_label, layer, color)
-
-    The code mostly focuses on the first 2 defines, the 2nd set is used if you want to make new toggeled layers
-
-
-Just like that it's became easier to maintain this code hahaha, enjoy, and I hope ZMK can come up with new changes for their RGB eventually.
+                - Making a toggleLayer is similar but instead we use:
+                    TO_RGB_MACRO(node_name, "ZMK_Studio_Description", LAYER_, NEWCOLOR)
+                    Then map the new macro node_name to our keymap, either in your files or ZMK.Studio
+ 
+Just like that it's became easier to update this code hahaha, enjoy, and I hope the devs at ZMK can come with new RGB features in the future.
 */
-// Defined layers, instead of numbers we can use the layer name to make the code easier to address.
+
+
+
+
+// 1. DEFINE LAYERS:
+// Defined layers, this is done first; instead of numbers we can use a "layer name" variable to make the code easier to address. For any new layer(s) you just change the number(s)
 #define LAYER_ABC 0
 #define LAYER_NMRW 1
 #define LAYER_KPAD 2
 #define LAYER_XTRA 3
 #define LAYER_GAME 4
 #define LAYER_GFUN 5
-#define LAYER_XTR2 6
-#define LAYER_TGL 7
-#define LAYER_TGLLR_1 8
-#define LAYER_TGLLR_2 9
-#define LAYER_TGLLR_2_SUBLLR_1 10
+
+#define LAYER_GAMETGL 6 
+#define LAYER_GAME2 7
+
+#define LAYER_XTR2 8
+#define LAYER_TGL 9
+#define LAYER_TGLLR_1 10
+#define LAYER_TGLLR_2 11
+#define LAYER_TGLLR_2_SUBLLR_1 12
 
 
+// 1a. DEFINE THE COLOR:
+// Get color codes here https://colorizer.org/
 // Dedicated Layer Colors, this defines a color using easaily identifiable variables instead of the code RGB_COLOR_HSB().
         // LAYOUT (COLOR, HUE, BRIGHTNESS)
 // #define RGB_LAYERNAME RGB_COLOR_HSB(0,0,0)
-// Get color codes here https://colorizer.org/
 
 #define RGB_ABC RGB_COLOR_HSB(19,100,17) // Dim Yellow BASE COLOR
 #define RGB_NMRW RGB_COLOR_HSB(183,67,18) // Teal
 #define RGB_KPAD RGB_COLOR_HSB(230,67,26) // Pale Blue 
 #define RGB_XTRA RGB_COLOR_HSB(273,67,23) // Light Purple
 #define RGB_GAME RGB_COLOR_HSB(0,100,25) // Red
+
+#define RGB_GAMETGL RGB_COLOR_HSB(200,100,60)
+#define RGB_G2 RGB_COLOR_HSB(73,67,15)
+
 #define RGB_GFUN RGB_COLOR_HSB(116,67,50) // Bright Yellow
 #define RGB_XTRA2 RGB_COLOR_HSB(116,67,26) // Pale Green
 #define RGB_TGL RGB_COLOR_HSB(251,67,50) // Bright Indigo
@@ -53,7 +71,8 @@ Just like that it's became easier to maintain this code hahaha, enjoy, and I hop
 #define RGB_TGLLR_2 RGB_COLOR_HSB(85,100,15) // Dim  Lime TGLLR2 BASE COLOR
 #define RGB_TGLLR_2_SUBLLR_1 RGB_COLOR_HSB(82,100,50) // Bright Lime  
 
-// Restructured Macros, here we redefined the macros to a new 'layout', we can use the above definitons to create a macro below. This give more modularity since we only have to define our variables now for the layers.
+// NEW MACRO FORMAT:
+// Restructured Macros, here we redefined the macros to a new 'layout', we can use the above definitons to create a macro below. This give more modularity since we only have to define our variables now for the layers. There is no need to build this code anymore since our variables are now handling it.
 #define MOMENTARY_RGB_MACRO(node_name, node_label, layer, active_color, release_color) \
         ZMK_MACRO(node_name, \
             bindings = \
@@ -89,16 +108,6 @@ Just like that it's became easier to maintain this code hahaha, enjoy, and I hop
             label = node_label; \
         )
 
-#define TO_RGB_PRESS_MACRO(node_name, node_label, layer, color) \
-        ZMK_MACRO(node_name, \
-            bindings = \
-                <&macro_tap>, \
-                <&to layer>, \
-                <&macro_press>, \
-                <&rgb_ug color>; \
-            label = node_label; \
-        )
-
 / {
     behaviors {
         hm: homerow_mods {
@@ -124,14 +133,20 @@ Just like that it's became easier to maintain this code hahaha, enjoy, and I hop
             global-quick-tap;
             quick-tap-ms = <400>;
         };
-// These create a behavior for the momentary LEDs, macros should be made FIRST; prior to making these behaviors! These are mostly used for layer-tapping.
-//      RGB_HOLD_TAP(hold_tap_layername, "ZMK Studio Description", macro_led)
+// 2. BEHAVIORS:
+// These create a behavior for the momentary LEDs, macros should be made FIRST; This is made prior to making RGB behaviors, for any momentary layers!
+    //      RGB_HOLD_TAP(hold_tap_layername, "ZMK_Studio_Description", macro_led)
+
         RGB_HOLD_TAP(hold_tap_nmrw, "HOLD_TAP_NMRW", nmrw_led)
         RGB_HOLD_TAP(hold_tap_xtra2, "HOLD_TAP_XTRA2", xtra2_led)
         RGB_HOLD_TAP(hold_tap_kpad, "HOLD_TAP_KPAD", kpad_led)
         RGB_HOLD_TAP(hold_tap_xtra, "HOLD_TAP_XTRA", xtra_led)
         RGB_HOLD_TAP(hold_tap_gfun, "HOLD_TAP_GFUN", gfun_led)
         RGB_HOLD_TAP(hold_tap_t2_s1, "HOLD_TAP_layer2_sublayer1", t2_s1_led)
+        RGB_HOLD_TAP(hold_tap_gtgl, "HOLD_TAP_GTGL", gtgl_led)
+
+
+
     };
 
     combos {
@@ -141,52 +156,67 @@ Just like that it's became easier to maintain this code hahaha, enjoy, and I hop
             bindings = <&kp LEFT_BRACKET>;
             key-positions = <4 3>;
             timeout-ms = <50>;
+            layers = <LAYER_ABC>;
+
         };
 
         right_bkt {
             bindings = <&kp RBKT>;
             key-positions = <7 8>;
             timeout-ms = <50>;
+            layers = <LAYER_ABC>;
+
         };
 
         left_par {
             bindings = <&kp LEFT_PARENTHESIS>;
             key-positions = <15 16>;
             timeout-ms = <50>;
+            layers = <LAYER_ABC>;
+
         };
 
         right_par {
             bindings = <&kp RIGHT_PARENTHESIS>;
             key-positions = <19 20>;
             timeout-ms = <50>;
+            layers = <LAYER_ABC>;
+
         };
 
         left_brace {
             bindings = <&kp LEFT_BRACE>;
             key-positions = <27 28>;
             timeout-ms = <50>;
+            layers = <LAYER_ABC>;
+
         };
 
         right_brace {
             bindings = <&kp RIGHT_BRACE>;
             key-positions = <32 31>;
             timeout-ms = <50>;
+            layers = <LAYER_ABC>;
+    
         };
 
         bac {
             bindings = <&kp BACKSLASH>;
             key-positions = <5 6>;
+            layers = <LAYER_ABC>;
+
         };
 
         pipe {
             bindings = <&kp PIPE>;
             key-positions = <17 18>;
+            layers = <LAYER_ABC>;
         };
 
         game_combo {
-            bindings = <&to_game>;
+            bindings = <&game_led>;
             key-positions = <0 11>;
-            layers = <LAYER_ABC LAYER_TGL>;
+            layers = <LAYER_ABC LAYER_TGL LAYER_GAME2>;
         };
 
         base_defaultLayer_led {
@@ -207,10 +237,14 @@ Just like that it's became easier to maintain this code hahaha, enjoy, and I hop
             layers = <LAYER_TGL>;
         };
     };
-// MACROS: 
-// Here is where you actually build the LED function with our new definitions. We have 2 new definitions. DEFINE_TO_RGB_MACRO and DEFINE_MOMENTARY_RGB_MACRO, use accoring to your needs, if using momentary then you will likely also be building a hold-tap behavior AFTER this. Since it's the hold-tap node that gets used in the keymap. 
+// 1. MACROS: 
+// Here is where you actually build the LED function with our new definitions. 
+// We have 2 new definitions. TO_RGB_MACRO and MOMENTARY_RGB_MACRO, use accoring to your needs.
+// If using momentary then you will likely also be building a hold-tap behavior AFTER this. The hold_tap node should then be mapped to a key 
+        //  TO_RGB_MACRO(node_name, "ZMK_Studio_Description", LAYER_, NEWCOLOR)
+        //  MOMENTARY_RGB_MACRO(node_name, "ZMK_Studio_Description", LAYER_, NEWCOLOR, DEFAULT_COLOR)
     macros {
-        TO_RGB_MACRO(to_game, "GameLayer LED Macro", LAYER_GAME, RGB_GAME)
+        TO_RGB_MACRO(game_led, "GameLayer LED Macro", LAYER_GAME, RGB_GAME)
 
         MOMENTARY_RGB_MACRO(xtra2_led, "xtra2Layer Momentary LED Macro", LAYER_XTR2, RGB_XTRA2, RGB_ABC)
 
@@ -228,10 +262,13 @@ Just like that it's became easier to maintain this code hahaha, enjoy, and I hop
 
         TO_RGB_MACRO(t1_led, "ToggleLayer1 LED", LAYER_TGLLR_1, RGB_TGLLR_1)
 
-        TO_RGB_PRESS_MACRO(to_t2_led, "ToggleLayer LED", LAYER_TGLLR_2, RGB_TGLLR_2)
+        TO_RGB_MACRO(to_t2_led, "ToggleLayer2 LED", LAYER_TGLLR_2, RGB_TGLLR_2)
 
         MOMENTARY_RGB_MACRO(t2_s1_led, "ToggleLayer2 SubLayer1 Momentary LED Macro", LAYER_TGLLR_2_SUBLLR_1, RGB_TGLLR_2_SUBLLR_1, RGB_TGLLR_2)
 
-    //  TO_RGB_MACRO(name_of_NEW_bind, "ZMK Studio Description", LAYER, COLOR, DEFAULT_COLOR)
+        MOMENTARY_RGB_MACRO(gtgl_led, "gametoggle LED Macro", LAYER_GAMETGL, RGB_GAMETGL, RGB_GAME)
+
+        TO_RGB_MACRO(g2_led, "Game2 LED Macro", LAYER_GAME2, RGB_G2)
+
     };
 };
