@@ -35,9 +35,11 @@ Just like that it's became easier to maintain this code hahaha, enjoy, and I hop
 #define LAYER_TGLLR_2 9
 #define LAYER_TGLLR_2_SUBLLR_1 10
 
+
 // Dedicated Layer Colors, this defines a color using easaily identifiable variables instead of the code RGB_COLOR_HSB().
         // LAYOUT (COLOR, HUE, BRIGHTNESS)
 // #define RGB_LAYERNAME RGB_COLOR_HSB(0,0,0)
+// Get color codes here https://colorizer.org/
 
 #define RGB_ABC RGB_COLOR_HSB(19,100,17) // Dim Yellow BASE COLOR
 #define RGB_NMRW RGB_COLOR_HSB(183,67,18) // Teal
