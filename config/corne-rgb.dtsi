@@ -1,22 +1,28 @@
 /*
-*ANY new Layers get defined in here along with an assigned color. Format for each macro is defined below, we no longer have to use the "standard" ZMK formatting and can add to our code much easier using these new syntaxs and variables.
+*ANY new Layers get defined in here along with an assigned color. New formats are defined below, we no longer have to use the "standard" ZMK formatting, and can add to the code much easier using these new syntaxs and variables. I set up a "template" for your use, so you can better understand the layouts of this file.
+
 Just #define a layer
 then #define the color for the layer
 Build your macros, THEN build your hold-tap behavior if needed.
 Then you can use these new behaviors in ZMK Studio
 
 New modular structuring-
-    Use for layers that are press activated, this is used in conjunction with the new definition below
+    This macro defines the layer color
         #define DEFINE_MOMENTARY_RGB_MACRO(node_name, node_label, layer, active_color, release_color)
+    This behavior defines the momentary layer function, usually used in conjunction with the above to get momentary LEDs
         #define DEFINE_RGB_HOLD_TAP(node_name, node_label, macro_ref)
 
-    This is only used for our toggleLayer
+    This is only used for our "toggleLayer"
         #define DEFINE_TO_RGB_MACRO(node_name, node_label, layer, color)
-    And this is used in conjunction with above for all the toggle layers
+    And this is used in conjunction with above for the layers that are associated with the toggleLayer
         #define DEFINE_TO_RGB_PRESS_MACRO(node_name, node_label, layer, color)
+
+    The code mostly focuses on the first 2 defines, the 2nd set is used if you want to make new toggeled layers
+
+
 Just like that it's became easier to maintain this code hahaha, enjoy, and I hope ZMK can come up with new changes for their RGB eventually.
 */
-// Layers, Add an
+// Defined layers, instead of numbers we can use the layer name to make the code easier to address.
 #define LAYER_ABC 0
 #define LAYER_NMRW 1
 #define LAYER_KPAD 2
@@ -29,7 +35,7 @@ Just like that it's became easier to maintain this code hahaha, enjoy, and I hop
 #define LAYER_TGLLR_2 9
 #define LAYER_TGLLR_2_SUBLLR_1 10
 
-// Dedicated Layer Colors, this defines a color using variables instead of the code RGB_COLOR_HSB().
+// Dedicated Layer Colors, this defines a color using easaily identifiable variables instead of the code RGB_COLOR_HSB().
 #define RGB_ABC RGB_COLOR_HSB(19,100,17) // Dim Yellow BASE COLOR
 #define RGB_NMRW RGB_COLOR_HSB(183,67,18) // Teal
 #define RGB_KPAD RGB_COLOR_HSB(230,67,26) // Pale Blue 
@@ -114,12 +120,12 @@ Just like that it's became easier to maintain this code hahaha, enjoy, and I hop
             quick-tap-ms = <400>;
         };
 // These create a behavior for the momentary LEDs, macros should be made FIRST; prior to making these behaviors! These are mostly used for layer-tapping.
-        DEFINE_RGB_HOLD_TAP(hold_tap_nmrw_led, "HOLD_TAP_NMRW_LED", nmrw_led)
-        DEFINE_RGB_HOLD_TAP(hold_tap_xtra2_led, "HOLD_TAP_XTRA2_LED", xtra2_led)
-        DEFINE_RGB_HOLD_TAP(hold_tap_kpad_led, "HOLD_TAP_KPAD_LED", kpad_led)
-        DEFINE_RGB_HOLD_TAP(hold_tap_xtra_led, "HOLD_TAP_XTRA_LED", xtra_led)
-        DEFINE_RGB_HOLD_TAP(hold_tap_gfun_led, "HOLD_TAP_GFUN_LED", gfun_led)
-        DEFINE_RGB_HOLD_TAP(hold_tap_t2_s1, "layer2_sublayer1_LED", t2_s1_led)
+        DEFINE_RGB_HOLD_TAP(hold_tap_nmrw_led, "HOLD_TAP_NMRW", nmrw_led)
+        DEFINE_RGB_HOLD_TAP(hold_tap_xtra2_led, "HOLD_TAP_XTRA2", xtra2_led)
+        DEFINE_RGB_HOLD_TAP(hold_tap_kpad_led, "HOLD_TAP_KPAD", kpad_led)
+        DEFINE_RGB_HOLD_TAP(hold_tap_xtra_led, "HOLD_TAP_XTRA", xtra_led)
+        DEFINE_RGB_HOLD_TAP(hold_tap_gfun_led, "HOLD_TAP_GFUN", gfun_led)
+        DEFINE_RGB_HOLD_TAP(hold_tap_t2_s1, "HOLD_TAP_layer2_sublayer1", t2_s1_led)
     };
 
     combos {
