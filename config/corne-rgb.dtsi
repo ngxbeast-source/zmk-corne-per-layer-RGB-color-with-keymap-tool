@@ -247,8 +247,8 @@ Just like that it's became easier to update this code hahaha, enjoy, and I hope 
         game_toggle {
             bindings = <&gtgl_led>;
             key-positions = <38 39>;
-            layers = <LAYER_GAME LAYER_GAME2>
-        }
+            layers = <LAYER_GAME LAYER_GAME2>;
+        };
     };
 // 1. MACROS: 
 // Here is where you actually build the LED function with our new definitions. 
