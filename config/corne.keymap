@@ -86,7 +86,7 @@
 
             label = "GTGL";
         };
-        
+
         game2 {
             display-name = "GME2";
             bindings = <
