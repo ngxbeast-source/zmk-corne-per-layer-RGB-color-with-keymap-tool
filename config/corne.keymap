@@ -78,10 +78,10 @@
         game_toggle {
             display-name = "GTGL";
             bindings = <
+&g2_led  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
 &none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
 &none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
-&none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
-                     &none  &none  &g2_led    &none  &none  &none
+                     &none  &none  &none    &none  &none  &none
             >;
 
             label = "GTGL";
