@@ -8,7 +8,7 @@ This is a **VERY AMATEUR** attempt at implementing "Per-layer RGB colors into th
 
 Used https://nickcoutsos.github.io/keymap-editor/ for all of the macros and hold-taps
 
-- ~~5~~ 11! Layers with their own color setting (the default layer color is a warm orange/yellow)
+- ~~5~~ 13! Layers with their own color setting (the default layer color is a warm orange/yellow)
 - Implemented a "gaming" layer combo (so that way there are no accidental presses)
 - The active `config/corne.keymap` now stays focused on layer bindings, while the RGB macros/combos live in `config/corne-rgb.dtsi` so the per-layer colors are easier to maintain.
 - The zero-parameter RGB macros in `config/corne-rgb.dtsi` now use ZMK's `ZMK_MACRO(...)` convenience C macro, so the macro definitions stay shorter without changing the RGB behavior.
