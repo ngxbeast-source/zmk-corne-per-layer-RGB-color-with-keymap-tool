@@ -73,7 +73,7 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 
 ![combos](corneCombos.png)
   - Red Bring Us To the Game Layer (MUST BE ON BASE LAYER TO ACCESS)
-    - To leave the Game Layer press the combo again FROM THE BASE GAME LAYER.
+    - To leave the Game Layer press the combo twice until you return to the BASE layer
   - Blue Brings Us To the "Toggle-Layer" Layer (MUST BE ON BASE LAYER TO ACCESS)
     - To return to the BASE layer you can press the thumb buttons twice until you return to the BASE layer
   - Purple Brings Us to the "Game Toggle-Layer" Layer (MUST BE ON GAME LAYER TO ACCESS)
