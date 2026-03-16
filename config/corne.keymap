@@ -12,8 +12,7 @@
 #include "corne-rgb.dtsi"
 
 / {
-                ZMK_MACRO(fluxled 
-            compatible = "zmk,behavior-macro";
+                ZMK_MACRO(fluxled, 
             bindings =
                 <&macro_tap>,
                 <&kp LA(END)>,
