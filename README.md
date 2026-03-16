@@ -8,11 +8,12 @@ This is a **VERY AMATEUR** attempt at implementing "Per-layer RGB colors into th
 
 Used https://nickcoutsos.github.io/keymap-editor/ for all of the macros and hold-taps
 
-- ~~5~~ 11! Layers with their own color setting (the default layer color is a warm orange/yellow)
+- ~~5~~ 13! Layers with their own color setting (the default/Base layer color is a warm dim orange/yellow)
 - Implemented a "gaming" layer combo (so that way there are no accidental presses)
 - The active `config/corne.keymap` now stays focused on layer bindings, while the RGB macros/combos live in `config/corne-rgb.dtsi` so the per-layer colors are easier to maintain.
 - The zero-parameter RGB macros in `config/corne-rgb.dtsi` now use ZMK's `ZMK_MACRO(...)` convenience C macro, so the macro definitions stay shorter without changing the RGB behavior.
 - The layers/macros behave the same way "home-row mods" work but since we cant put macros on home-rows we have to use "hold-tap" (or so I assume). This way we avoid triggering the LED change when the layer isn't "activated" and we just want a simple key tap; with NO LED change.
+- There is now a "blink" indicator for when you activate CapsLock (need to improve the logic but it works), might make one for num lock similar to the "flux" key bind so it can ba modular in ZMK.
 
 I made a silly mistake when I was first attempting this, I put the layertap behavior IN the macro, so it would run the whole macro whenever I just wanted a simple key tap. In theory it was working, it changed my colors when I pressed the correct layer key, but it did this **EVERYTIME** the layer key was pressed, and since I was using layer-tap before this I was frequently pressing these keys in my normal use. I figured I had to "separate" the layer-tap from the macro and just leave the layer in.
 (It would give a nice little light show when I would type lol, before this fix.)
@@ -36,7 +37,7 @@ Activate the layer pressing this combo: the top left key, on the left keyboard, 
 If deciding to play games with this it's recommended to plug it in via USB to negate/avoid any input lag AND to switch the output to USB on the keyboard. I'll probably put toggle output to USB when switching to the game layer somewhere in the macro.
 
 #### NEW
-There is now a separate LayerToggle in the Game Layer to switch to a new layout for certain games, just press the same combo as the LayerToggle when you are on the game layer (the inward thumb keys on both the left and right halves. At some point I'll add a sub layer and 5 more layers (2 more toggle layers and 3 sub layers for each) to give at least 4 areas to configure for games.   
+There is now a separate LayerToggle in the Game Layer to switch to a new layout for certain games, just press the same combo as the BASE LayerToggle when you are on the game layer (the inward thumb keys on both the left and right halves. At some point I'll add a sub layer and 5 more layers (2 more toggle layers and 3 sub layers for each) to give at least 4 areas to configure for games.   
 
 ---
 
