@@ -10,14 +10,15 @@
 #include <dt-bindings/zmk/outputs.h>
 #include <dt-bindings/zmk/rgb.h>
 #include "corne-rgb.dtsi"
+
+/ {
+    macros {
 /* Flux blink with configurable colors */
 #define RGB_FLUX_ON  RGB_COLOR_HSB(39,100,75)   /* activation color */
 #define RGB_FLUX_OFF RGB_COLOR_HSB(273,67,23)   /* fallback/default */
 #define BLINK1_ON  RGB_COLOR_HSB(39,100,75)   /* activation color */
 #define BLINK1_OFF RGB_COLOR_HSB(19,100,17)  /* fallback/default */
 
-/ {
-    macros {
 /* One-parameter macro: param1 supplies the keycode */
     fluxled: fluxled {
     compatible = "zmk,behavior-macro-one-param";  // 1 parameter only 
