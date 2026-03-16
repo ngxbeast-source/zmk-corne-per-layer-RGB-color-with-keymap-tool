@@ -88,7 +88,7 @@ So now we can think about our layers in 3 ways: Is it a BaseLayer? (a layer that
 #define BLINK_OFF2 RGB_COLOR_HSB(0,0,0)      /* EXTRA fallback/default */
 
 #define N_BLINK_ON RGB_COLOR_HSB(0,100,60)  /* activation color */
-#define N_BLINK_OFF RGB_COLOR_HSB(0,100,60)      /* fallback/default */
+#define C_BLINK_OFF RGB_COLOR_HSB(19,100,17)    /* fallback/default */
 
 #define C_BLINK_ON RGB_COLOR_HSB(200,100,60)
 #define C_BLINK_OFF RGB_COLOR_HSB(19,100,17)  /* fallback/default */
