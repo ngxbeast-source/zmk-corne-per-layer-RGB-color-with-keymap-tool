@@ -94,13 +94,13 @@ So now we can think about our layers in 3 ways: Is it a BaseLayer? (a layer that
 #define C_BLINK_OFF RGB_COLOR_HSB(19,100,17)  /* fallback/default */
 
 #define BLINK_SEQ(ON, OFF, WAIT) \
-        <&macro_tap       &rgb_ug ON>, \
-        <&macro_wait_time WAIT>,       \
-        <&macro_tap       &rgb_ug RGB_TOG>, \
-        <&macro_wait_time WAIT>,       \
-        <&macro_tap       &rgb_ug RGB_TOG>, \
-        <&macro_wait_time WAIT>,       \
-        <&macro_tap       &rgb_ug OFF>;
+        &macro_tap       &rgb_ug ON \
+        &macro_wait_time WAIT       \
+        &macro_tap       &rgb_ug RGB_TOG \
+        &macro_wait_time WAIT       \
+        &macro_tap       &rgb_ug RGB_TOG \
+        &macro_wait_time WAIT       \
+        &macro_tap       &rgb_ug OFF \
 
 // NEW MACRO FORMAT:
 // Restructured Macros, here we redefined the macros to a new 'layout', we can use the above definitons to create a macro below. This give more modularity since we only have to define our variables now for the layers. There is no need to build this code anymore since our variables are now handling it.
@@ -371,7 +371,7 @@ So now we can think about our layers in 3 ways: Is it a BaseLayer? (a layer that
         label = "NUM TOGGLE + BLINK";
         #binding-cells = <0>;
         bindings = <
-            &macro_tap &kp KP_NUMLOCK
+            <&macro_tap &kp KP_NUMLOCK
             BLINK_SEQ(N_BLINK_ON, N_BLINK_OFF, 80)
     >;
 
