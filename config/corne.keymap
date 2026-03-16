@@ -11,7 +11,9 @@
 #include <dt-bindings/zmk/rgb.h>
 #include "corne-rgb.dtsi"
 
-/ {
+/ 
+    macros {
+
         fluxled: fluxled {
             label = "FLUX";
             compatible = "zmk,behavior-macro";
