@@ -20,9 +20,9 @@
     macros {
 /* One-parameter macro: param1 supplies the keycode */
     fluxled: fluxled {
-    compatible = "zmk,behavior-macro-one-param";  // 1 parameter only
+    compatible = "zmk,behavior-macro-one-param";  /* 1 parameter only */
     label = "FLUX BLINK (key param)";
-    #binding-cells = <1>;                         // param1 = keycode
+    #binding-cells = <1>;                         /* param1 = keycode */
     wait-ms = <0>;
     tap-ms = <0>;
 
@@ -61,8 +61,8 @@
             compatible = "zmk,behavior-tap-dance";
             #binding-cells = <0>;
             tapping-term-ms = <200>;
-            bindings = <&kp LSFT>,    /* single tap shift */
-                       <&caps_blink>; /* double tap  cpaslock*/
+            bindings = <&kp LSFT>,   
+                       <&caps_blink>; 
         };
     };
 
