@@ -35,7 +35,7 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 
 ---
 
-## Files of interest
+## Files of Interest
 
 - `config/corne.keymap` — main keymap (focused on layer bindings).
 - `config/corne-rgb.dtsi` — RGB macros and combos (per-layer color definitions and modular macros).
@@ -43,7 +43,7 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 
 ---
 
-## How it works
+## How I t Works
 
 - Layer color changes are triggered by macros and combos separated from the basic keymap. This prevents unintended LED changes on simple taps.
 - Hold-tap behavior is used to simulate home-row-mod behaviour for layer activation, while macros run only when the layer is actually activated.
@@ -61,7 +61,7 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 
 ---
 
-## Toggle-Layer system
+## "Toggle-Layer" Layer System
 - How to use: press the inward thumb keys to enter the Toggle Layer on both halves, then press a top-row key (or other assigned key) to switch to one of the toggled sub-layers. Press the gateway combo again to return to the Toggle Layer, then press it a second time to go back to the Base Layer.
 
 - A separate "Toggle Layer" is activated by a pair of inward thumb keys (both halves). This acts as the gateway to multiple "Toggeled Layers".
@@ -85,7 +85,7 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 
 ---
 
-## AI update
+## AI Update
 
 I used Copilot to help modularize and refine the macros and combos. The modular structure now makes it easier to add new layers and corresponding RGB behaviors — add a layer color/macro in `corne-rgb.dtsi` and #include that file in your keymap.
 
