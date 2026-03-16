@@ -15,12 +15,16 @@
     macros {
 
         fluxled: fluxled {
-            label = "FLUX";
+            label = "FLUX ON/OFF BLINK";
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
             bindings = <
                 &macro_tap       &kp LA(LC(END))
-                &macro_tap       &rgb_ug RGB_COLOR_HSB(39,100,50)  /* Flux Activation Color */
+                &macro_tap       &rgb_ug RGB_COLOR_HSB(39,100,75)  /* Flux Activation Color */
+                &macro_wait_time 30
+                &macro_tap       &rgb_ug RGB_TOG                   /* OFF */
+                &macro_wait_time 30
+                &macro_tap       &rgb_ug RGB_TOG                   /* ON */
                 &macro_wait_time 30
                 &macro_tap       &rgb_ug RGB_TOG                   /* OFF */
                 &macro_wait_time 30
