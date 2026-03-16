@@ -17,7 +17,7 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 - [Overview](#overview)
 - [Highlights / Features](#highlights--features)
 - [Files of interest](#files-of-interest)
-- [How it works (high level)](#how-it-works-high-level)
+- [How it works](#how-it-works)
 - [Game layer](#game-layer)
 - [Toggle-Layer system](#toggle-layer-system)
 - [Notes and caveats](#notes-and-caveats)
@@ -45,7 +45,7 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 
 ---
 
-## How it works (high level)
+## How it works
 
 - Layer color changes are triggered by macros and combos separated from the basic keymap. This prevents unintended LED changes on simple taps.
 - Hold-tap behavior is used to simulate home-row-mod behaviour for layer activation, while macros run only when the layer is actually activated.
