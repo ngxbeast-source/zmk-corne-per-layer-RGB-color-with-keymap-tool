@@ -69,7 +69,7 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 - Toggled layers selected from the gateway have each their own "Sub-layer", or thumb-layers, with an individual RGB color. These sub-layers let you create dedicated small sub-layouts (each with its own distinct RGB setting), think momentary layers.
 - The Toggle Layer reduces accidental activation, and less "key clutter" while allowing multiple dedicated layouts for different tasks (e.g., Photoshop, coding, emails, gaming).
 
-- When making a Toggled Layer it's ***IMPORTANT*** that you add all sub-layouts, you'll be using in the Toggled Layer, BELOW the Toggled Layer! To avoid any "layer meshing" (layers can get "stuck" on top of each other [See zmk.dev #Layers or look at my layout/keymap, (https://zmk.dev/docs/keymaps#layers)])
+- When making a Toggled Layer it's ***IMPORTANT*** that you add all sub-layouts, you'll be using in the Toggled Layer, BELOW the Toggled Layer! To avoid any "layer meshing"; Layers can get "stuck" on top of each other [See zmk.dev #Layers or look at my layout/keymap, (https://zmk.dev/docs/keymaps#layers)]
 - or, look at my layout/keymap, or layer numbers in `corne-rgb.dtsi` for an idea of how I pathed the layers.
 
 ![combos](corneCombos.png)
