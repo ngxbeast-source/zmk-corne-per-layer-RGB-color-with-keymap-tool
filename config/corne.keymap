@@ -57,7 +57,7 @@
         td_caps: td_capsBLINK {
             compatible = "zmk,behavior-tap-dance";
             #binding-cells = <0>;
-            tapping-term-ms = <180>;
+            tapping-term-ms = <220>;
             bindings = <&kp LSFT>,   
                        <&caps_blink>; 
         };
@@ -70,7 +70,7 @@
             display-name = "ABC";
             bindings = <
 &kp ESC         &kp Q  &kp W           &kp E        &kp R                   &kp T                     &kp Y                 &kp U                   &kp I          &kp O            &kp P               &kp BSPC
-&kp LEFT_SHIFT  &kp A  &hm LEFT_ALT S  &hm LCTRL D  &hm LEFT_SHIFT F        &kp G                     &kp H                 &hm RSHIFT J            &hm RCTRL K    &hm RIGHT_ALT L  &hm RGUI SEMICOLON  &kp SQT
+&td_caps        &kp A  &hm LEFT_ALT S  &hm LCTRL D  &hm LEFT_SHIFT F        &kp G                     &kp H                 &hm RSHIFT J            &hm RCTRL K    &hm RIGHT_ALT L  &hm RGUI SEMICOLON  &kp SQT
 &kp LCTRL       &kp Z  &kp X           &kp C        &kp V                   &kp B                     &kp N                 &kp M                   &kp COMMA      &kp DOT          &kp FSLH            &kp ESC
                                        &kp TAB      &hold_tap_nmrw 0 SPACE  &hold_tap_kpad 0 ENTER    &hold_tap_xtra 0 DEL  &hold_tap_xtra2 0 LEFT  &hm F11 RIGHT
             >;
