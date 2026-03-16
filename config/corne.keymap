@@ -18,7 +18,7 @@
             label = "FLUX";
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
-            bindings = <
+            bindings =
                 <&macro_tap &kp LA(END)>; 
                 <&macro_tap &rgb_ug RGB_COLOR_HSB(39,100,50)>;
                 <&macro_pause_for_release>;
