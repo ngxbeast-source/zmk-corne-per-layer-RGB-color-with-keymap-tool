@@ -107,16 +107,6 @@ So now we can think about our layers in 3 ways: Is it a BaseLayer? (a layer that
             label = node_label; \
         )
 
-#define RGB_HOLD_TAP(node_name, node_label, macro_ref) \
-        node_name: node_name { \
-            compatible = "zmk,behavior-hold-tap"; \
-            label = node_label; \
-            bindings = <&macro_ref>, <&kp>; \
-            #binding-cells = <2>; \
-            tapping-term-ms = <180>; \
-            flavor = "tap-preferred"; \
-        };
-
 #define TO_RGB_MACRO(node_name, node_label, layer, color) \
         ZMK_MACRO(node_name, \
             bindings = \
@@ -135,6 +125,16 @@ So now we can think about our layers in 3 ways: Is it a BaseLayer? (a layer that
                 <&rgb_ug color>; \
             label = node_label; \
         )   
+        // New Behavior Structure
+#define RGB_HOLD_TAP(node_name, node_label, macro_ref) \
+        node_name: node_name { \
+            compatible = "zmk,behavior-hold-tap"; \
+            label = node_label; \
+            bindings = <&macro_ref>, <&kp>; \
+            #binding-cells = <2>; \
+            tapping-term-ms = <180>; \
+            flavor = "tap-preferred"; \
+        };
 // #define BLINK_MACRO(node_name, node_label, KP, blink_color, back_color) \
 //           ZMK_MACRO(node_name
 //                bindings = \
