@@ -252,7 +252,7 @@ So now we can think about our layers in 3 ways: Is it a BaseLayer? (a layer that
         gameLayer {
             bindings = <&game_led>;
             key-positions = <0 11>;
-            layers = <LAYER_ABC LAYER_TGL LAYER_GAME2 LAYER_GAMETGL>;
+            layers = <LAYER_ABC LAYER_TGL LAYER_GAME2>;
         };
 // Combo Activates the BaseLayer on Layer(s): Game
         gameLayer_2_BaseLayer {
@@ -277,6 +277,12 @@ So now we can think about our layers in 3 ways: Is it a BaseLayer? (a layer that
             bindings = <&gtgl_led>;
             key-positions = <38 39>;
             layers = <LAYER_GAME LAYER_GAME2>;
+        };
+// Combo Activates the GameLayer on Layer(s): Game
+        game_toggle_2_game {
+            bindings = <&game_led>;
+            key-positions = <38 39>;
+            layers = <LAYER_GAMETGL>;
         };
     };
 // 1. MACROS: 
