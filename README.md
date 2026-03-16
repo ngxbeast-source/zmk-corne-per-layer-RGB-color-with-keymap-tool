@@ -27,8 +27,9 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 
 - 13 layers (each with its own RGB color). The default/base layer uses a warm, dim orange/yellow.
 - A deliberately designed "game" layer to reduce accidental activation.
+- A deliberately designed "Toggle Layer" function for multiple dedicated layers
 - Per-layer RGB macro definitions moved out of the main keymap into a separate file for maintainability.
-- Layer activation uses hold-taps and combo patterns to avoid running macros on simple taps.
+- Layer RGB activation uses hold-taps and combo patterns to avoid running macros on simple taps.
 - A CapsLock blink indicator has been implemented (logic can be improved); can extend to NumLock or other indicators.
 
 ---
