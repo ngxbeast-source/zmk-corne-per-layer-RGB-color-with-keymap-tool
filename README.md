@@ -37,7 +37,7 @@ Activate the layer pressing this combo: the top left key, on the left keyboard, 
 If deciding to play games with this it's recommended to plug it in via USB to negate/avoid any input lag AND to switch the output to USB on the keyboard. I'll probably put toggle output to USB when switching to the game layer somewhere in the macro.
 
 #### NEW
-There is now a separate LayerToggle in the Game Layer to switch to a new layout for certain games, just press the same combo as the LayerToggle when you are on the game layer (the inward thumb keys on both the left and right halves. At some point I'll add a sub layer and 5 more layers (2 more toggle layers and 3 sub layers for each) to give at least 4 areas to configure for games.   
+There is now a separate LayerToggle in the Game Layer to switch to a new layout for certain games, just press the same combo as the BASE LayerToggle when you are on the game layer (the inward thumb keys on both the left and right halves. At some point I'll add a sub layer and 5 more layers (2 more toggle layers and 3 sub layers for each) to give at least 4 areas to configure for games.   
 
 ---
 
