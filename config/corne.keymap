@@ -45,7 +45,7 @@
     label = "CAPS TOGGLE + BLINK";
     #binding-cells = <0>;
     bindings = <
-        &macro_tap       &kp CAPS_LOCK
+        &macro_tap       &kp CAPS
         &macro_tap       &rgb_ug BLINK1_ON  /* blink ON color */
         &macro_wait_time 60
         &macro_tap       &rgb_ug RGB_TOG
