@@ -13,8 +13,6 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 ---
 
 ## Table of contents
-
-- [Overview](#overview)
 - [Highlights / Features](#highlights--features)
 - [Files of interest](#files-of-interest)
 - [How it works](#how-it-works)
