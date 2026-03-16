@@ -9,7 +9,7 @@ This is a **VERY AMATEUR** attempt at implementing "Per-layer RGB colors into th
 - And surprisingly CoPilot as well, for being able to work with my framework and show me some new tricks that I'm sure more seasoned veteran coders know about.
 - This project is experimental; reuse at your own risk. 
 
-Enjoy — this was a small project to understand just a LITTLE ZMK better and give the RGBs something to do. Pull requests or suggestions to simplify and improve the code are welcome. Hopefully there is more work in the future with the RGB functionality, my knowledge is non-existent coming to this stuff; this was mostly done with the help of the docs so the idea is nothing new. It's just a fun little thing to make your keyboard do in the mean time, until there are more options for the RGB functions upstreamed.
+Enjoy — this was a small project to understand ZMK just a LITTLE bit better and give the RGBs something to do. Pull requests or suggestions to simplify and improve the code are welcome. Hopefully there is more work in the future with the RGB functionality, my knowledge is non-existent coming to this stuff; this was mostly done with the help of the docs so the idea is nothing new. It's just a fun little thing to make your keyboard do in the mean time, until there are more options for the RGB functions upstreamed.
 
 ---
 
