@@ -362,7 +362,7 @@ So now we can think about our layers in 3 ways: Is it a BaseLayer? (a layer that
         label = "CAPS TOGGLE + BLINK";
         #binding-cells = <0>;
         bindings = <
-            &macro_tap &kp CAP
+            &macro_tap &kp CAPS
             BLINK_SEQ(C_BLINK_ON, C_BLINK_OFF, 80)
     >;
     };
