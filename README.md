@@ -43,7 +43,7 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 
 ---
 
-## How I t Works
+## How It Works
 
 - Layer color changes are triggered by macros and combos separated from the basic keymap. This prevents unintended LED changes on simple taps.
 - Hold-tap behavior is used to simulate home-row-mod behaviour for layer activation, while macros run only when the layer is actually activated.
@@ -52,12 +52,13 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 
 ---
 
-## Game layer
+## Game Layer
 
 - Activation: press the top-left key on the left half AND the top-right key on the right half at the same time. This toggles the "game" layer and sets its RGB color.
 - Deactivation: press the same combo again to return to the base layer and its color.
 - The game layer includes a nested "functions" layer to access F-keys and numbers for convenience while gaming.
 - Recommendation: use wired USB and switch the keyboard output to USB when using the game layer to avoid any potential input lag over BLE.
+- Along with it's "own" "Toggle-Layer" system designed for game profiles.
 
 ---
 
