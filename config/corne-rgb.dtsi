@@ -314,7 +314,7 @@ So now we can think about our layers in 3 ways: Is it a BaseLayer? (a layer that
         TO_RGB_PRESS_MACRO(gtgl_led, "gametoggle LED Macro", LAYER_GAMETGL, RGB_GAMETGL)
 
         // TEST
-                TO_RGB_MACRO(fluxled 
+                ZMK_MACRO(fluxled 
             compatible = "zmk,behavior-macro";
             bindings =
                 <&macro_tap>,
