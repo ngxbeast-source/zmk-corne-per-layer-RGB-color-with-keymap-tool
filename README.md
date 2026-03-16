@@ -30,7 +30,6 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 - 13 layers (each with its own RGB color). The default/base layer uses a warm, dim orange/yellow.
 - A deliberately designed "game" layer to reduce accidental activation.
 - Per-layer RGB macro definitions moved out of the main keymap into a separate file for maintainability.
-- Zero-parameter RGB macros in `config/corne-rgb.dtsi` use ZMK's `ZMK_MACRO(...)` convenience macro to keep definitions concise.
 - Layer activation uses hold-taps and combo patterns to avoid running macros on simple taps.
 - A CapsLock blink indicator has been implemented (logic can be improved); can extend to NumLock or other indicators.
 
@@ -66,9 +65,8 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 - How to use: press the inward thumb keys to enter the Toggle Layer on both halves, then press a top-row key (or other assigned key) to switch to one of the toggled sub-layers. Press the gateway combo again to return to the Toggle Layer, then press it a second time to go back to the Base Layer.
 
 - A separate "Toggle Layer" is activated by a pair of inward thumb keys (both halves). This acts as the gateway to multiple "sub-layers" (toggles).
-- Toggled layers selected from the gateway have each their own Sub-layer, or thumb-layers, with an individual RGB color. These thumb-layers let you create dedicated small sub-layouts (each with its own distinct RGB setting) that are easy to enter and exit from a single gateway.
-- Sub-layers accessed from the Toggle Layer can each have their own distinct RGB color (brighter/sharper to highlight they are active).
-- The Toggle Layer reduces accidental activation while allowing multiple dedicated layouts for different tasks (e.g., Photoshop, coding, gaming).
+- Toggled layers selected from the gateway have each their own "Sub-layer", or thumb-layers, with an individual RGB color. These sub-layers let you create dedicated small sub-layouts (each with its own distinct RGB setting), think momentary layers.
+- The Toggle Layer reduces accidental activation, and less "key clutter" while allowing multiple dedicated layouts for different tasks (e.g., Photoshop, coding, emails, gaming).
 
 
 ---
@@ -83,7 +81,7 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 
 ## AI update
 
-I used Copilot to help modularize and refine the macros and combos. The modular structure now makes it easier to add new layers and corresponding RGB behaviors — add a layer color/macro in `corne-rgb.dtsi` and include that file in your keymap.
+I used Copilot to help modularize and refine the macros and combos. The modular structure now makes it easier to add new layers and corresponding RGB behaviors — add a layer color/macro in `corne-rgb.dtsi` and #include that file in your keymap.
 
 ---
 
