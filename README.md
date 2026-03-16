@@ -40,7 +40,6 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 - `config/corne.keymap` — main keymap (focused on layer bindings).
 - `config/corne-rgb.dtsi` — RGB macros and combos (per-layer color definitions and modular macros).
   - Include it in your `.keymap` with: `#include "corne-rgb.dtsi"` (adjust filename as needed).
-- Macros use `ZMK_MACRO(...)` for more compact C macro definitions.
 
 ---
 
