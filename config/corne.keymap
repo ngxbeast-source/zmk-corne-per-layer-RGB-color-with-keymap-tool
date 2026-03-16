@@ -11,58 +11,7 @@
 #include <dt-bindings/zmk/rgb.h>
 #include "corne-rgb.dtsi"
 
-/* Flux blink with configurable colors */
-#define RGB_FLUX_ON  RGB_COLOR_HSB(39,100,75)   /* activation color */
-#define RGB_FLUX_OFF RGB_COLOR_HSB(273,67,23)   /* fallback/default */
-#define BLINK1_ON RGB_COLOR_HSB(200,100,60)
-#define BLINK1_OFF RGB_COLOR_HSB(19,100,17)  /* fallback/default */
-
 / {
-    fluxled: fluxled {
-    compatible = "zmk,behavior-macro-one-param";  // 1 parameter only 
-    label = "FLUX BLINK (key param)";
-    #binding-cells = <1>;                         // param1 = keycode 
-    wait-ms = <0>;
-    tap-ms = <0>;
-
-    bindings = <
-        &macro_param_1to1 &macro_tap &kp MACRO_PLACEHOLDER
-        &macro_tap       &rgb_ug RGB_FLUX_ON
-        &macro_wait_time 100
-        &macro_tap       &rgb_ug RGB_TOG
-        &macro_wait_time 100
-        &macro_tap       &rgb_ug RGB_TOG
-        &macro_wait_time 100
-        &macro_tap       &rgb_ug RGB_FLUX_OFF
-    >;
-
-    };
-    caps_blink: caps_blink {
-    compatible = "zmk,behavior-macro";
-    label = "CAPS TOGGLE + BLINK";
-    #binding-cells = <0>;
-    bindings = <
-        &macro_tap       &kp CAPS
-        &macro_tap       &rgb_ug BLINK1_ON  
-        &macro_wait_time 80
-        &macro_tap       &rgb_ug RGB_TOG
-        &macro_wait_time 80
-        &macro_tap       &rgb_ug RGB_TOG
-        &macro_wait_time 80
-        &macro_tap       &rgb_ug BLINK1_OFF  
-    >;
-
-    };
-    behaviors {
-        td_caps: td_capsBLINK {
-            compatible = "zmk,behavior-tap-dance";
-            #binding-cells = <0>;
-            tapping-term-ms = <300>;
-            bindings = <&kp LSFT>,   
-                       <&caps_blink>; 
-        };
-    };
-
     keymap {
         compatible = "zmk,keymap";
 
@@ -70,7 +19,7 @@
             display-name = "ABC";
             bindings = <
 &kp ESC         &kp Q  &kp W           &kp E        &kp R                   &kp T                     &kp Y                 &kp U                   &kp I          &kp O            &kp P               &kp BSPC
-&td_caps        &kp A  &hm LEFT_ALT S  &hm LCTRL D  &hm LEFT_SHIFT F        &kp G                     &kp H                 &hm RSHIFT J            &hm RCTRL K    &hm RIGHT_ALT L  &hm RGUI SEMICOLON  &kp SQT
+&td_numcaps     &kp A  &hm LEFT_ALT S  &hm LCTRL D  &hm LEFT_SHIFT F        &kp G                     &kp H                 &hm RSHIFT J            &hm RCTRL K    &hm RIGHT_ALT L  &hm RGUI SEMICOLON  &kp SQT
 &kp LCTRL       &kp Z  &kp X           &kp C        &kp V                   &kp B                     &kp N                 &kp M                   &kp COMMA      &kp DOT          &kp FSLH            &kp ESC
                                        &kp TAB      &hold_tap_nmrw 0 SPACE  &hold_tap_kpad 0 ENTER    &hold_tap_xtra 0 DEL  &hold_tap_xtra2 0 LEFT  &hm F11 RIGHT
             >;
@@ -90,9 +39,9 @@
             display-name = "KPAD";
             bindings = <
 &kp ESCAPE         &none      &kp F2            &none       &none              &kp F5           &kp KP_N7       &kp KP_N8  &kp KP_N9  &none     &none     &kp BSPC
-&kp KP_NUMLOCK           &none      &kp HOME          &kp UP      &kp END            &kp BACKSPACE    &kp KP_N4       &kp KP_N5  &kp KP_N6  &none     &kp UP    &none
+&trans             &none      &kp HOME          &kp UP      &kp END            &kp BACKSPACE    &kp KP_N4       &kp KP_N5  &kp KP_N6  &none     &kp UP    &none
 &hm (LC(X)) LC(C)  &kp LC(V)  &kp LC(LS(LEFT))  &kp DOWN    &kp LC(LS(RIGHT))  &kp RET          &kp KP_N1       &kp KP_N2  &kp KP_N3  &kp LEFT  &kp DOWN  &kp RIGHT
-                                                &kp LA(F4)  &none              &none            &none           &none      &kp KP_N0
+                                                &kp LA(F4)  &none              &none            &kp KP_ENTER    &kp KP_N0  &kp KP_DOT 
             >;
         };
 
@@ -102,7 +51,7 @@
 &bt BT_CLR          &bt BT_SEL 0     &bt BT_SEL 1      &bt BT_SEL 2  &bt BT_SEL 3    &none             &rgb_ug RGB_EFF  &none            &hm C_PLAY_PAUSE C_REWIND  &kp C_FAST_FORWARD  &none     &rgb_ug RGB_TOG
 &out OUT_TOG        &none            &kp LS(LA(DOWN))  &kp UP        &kp LS(LA(UP))  &none             &rgb_ug RGB_HUI  &rgb_ug RGB_HUD  &hm C_MUTE C_VOL_DN        &kp C_VOLUME_UP     &kp UP    &kp ENTER
 &kp LA(LC(ESCAPE))  &kp LA(LC(DEL))  &kp LEFT          &kp DOWN      &kp RIGHT       &none             &rgb_ug RGB_SAD  &rgb_ug RGB_SAI  &none                      &kp LEFT            &kp DOWN  &kp RIGHT
-                                                    &fluxled LA(END)  &none         &studio_unlock    &none            &rgb_ug RGB_BRD  &rgb_ug RGB_BRI
+                                                    &blnk LA(END)  &none         &studio_unlock    &none            &rgb_ug RGB_BRD  &rgb_ug RGB_BRI
             >;
         };
 
