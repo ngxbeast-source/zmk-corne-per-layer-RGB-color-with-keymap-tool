@@ -14,14 +14,14 @@ New modular structuring-
  #define RGB_HOLD_TAP(node_name, node_label, macro_ref)
     This behavior defines the "new" momentary layer macro's function; used in conjunction with the above to get momentary LEDs
 
-            Making a momentary layer:
+            Making a momentary layer: 
                     1. Define the layer
                     1a. Define the RGB color
-                    2. Build the macro using 
+                    2. Build the MACRO using 
                         MOMENTARY_RGB_MACRO(node_name, "ZMK_Studio_Description", LAYER_, NEWCOLOR, DEFAULT_COLOR)
-                    3. Build the behavior using
+                    3. Build the BEHAVIOR using
                         RGB_HOLD_TAP(node_name, node_label, macro_ref)
-                    4. Map the new behavior node_name into your .keymap
+                    4. Map the new BEHAVIOR node_name into your .keymap
 
                 - Making a TOGGLED Layer uses a similar approach (not to be confused with a "ToggleLayer" which is the "menu" to access a TOGGLED LAYER. i.e TGLR1 & 2 CANNOT be activated until we are on the ToggleLayer) but instead we use:
                     TO_RGB_MACRO(node_name, "ZMK_Studio_Description", LAYER_, NEWCOLOR)
@@ -65,7 +65,6 @@ So now we can think about our layers in 3 ways: Is it a BaseLayer? (a layer that
         // LAYOUT (COLOR, HUE, BRIGHTNESS)
 // #define RGB_LAYERNAME RGB_COLOR_HSB(0,0,0)
 // Personally I use a brighter setting for my momentary/toggle layers, and then use a dimmer one for the "BASE" layers depending on the color intensity.
-
 #define RGB_ABC RGB_COLOR_HSB(19,100,17) // Dim Yellow BASELAYER COLOR
 #define RGB_NMRW RGB_COLOR_HSB(183,45,18) // Teal
 #define RGB_KPAD RGB_COLOR_HSB(230,87,26) // Pale Blue 
@@ -79,6 +78,7 @@ So now we can think about our layers in 3 ways: Is it a BaseLayer? (a layer that
 #define RGB_TGLLR_1 RGB_COLOR_HSB(40,100,12) // Dim Yellow TGLLR2 BASE COLOR
 #define RGB_TGLLR_2 RGB_COLOR_HSB(85,100,15) // Dim  Lime TGLLR2 BASE COLOR
 #define RGB_TGLLR_2_SUBLLR_1 RGB_COLOR_HSB(82,100,50) // Bright Lime  
+//
 
 //TEST
 // Back Blink
