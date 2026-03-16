@@ -57,3 +57,6 @@ In theory you can now add as many layers as you want as each "Toggle Layer" can 
 **AI UPDATE:**
 
 I got lazy and let AI refine the code, honestly for the better while maintaining the initial idea. There is now fully functioning per-layer RGB — I even went ahead and added "toggle layers". In theory this is for when you're working on another program and you need a different set of layers and don't want to complicate your layouts, or if you are like me and just have a slow brain that can't process all the layer combos to get certain functions/hotkeys — it becomes easier to have "dedicated layers". It essentially just gives your keyboard access to be fully modular for whatever your tasks may be. Work in Photoshop? Then you can switch to your Photoshop layer and have all your Photoshop macros in a more accessible/memorable layout.
+
+## TO DO:
+Add a "blink" feature for key presses (like caps lock. or num lock)
