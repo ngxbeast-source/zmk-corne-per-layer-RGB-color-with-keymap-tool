@@ -20,14 +20,14 @@
     macros {
 /* One-parameter macro: param1 supplies the keycode */
     fluxled: fluxled {
-    compatible = "zmk,behavior-macro-one-param";  /* 1 parameter only */
+    compatible = "zmk,behavior-macro-one-param";  // 1 parameter only 
     label = "FLUX BLINK (key param)";
-    #binding-cells = <1>;                         /* param1 = keycode */
+    #binding-cells = <1>;                         // param1 = keycode 
     wait-ms = <0>;
     tap-ms = <0>;
 
     bindings = <
-        &macro_param_1to1 &macro_tap &kp MACRO_PLACEHOLDER     /* key press comes from param */
+        &macro_param_1to1 &macro_tap &kp MACRO_PLACEHOLDER
         &macro_tap       &rgb_ug RGB_FLUX_ON
         &macro_wait_time 60
         &macro_tap       &rgb_ug RGB_TOG
@@ -46,13 +46,13 @@
     #binding-cells = <0>;
     bindings = <
         &macro_tap       &kp CAPS
-        &macro_tap       &rgb_ug BLINK1_ON  /* blink ON color */
+        &macro_tap       &rgb_ug BLINK1_ON  
         &macro_wait_time 60
         &macro_tap       &rgb_ug RGB_TOG
         &macro_wait_time 60
         &macro_tap       &rgb_ug RGB_TOG
         &macro_wait_time 60
-        &macro_tap       &rgb_ug BLINK1_OFF  /* fallback/base color */
+        &macro_tap       &rgb_ug BLINK1_OFF  
     >;
 
     };
