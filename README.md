@@ -31,6 +31,7 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 - Per-layer RGB macro definitions moved out of the main keymap into a separate file for maintainability.
 - Layer RGB activation uses hold-taps and combo patterns to avoid running macros on simple taps.
 - A CapsLock blink indicator has been implemented (logic can be improved); can extend to NumLock or other indicators.
+- The `config/corne-rgb.dtsi` file should in theory work in any other keyboard since it doesn't affect the key map. We can isolate the RGB functions into one file for easier editing while only worrying about the layers in the .keymap file. (ty AI)
 
 ---
 
@@ -63,14 +64,15 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 ## Toggle-Layer system
 - How to use: press the inward thumb keys to enter the Toggle Layer on both halves, then press a top-row key (or other assigned key) to switch to one of the toggled sub-layers. Press the gateway combo again to return to the Toggle Layer, then press it a second time to go back to the Base Layer.
 
-- A separate "Toggle Layer" is activated by a pair of inward thumb keys (both halves). This acts as the gateway to multiple "sub-layers" (toggles).
+- A separate "Toggle Layer" is activated by a pair of inward thumb keys (both halves). This acts as the gateway to multiple "Toggeled Layers".
 - Toggled layers selected from the gateway have each their own "Sub-layer", or thumb-layers, with an individual RGB color. These sub-layers let you create dedicated small sub-layouts (each with its own distinct RGB setting), think momentary layers.
 - The Toggle Layer reduces accidental activation, and less "key clutter" while allowing multiple dedicated layouts for different tasks (e.g., Photoshop, coding, emails, gaming).
 
+- When making a Toggled Layer it's ***IMPORTANT*** that you add all sub-layouts you'll be using in the Toggled Layer BELOW the Toggled Layer! To avoid any "layer meshing" (layers can get "stuck" on top of each other [See zmk.dev #Layers(https://zmk.dev/docs/keymaps#layers)])
 
 ---
 
-## Notes and caveats
+## Notes
 
 - Early implementation mistake: layer-tap behavior was inside macros, causing macros to run on every layer-tap. I separated the layer-tap from macros so simple taps no longer trigger LED changes.
 - There were some timing/overlap issues when combining certain macros (e.g., returning to default color after leaving the game layer). Conditional layer combos helped mitigate this.
