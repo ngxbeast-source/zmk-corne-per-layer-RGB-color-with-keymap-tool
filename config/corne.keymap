@@ -28,11 +28,11 @@
     bindings = <
         &macro_param_1to1 &macro_tap &kp MACRO_PLACEHOLDER
         &macro_tap       &rgb_ug RGB_FLUX_ON
-        &macro_wait_time 80
+        &macro_wait_time 100
         &macro_tap       &rgb_ug RGB_TOG
-        &macro_wait_time 80
+        &macro_wait_time 100
         &macro_tap       &rgb_ug RGB_TOG
-        &macro_wait_time 80
+        &macro_wait_time 100
         &macro_tap       &rgb_ug RGB_FLUX_OFF
     >;
 
@@ -57,7 +57,7 @@
         td_caps: td_capsBLINK {
             compatible = "zmk,behavior-tap-dance";
             #binding-cells = <0>;
-            tapping-term-ms = <220>;
+            tapping-term-ms = <300>;
             bindings = <&kp LSFT>,   
                        <&caps_blink>; 
         };
@@ -90,9 +90,9 @@
             display-name = "KPAD";
             bindings = <
 &kp ESCAPE         &none      &kp F2            &none       &none              &kp F5           &kp KP_N7       &kp KP_N8  &kp KP_N9  &none     &none     &kp BSPC
-&kp CAPS           &none      &kp HOME          &kp UP      &kp END            &kp BACKSPACE    &kp KP_N4       &kp KP_N5  &kp KP_N6  &none     &kp UP    &none
+&kp KP_NUMLOCK           &none      &kp HOME          &kp UP      &kp END            &kp BACKSPACE    &kp KP_N4       &kp KP_N5  &kp KP_N6  &none     &kp UP    &none
 &hm (LC(X)) LC(C)  &kp LC(V)  &kp LC(LS(LEFT))  &kp DOWN    &kp LC(LS(RIGHT))  &kp RET          &kp KP_N1       &kp KP_N2  &kp KP_N3  &kp LEFT  &kp DOWN  &kp RIGHT
-                                                &kp LA(F4)  &none              &none            &kp KP_NUMLOCK  &none      &kp KP_N0
+                                                &kp LA(F4)  &none              &none            &none           &none      &kp KP_N0
             >;
         };
 
