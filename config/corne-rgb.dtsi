@@ -351,7 +351,7 @@ So now we can think about our layers in 3 ways: Is it a BaseLayer? (a layer that
         tap-ms  = <0>;
 
         bindings = <
-            <&macro_param_1to1 &macro_tap &kp MACRO_PLACEHOLDER>;
+            <&macro_param_1to1 &macro_tap &kp>;
             BLINK_SEQ(BLINK_ON, BLINK_OFF, 100)
     >;
 
