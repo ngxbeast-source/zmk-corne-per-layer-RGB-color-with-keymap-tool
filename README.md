@@ -1,63 +1,98 @@
-# PandaKB ZMK Corne v3 RGB BLE (Per-Layer RGB)
+# PandaKB ZMK Corne v3 RGB BLE — Per-Layer RGB
 
-This is a **VERY AMATEUR** attempt at implementing "Per-layer RGB colors into the firmware". There were a couple of roadblocks, but after much further reading, and thought, I came up with my own, albeit very messy, firmware utilizing macros and hold-taps to get this effect. This was just a small weekend project to help me understand ZMK a little bit more and to have a little "fun" with my build. I have the macros and hold-taps the way I like it, you're free to change the code if you wish, I'm sure there are ways I could simplify this code even more; but for now it functions.
+## Overview
 
----
+This is a **VERY AMATEUR** attempt at implementing "Per-layer RGB colors into the firmware". There were a couple of roadblocks, but after much further reading, and thought, I came up with my own, albeit very messy, firmware utilizing macros and hold-taps to get this effect. This was just a small weekend project to help me understand ZMK a little bit more and to have a little "fun" with my build. I have the macros and hold-taps the way I like it, you're free to change the code if you wish, I'm sure there are ways I could simplify this code even more since I dont really know much at all; but for now it functions. This is more explained for someone, like myself, who has no background in ANY coding.
+## Attribution
+- Thanks to Nick Coutsos with his keymap editor (https://nickcoutsos.github.io/keymap-editor/) for helping me create macros and hold-taps. His website helped a total noob like myself the "right" way to structure this for my first time ever digging into code.
+- And surprisingly CoPilot as well, for being able to work with my framework and show me some new tricks that I'm sure more seasoned veteran coders know about.
+- This project is experimental; reuse at your own risk. 
 
-## Breakdown of My Project
-
-Used https://nickcoutsos.github.io/keymap-editor/ for all of the macros and hold-taps
-
-- ~~5~~ 13! Layers with their own color setting (the default/Base layer color is a warm dim orange/yellow)
-- Implemented a "gaming" layer combo (so that way there are no accidental presses)
-- The active `config/corne.keymap` now stays focused on layer bindings, while the RGB macros/combos live in `config/corne-rgb.dtsi` so the per-layer colors are easier to maintain.
-- The zero-parameter RGB macros in `config/corne-rgb.dtsi` now use ZMK's `ZMK_MACRO(...)` convenience C macro, so the macro definitions stay shorter without changing the RGB behavior.
-- The layers/macros behave the same way "home-row mods" work but since we cant put macros on home-rows we have to use "hold-tap" (or so I assume). This way we avoid triggering the LED change when the layer isn't "activated" and we just want a simple key tap; with NO LED change.
-- There is now a "blink" indicator for when you activate CapsLock (need to improve the logic but it works), might make one for num lock similar to the "flux" key bind so it can ba modular in ZMK.
-
-I made a silly mistake when I was first attempting this, I put the layertap behavior IN the macro, so it would run the whole macro whenever I just wanted a simple key tap. In theory it was working, it changed my colors when I pressed the correct layer key, but it did this **EVERYTIME** the layer key was pressed, and since I was using layer-tap before this I was frequently pressing these keys in my normal use. I figured I had to "separate" the layer-tap from the macro and just leave the layer in.
-(It would give a nice little light show when I would type lol, before this fix.)
+Enjoy — Pull requests or suggestions to simplify and improve the code are welcome. Hopefully there is more work in the future with the RGB functionality, my knowledge is non-existent coming to this stuff; this was mostly done with the help of the docs so the idea is nothing new. It's just a fun little thing to make your keyboard do in the mean time until more RGB functions are upstreamed.
 
 ---
 
-### NEW MODULAR AI Implemented RGB config! (Can be copied easily)
+## Table of contents
+- [Highlights / Features](#highlights--features)
+- [Files of interest](#files-of-interest)
+- [How it works](#how-it-works)
+- [Game layer](#game-layer)
+- [Toggle-Layer system](#toggle-layer-system)
+- [Notes and caveats](#notes-and-caveats)
+- [AI update](#ai-update)
+- [To Do](#to-do)
+---
 
-Got super lazy and had copilot refine the code and it did a really surprisingly well job. All of the combos and macros have been modularized, now adding a new layer color/macro has been made easier. Layouts for the new code format/structure can be found in `corne-rgb.dtsi`. Anyone can easily add this to their own builds now — just be sure to add `#include corne-rgb.dtsi` to your `.keymap` file. Obviously change `corne` to whatever.
+## Highlights / Features
 
-Enjoy, this was just a small project to help me understand ZMK a little bit better, and to give my RGBs something to do. Thanks a lot to nickcoutsos, his program really helped with this project! ~~I still need to figure a way to change the LEDs back to default when coming off the gaming layer. Originally I wanted to put it on the Toggle/xtra2 layer but there was an issue, I believe to be with the macro inputs overlapping each other, the LED would go back to the "default" color unless you pressed the layer quickly (I might revisit this at some point it might just be a timing issue).~~ I just learned you can make "conditional layer" combos.
+- 13 layers (each with its own RGB color). The default/base layer uses a warm, dim orange/yellow.
+- A deliberately designed "game" layer to reduce accidental activation.
+- A deliberately designed "Toggle Layer" function for multiple dedicated layers
+- Per-layer RGB macro definitions moved out of the main keymap into a separate file for maintainability.
+- Layer RGB activation uses hold-taps and combo patterns to avoid running macros on simple taps.
+- A CapsLock blink indicator has been implemented (logic can be improved); can extend to NumLock or other indicators.
+- The `config/corne-rgb.dtsi` file should in theory work in any other keyboard since it doesn't affect the key map. We can isolate the RGB functions into one file for easier editing while only worrying about the layers in the .keymap file. (ty AI)
 
 ---
 
-## Game Layer
+## Files of interest
 
-Activate the layer pressing this combo: the top left key, on the left keyboard, and the top right key, on the right keyboard, AT THE SAME TIME. This then changes the layer to the "gaming" layer and its chosen corresponding color. To deactivate this layer, simply ~~press the left most thumb key on the right keyboard~~ press the same combo and it will go back to the base layer and switch to its corresponding color.
-
-- The game layer features a "functions" layer within itself to access the most common top row keys, F and number keys. I found it challenging to play some FPS games with this board; but for some casual play it did well. (It was mostly just a muscle memory issue.)
-
-If deciding to play games with this it's recommended to plug it in via USB to negate/avoid any input lag AND to switch the output to USB on the keyboard. I'll probably put toggle output to USB when switching to the game layer somewhere in the macro.
-
-#### NEW
-There is now a separate LayerToggle in the Game Layer to switch to a new layout for certain games, just press the same combo as the BASE LayerToggle when you are on the game layer (the inward thumb keys on both the left and right halves. At some point I'll add a sub layer and 5 more layers (2 more toggle layers and 3 sub layers for each) to give at least 4 areas to configure for games.   
+- `config/corne.keymap` — main keymap (focused on layer bindings).
+- `config/corne-rgb.dtsi` — RGB macros and combos (per-layer color definitions and modular macros).
+  - Include it in your `.keymap` with: `#include "corne-rgb.dtsi"` (adjust filename as needed).
 
 ---
 
-## New "Toggle-Layer" Layer
+## How it works
 
-Implemented a "new" system to the keyboard where we use combos to access a "hidden" layer. Similar to the game layer it's "out of the way" from other keys, reducing the risk of accidental activation. It requires a more deliberate press but it's not as "inaccessible" as the game combo, which is designed to be a "deliberate" combo. To enable this layer press both of the most inward thumb buttons to access the "Toggle Layer", then starting from the top row press a key to change your layer to a new toggled one. To leave these layers simply press the combo again to be brought back to the "Toggle Layer" then press it a second time to go back to the "Base Layer" (similar to the game layer).
-
-The "Toggle Layer" layer is represented with a much brighter sharper LED color to bring awareness to your eyes, much like the "design" I chose for the LEDs. Where the LEDs are brighter if being used on a "sub layer" and dims when on the base layer(s).
-
-In theory you can now add as many layers as you want as each "Toggle Layer" can have its own set of "sub-layers". 1 "Toggle Layer" can have as many "sub-layers" as you can fit/work with. I'm sure there are more creative ways to use layers but for someone like me who uses only the thumb keys for my layers I become limited to only 4 extra layers, and with the scope of the utility I get from my PC, 4 layers sometimes still isn't enough.
-
----
-
-*Baby's first "program" for a stupid visual learner*
+- Layer color changes are triggered by macros and combos separated from the basic keymap. This prevents unintended LED changes on simple taps.
+- Hold-tap behavior is used to simulate home-row-mod behaviour for layer activation, while macros run only when the layer is actually activated.
+- Combos are used for deliberate multi-key activation (for example, the game layer requires a simultaneous press of two keys on separate halves).
+- Further instructions can be found in the `"corne-rgb.dtsi"`, I tried my best to format it to be understandable, my peanutbrain was running on bong water, cigarettes, and solder fumes at 3AM 
 
 ---
 
-**AI UPDATE:**
+## Game layer
 
-I got lazy and let AI refine the code, honestly for the better while maintaining the initial idea. There is now fully functioning per-layer RGB — I even went ahead and added "toggle layers". In theory this is for when you're working on another program and you need a different set of layers and don't want to complicate your layouts, or if you are like me and just have a slow brain that can't process all the layer combos to get certain functions/hotkeys — it becomes easier to have "dedicated layers". It essentially just gives your keyboard access to be fully modular for whatever your tasks may be. Work in Photoshop? Then you can switch to your Photoshop layer and have all your Photoshop macros in a more accessible/memorable layout.
+- Activation: press the top-left key on the left half AND the top-right key on the right half at the same time. This toggles the "game" layer and sets its RGB color.
+- Deactivation: press the same combo again to return to the base layer and its color.
+- The game layer includes a nested "functions" layer to access F-keys and numbers for convenience while gaming.
+- Recommendation: use wired USB and switch the keyboard output to USB when using the game layer to avoid any potential input lag over BLE.
 
-## TO DO:
-Add a "blink" feature for key presses (like caps lock. or num lock)
+---
+
+## Toggle-Layer system
+- How to use: press the inward thumb keys to enter the Toggle Layer on both halves, then press a top-row key (or other assigned key) to switch to one of the toggled sub-layers. Press the gateway combo again to return to the Toggle Layer, then press it a second time to go back to the Base Layer.
+
+- A separate "Toggle Layer" is activated by a pair of inward thumb keys (both halves). This acts as the gateway to multiple "Toggeled Layers".
+- Toggled layers selected from the gateway have each their own "Sub-layer", or thumb-layers, with an individual RGB color. These sub-layers let you create dedicated small sub-layouts (each with its own distinct RGB setting), think momentary layers.
+- The Toggle Layer reduces accidental activation, and less "key clutter" while allowing multiple dedicated layouts for different tasks (e.g., Photoshop, coding, emails, gaming).
+
+- When making a Toggled Layer it's ***IMPORTANT*** that you add all sub-layouts you'll be using in the Toggled Layer BELOW the Toggled Layer! To avoid any "layer meshing" (layers can get "stuck" on top of each other [See zmk.dev #Layers(https://zmk.dev/docs/keymaps#layers)])
+
+
+
+---
+
+## Notes
+
+- Early implementation mistake: layer-tap behavior was inside macros, causing macros to run on every layer-tap. I separated the layer-tap from macros so simple taps no longer trigger LED changes.
+- There were some timing/overlap issues when combining certain macros (e.g., returning to default color after leaving the game layer). Conditional layer combos helped mitigate this.
+- The current approach is functional but can likely be simplified; contributions and suggestions are welcome.
+
+---
+
+## AI update
+
+I used Copilot to help modularize and refine the macros and combos. The modular structure now makes it easier to add new layers and corresponding RGB behaviors — add a layer color/macro in `corne-rgb.dtsi` and #include that file in your keymap.
+
+---
+
+## To Do
+
+- Improve the CapsLock blink logic and add a similar blink/indicator for NumLock and other toggles.
+- Optional: document exact combo key positions for common Corne layouts (for clarity).
+
+---
+
+Edited with AI for clarity
