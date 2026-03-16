@@ -70,6 +70,8 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 
 - When making a Toggled Layer it's ***IMPORTANT*** that you add all sub-layouts you'll be using in the Toggled Layer BELOW the Toggled Layer! To avoid any "layer meshing" (layers can get "stuck" on top of each other [See zmk.dev #Layers(https://zmk.dev/docs/keymaps#layers)])
 
+
+
 ---
 
 ## Notes
