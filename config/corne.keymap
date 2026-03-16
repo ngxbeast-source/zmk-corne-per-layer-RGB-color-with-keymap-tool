@@ -14,7 +14,7 @@
 /* Flux blink with configurable colors */
 #define RGB_FLUX_ON  RGB_COLOR_HSB(39,100,75)   /* activation color */
 #define RGB_FLUX_OFF RGB_COLOR_HSB(273,67,23)   /* fallback/default */
-#define BLINK1_ON  RGB_COLOR_HSB(39,100,75)   /* activation color */
+#define BLINK1_ON RGB_COLOR_HSB(200,100,60)
 #define BLINK1_OFF RGB_COLOR_HSB(19,100,17)  /* fallback/default */
 
 / {
@@ -28,13 +28,11 @@
     bindings = <
         &macro_param_1to1 &macro_tap &kp MACRO_PLACEHOLDER
         &macro_tap       &rgb_ug RGB_FLUX_ON
-        &macro_wait_time 60
+        &macro_wait_time 80
         &macro_tap       &rgb_ug RGB_TOG
-        &macro_wait_time 60
+        &macro_wait_time 80
         &macro_tap       &rgb_ug RGB_TOG
-        &macro_wait_time 60
-        &macro_tap       &rgb_ug RGB_TOG
-        &macro_wait_time 60
+        &macro_wait_time 80
         &macro_tap       &rgb_ug RGB_FLUX_OFF
     >;
 
@@ -46,11 +44,11 @@
     bindings = <
         &macro_tap       &kp CAPS
         &macro_tap       &rgb_ug BLINK1_ON  
-        &macro_wait_time 60
+        &macro_wait_time 80
         &macro_tap       &rgb_ug RGB_TOG
-        &macro_wait_time 60
+        &macro_wait_time 80
         &macro_tap       &rgb_ug RGB_TOG
-        &macro_wait_time 60
+        &macro_wait_time 80
         &macro_tap       &rgb_ug BLINK1_OFF  
     >;
 
@@ -59,7 +57,7 @@
         td_caps: td_capsBLINK {
             compatible = "zmk,behavior-tap-dance";
             #binding-cells = <0>;
-            tapping-term-ms = <200>;
+            tapping-term-ms = <180>;
             bindings = <&kp LSFT>,   
                        <&caps_blink>; 
         };
