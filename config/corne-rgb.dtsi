@@ -66,7 +66,7 @@ So now we can think about our layers in 3 ways: Is it a BaseLayer? (a layer that
 // #define RGB_LAYERNAME RGB_COLOR_HSB(0,0,0)
 // Personally I use a brighter setting for my momentary/toggle layers, and then use a dimmer one for the "BASE" layers depending on the color intensity.
 
-#define RGB_ABC RGB_COLOR_HSB(19,100,17) // Dim Yellow BASE COLOR
+#define RGB_ABC RGB_COLOR_HSB(19,100,17) // Dim Yellow BASELAYER COLOR
 #define RGB_NMRW RGB_COLOR_HSB(183,67,18) // Teal
 #define RGB_KPAD RGB_COLOR_HSB(230,67,26) // Pale Blue 
 #define RGB_XTRA RGB_COLOR_HSB(273,67,23) // Light Purple
@@ -82,10 +82,11 @@ So now we can think about our layers in 3 ways: Is it a BaseLayer? (a layer that
 
 //TEST
 // Back Blink
-#define RGB_BLINK1 RGB_COLOR_HSB(273,67,23) //XTRA Layer COLOR
+//#define BLINK1_OFF RGB_COLOR_HSB(273,67,23) //XTRA Layer COLOR
+//#define BLINK2_OFF RGB_COLOR_HSB(19,100,17) // Dim Yellow BASELAYER COLOR
 // Blink Colors
-//#define RGB_BLINK2 RGB_COLOR_HSB(273,67,23)
-//#define RGB_BLINK3 RGB_COLOR_HSB(273,67,23) 
+//#define BLINK1_ON  RGB_COLOR_HSB(39,100,75) // Bright Yellow
+//#define BLINK2_ON RGB_COLOR_HSB(200,100,60) // Bright MC Diamonds 
 //#define RGB_BLINK4 RGB_COLOR_HSB(273,67,23)
 //#define RGB_BLINK5 RGB_COLOR_HSB(273,67,23)
 
