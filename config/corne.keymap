@@ -12,27 +12,27 @@
 #include "corne-rgb.dtsi"
 
 / {
-    macros {
+/* Flux blink with configurable colors */
+fluxled: fluxled {
+    compatible = "zmk,behavior-macro-two-param";   // two parameters allowed upstream
+    label = "FLUX BLINK";
+    #binding-cells = <2>;                          // param1 = ON color, param2 = default color
+    wait-ms = <0>;
+    tap-ms = <0>;
 
-        fluxled: fluxled {
-            label = "FLUX ON/OFF BLINK";
-            compatible = "zmk,behavior-macro";
-            #binding-cells = <0>;
-            bindings = <
-                &macro_tap       &kp LA(LC(END))
-                &macro_tap       &rgb_ug RGB_COLOR_HSB(39,100,75)  /* Flux Activation Color */
-                &macro_wait_time 30
-                &macro_tap       &rgb_ug RGB_TOG                   /* OFF */
-                &macro_wait_time 30
-                &macro_tap       &rgb_ug RGB_TOG                   /* ON */
-                &macro_wait_time 30
-                &macro_tap       &rgb_ug RGB_TOG                   /* OFF */
-                &macro_wait_time 30
-                &macro_tap       &rgb_ug RGB_TOG                   /* ON */
-                &macro_wait_time 30
-                &macro_tap       &rgb_ug RGB_COLOR_HSB(273,67,23)  /* Default Color */
-            >;
-        };
+    bindings = <
+        &macro_tap       &kp LA(LC(END))
+        &macro_param_1to1 &macro_tap &rgb_ug MACRO_PLACEHOLDER /* activation color */
+        &macro_wait_time 30
+        &macro_tap       &rgb_ug RGB_TOG
+        &macro_wait_time 30
+        &macro_tap       &rgb_ug RGB_TOG
+        &macro_wait_time 30
+        &macro_tap       &rgb_ug RGB_TOG
+        &macro_wait_time 30
+        &macro_param_2to1 &macro_tap &rgb_ug MACRO_PLACEHOLDER /* default color */
+    >;
+};
     };
 
     keymap {
