@@ -45,10 +45,10 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 
 ## How It Works
 
-- Layer color changes are triggered by macros and combos separated from the basic keymap. This prevents unintended LED changes on simple taps.
+- Layer color changes are triggered by macros in conjunction with `hold-taps`. This prevents unintended LED changes on simple taps.
 - Hold-tap behavior is used to simulate home-row-mod behaviour for layer activation, while macros run only when the layer is actually activated.
 - Combos are used for deliberate multi-key activation (for example, the game layer requires a simultaneous press of two keys on separate halves).
-- Further instructions can be found in the `"corne-rgb.dtsi"`, I tried my best to format it to be understandable, my peanutbrain was running on bong water, cigarettes, and solder fumes at 3AM 
+- Further instructions can be found in the `"corne-rgb.dtsi"`, I tried my best to format it to be understandable, my peanutbrain was running on bong water, cigarettes, and solder fumes at 3AM (much liek now)
 
 ---
 
