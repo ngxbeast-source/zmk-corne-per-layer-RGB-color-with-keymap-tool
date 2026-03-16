@@ -71,6 +71,9 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 - When making a Toggled Layer it's ***IMPORTANT*** that you add all sub-layouts you'll be using in the Toggled Layer BELOW the Toggled Layer! To avoid any "layer meshing" (layers can get "stuck" on top of each other [See zmk.dev #Layers(https://zmk.dev/docs/keymaps#layers)])
 
 ![combos](corneCombos.png)
+- Red Bring Us To the Game Layer(MUST BE ON BASE LAYER TO ACCESS)
+- Blue Brings Us To the "Toggle-Layer" Layer(MUST BE ON BASE LAYER TO ACCESS)
+- Purple Brings Us to the "Game Toggle-Layer" Layer(MUST BE ON GAME LAYER TO ACCESS)
 
 ---
 
