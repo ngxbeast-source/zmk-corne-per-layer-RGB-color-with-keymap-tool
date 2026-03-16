@@ -371,7 +371,7 @@ So now we can think about our layers in 3 ways: Is it a BaseLayer? (a layer that
         label = "NUM TOGGLE + BLINK";
         #binding-cells = <0>;
         bindings = <
-            <&macro_tap &kp KP_NUMLOCK
+            &macro_tap &kp KP_NUMLOCK
             BLINK_SEQ(N_BLINK_ON, N_BLINK_OFF, 80)
     >;
 
