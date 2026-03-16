@@ -62,7 +62,7 @@
             #binding-cells = <0>;
             tapping-term-ms = <200>;
             bindings = <&kp LSFT>,    /* single tap shift */
-                       <&caps_blink> /* double tap  cpaslock*/
+                       <&caps_blink>; /* double tap  cpaslock*/
         };
     };
 
