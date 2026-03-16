@@ -17,7 +17,7 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 - [Files of interest](#files-of-interest)
 - [How it works](#how-it-works)
 - [Game layer](#game-layer)
-- [Toggle-Layer system](#"toggle"-layer-system)
+- [Toggle-Layer system](#toggle-layer-layer-system)
 - [Notes and caveats](#notes-and-caveats)
 - [AI update](#ai-update)
 - [To Do](#to-do)
