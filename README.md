@@ -66,11 +66,12 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 - How to use: press the inward thumb keys to enter the Toggle Layer on both halves, then press a top-row key (or other assigned key) to switch to one of the toggled sub-layers. Press the gateway combo again to return to the Toggle Layer, then press it a second time to go back to the Base Layer.
 
 - A separate "Toggle Layer" is activated by a pair of inward thumb keys (both halves). This acts as the gateway to multiple "Toggeled Layers".
-- Toggled layers selected from the gateway have each their own "Sub-layer", or thumb-layers, with an individual RGB color. These sub-layers let you create dedicated small sub-layouts (each with its own distinct RGB setting), think momentary layers.
+- Toggled layers selected from the gateway can house their own "Sub-layer" with an individual RGB color. These sub-layers let you create dedicated small sub-layouts (each with its own distinct RGB setting), think momentary layers.
 - The Toggle Layer reduces accidental activation, and less "key clutter" while allowing multiple dedicated layouts for different tasks (e.g., Photoshop, coding, emails, gaming).
 
 - When making a Toggled Layer it's ***IMPORTANT*** that you add all sub-layouts, you'll be using in the Toggled Layer, BELOW the Toggled Layer! To avoid any "layer meshing"; Layers can get "stuck" on top of each other [See zmk.dev #Layers(https://zmk.dev/docs/keymaps#layers)]
 - or, look at my layout/keymap, or layer numbers in `corne-rgb.dtsi` for an idea of how I pathed the layers.
+  - You wouldnt have Layer 12 with a key to go to layer 2, since there could be layers inbetween that may "bleed" key presses through the layer you are tryign to "dig" to. 
 
 ![combos](corneCombos.png)
   - Red Bring Us To the Game Layer (MUST BE ON BASE LAYER TO ACCESS)
