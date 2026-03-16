@@ -18,7 +18,6 @@
 #define BLINK1_OFF RGB_COLOR_HSB(19,100,17)  /* fallback/default */
 
 / {
-    macros {
     fluxled: fluxled {
     compatible = "zmk,behavior-macro-one-param";  // 1 parameter only 
     label = "FLUX BLINK (key param)";
