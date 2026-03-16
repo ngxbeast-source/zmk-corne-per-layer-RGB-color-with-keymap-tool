@@ -17,7 +17,7 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 - [Files of interest](#files-of-interest)
 - [How it works](#how-it-works)
 - [Game layer](#game-layer)
-- [Toggle-Layer system](#toggle-layer-system)
+- [Toggle-Layer system](#toggle-layer-layer-system)
 - [Notes and caveats](#notes-and-caveats)
 - [AI update](#ai-update)
 - [To Do](#to-do)
@@ -35,7 +35,7 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 
 ---
 
-## Files of interest
+## Files of Interest
 
 - `config/corne.keymap` — main keymap (focused on layer bindings).
 - `config/corne-rgb.dtsi` — RGB macros and combos (per-layer color definitions and modular macros).
@@ -43,34 +43,42 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 
 ---
 
-## How it works
+## How It Works
 
-- Layer color changes are triggered by macros and combos separated from the basic keymap. This prevents unintended LED changes on simple taps.
+- Layer color changes are triggered by macros in conjunction with `hold-taps`. This prevents unintended LED changes on simple taps.
 - Hold-tap behavior is used to simulate home-row-mod behaviour for layer activation, while macros run only when the layer is actually activated.
 - Combos are used for deliberate multi-key activation (for example, the game layer requires a simultaneous press of two keys on separate halves).
-- Further instructions can be found in the `"corne-rgb.dtsi"`, I tried my best to format it to be understandable, my peanutbrain was running on bong water, cigarettes, and solder fumes at 3AM 
+- Further instructions for implementing the code can be found in the `"corne-rgb.dtsi"`, I tried my best to format it to be understandable, my peanutbrain was running on bong water, cigarettes, and solder fumes at 3AM (much liek now)
 
 ---
 
-## Game layer
+## Game Layer
 
 - Activation: press the top-left key on the left half AND the top-right key on the right half at the same time. This toggles the "game" layer and sets its RGB color.
 - Deactivation: press the same combo again to return to the base layer and its color.
 - The game layer includes a nested "functions" layer to access F-keys and numbers for convenience while gaming.
 - Recommendation: use wired USB and switch the keyboard output to USB when using the game layer to avoid any potential input lag over BLE.
+- Along with it's "own" "Toggle-Layer" system designed for game profiles.
 
 ---
 
-## Toggle-Layer system
+## "Toggle-Layer" Layer System
 - How to use: press the inward thumb keys to enter the Toggle Layer on both halves, then press a top-row key (or other assigned key) to switch to one of the toggled sub-layers. Press the gateway combo again to return to the Toggle Layer, then press it a second time to go back to the Base Layer.
 
 - A separate "Toggle Layer" is activated by a pair of inward thumb keys (both halves). This acts as the gateway to multiple "Toggeled Layers".
-- Toggled layers selected from the gateway have each their own "Sub-layer", or thumb-layers, with an individual RGB color. These sub-layers let you create dedicated small sub-layouts (each with its own distinct RGB setting), think momentary layers.
+- Toggled layers selected from the gateway can house their own "Sub-layer" with an individual RGB color. These sub-layers let you create dedicated small sub-layouts (each with its own distinct RGB setting), think momentary layers.
 - The Toggle Layer reduces accidental activation, and less "key clutter" while allowing multiple dedicated layouts for different tasks (e.g., Photoshop, coding, emails, gaming).
 
-- When making a Toggled Layer it's ***IMPORTANT*** that you add all sub-layouts you'll be using in the Toggled Layer BELOW the Toggled Layer! To avoid any "layer meshing" (layers can get "stuck" on top of each other [See zmk.dev #Layers(https://zmk.dev/docs/keymaps#layers)])
+- When making a Toggled Layer it's ***IMPORTANT*** that you add all sub-layouts, you'll be using in the Toggled Layer, BELOW the Toggled Layer! To avoid any "layer meshing"; Layers can get "stuck" on top of each other [See zmk.dev #Layers(https://zmk.dev/docs/keymaps#layers)]
+- or, look at my layout/keymap, or layer numbers in `corne-rgb.dtsi` for an idea of how I pathed the layers.
+  - You wouldnt have Layer 12 with a key to go to layer 2, since there could be layers inbetween that may "bleed" key presses through the layer you are trying to "dig" to. It's good practice to put any "sub-layouts" below  the toggled layer in your .keymap. Layer12 is the new "Sub-Base Layer", so Layer13 should be it's "sub-layout" in the sequence.
 
-
+![combos](corneCombos.png)
+  - Red Bring Us To the Game Layer (MUST BE ON BASE LAYER TO ACCESS)
+    - To leave the Game Layer press the combo twice until you return to the BASE layer
+  - Blue Brings Us To the "Toggle-Layer" Layer (MUST BE ON BASE LAYER TO ACCESS)
+    - To return to the BASE layer you can press the thumb buttons twice until you return to the BASE layer
+  - Purple Brings Us to the "Game Toggle-Layer" Layer (MUST BE ON GAME LAYER TO ACCESS)
 
 ---
 
@@ -82,7 +90,7 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 
 ---
 
-## AI update
+## AI Update
 
 I used Copilot to help modularize and refine the macros and combos. The modular structure now makes it easier to add new layers and corresponding RGB behaviors — add a layer color/macro in `corne-rgb.dtsi` and #include that file in your keymap.
 
