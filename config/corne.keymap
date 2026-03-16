@@ -18,15 +18,16 @@
             label = "FLUX";
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
-            bindings =
-            <&macro_tap       &kp LA(END)>;
-            <&macro_tap       &rgb_ug RGB_COLOR_HSB(39,100,50)>; // Flux Activation Color
-            <&macro_wait_time 80>;
-            <&macro_tap       &rgb_ug RGB_TOG>; // OFF
-            <&macro_wait_time 80>;
-            <&macro_tap       &rgb_ug RGB_TOG>; // ON
-            <&macro_wait_time 80>;
-            <&macro_tap       &rgb_ug RGB_COLOR_HSB(273,67,23)>; // Default Color
+            bindings = <
+                &macro_tap       &kp LA(END)
+                &macro_tap       &rgb_ug RGB_COLOR_HSB(39,100,50)  /* Flux Activation Color */
+                &macro_wait_time 80
+                &macro_tap       &rgb_ug RGB_TOG                   /* OFF */
+                &macro_wait_time 80
+                &macro_tap       &rgb_ug RGB_TOG                   /* ON */
+                &macro_wait_time 80
+                &macro_tap       &rgb_ug RGB_COLOR_HSB(273,67,23)  /* Default Color */
+            >;
         };
     };
 
