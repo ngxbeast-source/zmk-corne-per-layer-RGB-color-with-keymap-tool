@@ -49,19 +49,19 @@
 // Get color codes here https://colorizer.org/
 // Layers + colors (single source of truth)
 #define LAYERS(_) \
-  _(ABC,      0, RGB_COLOR_HSB(19,100,17)) \ //BASE
-  _(NMRW,     1, RGB_COLOR_HSB(183,45,18)) \  //SUB-LAYOUT
-  _(KPAD,     2, RGB_COLOR_HSB(230,87,26)) \  //SUB-LAYOUT 
-  _(XTRA,     3, RGB_COLOR_HSB(273,67,23)) \  //SUB-LAYOUT
-  _(XTR2,     4, RGB_COLOR_HSB(116,67,26)) \  //SUB-LAYOUT
-  _(GAME,     5, RGB_COLOR_HSB(0,100,25)) \     //SUB-BASE
-  _(GFUN,     6, RGB_COLOR_HSB(116,67,50)) \      //SUB-LAYOUT
-  _(GAMETGL,  7, RGB_COLOR_HSB(200,100,60)) \       //TOGGLE-LAYER
-  _(GAME2,    8, RGB_COLOR_HSB(73,67,15)) \           //SUB-BASE
-  _(TGL,      9, RGB_COLOR_HSB(251,67,50)) \           //TOGGLE-LAYER    
-  _(T1,      10, RGB_COLOR_HSB(40,100,12)) \              //SUB-BASE
-  _(T2,      11, RGB_COLOR_HSB(85,100,15)) \                 //SUB-BASE
-  _(T2S1,    12, RGB_COLOR_HSB(82,100,50))                      //SUB-LAYOUT
+  _(ABC,      0, RGB_COLOR_HSB(19,100,17)) \ /* BASE */
+  _(NMRW,     1, RGB_COLOR_HSB(183,45,18)) \  /* SUB-LAYOUT /*
+  _(KPAD,     2, RGB_COLOR_HSB(230,87,26)) \  /* SUB-LAYOUT /* 
+  _(XTRA,     3, RGB_COLOR_HSB(273,67,23)) \  /* SUB-LAYOUT /*
+  _(XTR2,     4, RGB_COLOR_HSB(116,67,26)) \  /* SUB-LAYOUT /*
+  _(GAME,     5, RGB_COLOR_HSB(0,100,25)) \     /* SUB-BASE */
+  _(GFUN,     6, RGB_COLOR_HSB(116,67,50)) \      /* SUB-LAYOUT /*
+  _(GAMETGL,  7, RGB_COLOR_HSB(200,100,60)) \       /* TOGGLE-LAYER */
+  _(GAME2,    8, RGB_COLOR_HSB(73,67,15)) \           /* SUB-BASE */
+  _(TGL,      9, RGB_COLOR_HSB(251,67,50)) \           /* TOGGLE-LAYER */   
+  _(T1,      10, RGB_COLOR_HSB(40,100,12)) \              /* SUB-BASE */
+  _(T2,      11, RGB_COLOR_HSB(85,100,15)) \                 /* SUB-BASE */
+  _(T2S1,    12, RGB_COLOR_HSB(82,100,50))                      /* SUB-LAYOUT /*
 
 #define LAYER_DEF(name, idx, col)  #define LAYER_##name idx
 #define COLOR_DEF(name, idx, col)  #define RGB_##name   col
