@@ -36,9 +36,6 @@
  *   Momentary   = active while held (focus for sub-layouts and quick access)
  */
 
-// Layers + colors (single source of truth)
-// (Don't put a trailing backslash after the last entry,
-// and use block comments, not line comments, after macro items.)
 #define LAYERS(_)                                                          \
   _(ABC,      0, RGB_COLOR_HSB(19,100,17))   /* BASE */                    \
   _(NMRW,     1, RGB_COLOR_HSB(183,45,18))   /* SUB-LAYOUT */              \
@@ -57,10 +54,7 @@
 // #define LAYER_XXX n
 #define LAYER_DEF(name, idx, col)  #define LAYER_##name idx
 #define COLOR_DEF(name, idx, col)  #define RGB_##name   col
-LAYERS(LAYER_DEF)
-LAYERS(COLOR_DEF)
 
-// Blink helpers
 #define BLINK_ON   RGB_COLOR_HSB(39,100,75)
 #define BLINK_OFF  RGB_COLOR_HSB(273,67,23)
 #define BLINK_SEQ(ON, OFF, WAIT)                                     \
@@ -96,7 +90,11 @@ LAYERS(COLOR_DEF)
 #define COMBO(name, bind, p1, p2, ...)                              \
   name { bindings = <bind>; key-positions = <p1 p2>; layers = <__VA_ARGS__>; timeout-ms = <50>; }
 
- /{
+/
+{
+  // Macro expansions for layers and colors
+  LAYERS(LAYER_DEF)
+  LAYERS(COLOR_DEF)
   macros {
     TO_RGB_MACRO(default_led, "Base",    LAYER_ABC,   RGB_ABC)
     TO_RGB_MACRO(game_led,    "Game",    LAYER_GAME,  RGB_GAME)
