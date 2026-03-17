@@ -1,5 +1,5 @@
 /*
-*ANY new Layers get defined in here along with an assigned color. New formats are defined below, we no longer have to use the "standard" ZMK formatting, and can add to the code much easier using these new syntaxes and variables. I set up a "template" for your use in the appropriate areas, so you can better understand the layouts of this file.
+*ANY new Layers get defined in here, along with an assigned color. New formats are defined below, we no longer have to use the "standard" ZMK formatting, and can add to the code much easier using these new syntaxes and variables. I set up a "template" for your use in the appropriate areas, so you can better understand the layouts of this file.
 
 Order of Operations:
     Just #define a layer
@@ -28,7 +28,7 @@ New modular structuring-
                     Then map the new macro node_name to our keymap, either in your files or ZMK.Studio
 
                 - Making a ToggleLayer (GAMETGL & TGL)
-                 Is used mostly exclusively for ToggleLayers since the RGB behaves differently on ToggleLayers when switching to a TOGGLED LAYER. 
+                 Is used mostly exclusively for ToggleLayers; since the RGB behaves differently on ToggleLayers when switching to a TOGGLED LAYER. 
                         TO_RGB_PRESS_MACRO(node_name, "ZMK_Studio_Description", LAYER_, NEWCOLOR)
                 I personally use these on combos so that way we can have a "hidden" out of the way ToggleLayer activation, and it makes navigating between different Base Layers much more accessible. I was also having an isssue making the TOGGLED LAYERS rgbs work properly due to my naive/no understanding of programming so I just opted for the more direct approach.
                                     COMBO -> MENU -> SELECTED LAYER
@@ -43,7 +43,7 @@ So now we can think about our layers in 3 ways: Is it a BaseLayer? (a layer that
 
 
 
-// 1. DEFINE LAYERS:
+// 1.#DEFINE LAYERS:
 // Defined layers, this is done first; instead of numbers we can use a "layer name" variable to make the code easier to address. For any new layer(s) you just change the number(s), make sure the number matches with the corrosponding layer in the keymap, everything is in sequence starting from 0.
 #define LAYER_ABC 0
 #define LAYER_NMRW 1
@@ -183,7 +183,7 @@ So now we can think about our layers in 3 ways: Is it a BaseLayer? (a layer that
             global-quick-tap;
             quick-tap-ms = <400>;
         };
-// 2. BEHAVIORS:
+// 3. BEHAVIORS:
 // These create a behavior for the momentary LEDs, macros should be made FIRST; This is made AFTER making RGB behaviors, for any momentary layers!
     //      RGB_HOLD_TAP(hold_tap_layername, "ZMK_Studio_Description", macro_led)
 
