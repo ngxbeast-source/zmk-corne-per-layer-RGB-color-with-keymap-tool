@@ -51,6 +51,10 @@
     &macro_wait_time WAIT \
     &macro_tap &rgb_ug RGB_TOG \
     &macro_wait_time WAIT \
+    &macro_tap &rgb_ug RGB_TOG \
+    &macro_wait_time WAIT \
+    &macro_tap &rgb_ug RGB_TOG \
+    &macro_wait_time WAIT \
     &macro_tap &rgb_ug OFF
 
 /* ----MACRO HELPERS (Templates for building new macros) ---- */
@@ -96,7 +100,7 @@
             label = node_label; \
             bindings = <&macro_ref>, <&kp>; \
             #binding-cells = <2>; \
-            tapping-term-ms = <180>; \
+            tapping-term-ms = <200>; \
             flavor = "tap-preferred"; \
         };
 
@@ -137,16 +141,16 @@
         bindings = <
             &macro_param_1to1
             &macro_tap &kp MACRO_PLACEHOLDER
-            BLINK_SEQ(BLINK_ON, BLINK_OFF, 100)
+            BLINK_SEQ(BLINK_ON, BLINK_OFF, 45)
         >;
     };
     ZMK_MACRO(caps_blink,
         label = "CAPS TOGGLE + BLINK";
-        bindings = <&macro_tap &kp CAPS BLINK_SEQ(C_BLINK_ON, C_BLINK_OFF, 80)>;
+        bindings = <&macro_tap &kp CAPS BLINK_SEQ(C_BLINK_ON, C_BLINK_OFF, 45)>;
     )
     ZMK_MACRO(num_blink,
         label = "NUM TOGGLE + BLINK";
-        bindings = <&macro_tap &kp KP_NUMLOCK BLINK_SEQ(N_BLINK_ON, N_BLINK_OFF, 80)>;
+        bindings = <&macro_tap &kp KP_NUMLOCK BLINK_SEQ(N_BLINK_ON, N_BLINK_OFF, 45)>;
     )
 
     /* ---- STEP 4: BEHAVIORS - HOLD-TAP ---- */
