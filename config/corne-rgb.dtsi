@@ -130,13 +130,13 @@
         >;
     };
     ZMK_MACRO(caps_blink,
-        label = "CAPS TOGGLE + BLINK";
-        bindings = &macro_tap &kp CAPS;
+        label = "CAPS TOGGLE + BLINK",
+        bindings = &macro_tap &kp CAPS,
             BLINK_SEQ(C_BLINK_ON, C_BLINK_OFF, 80);
         )
     ZMK_MACRO(num_blink,
-        label = "NUM TOGGLE + BLINK";
-        bindings = &macro_tap &kp KP_NUMLOCK;
+        label = "NUM TOGGLE + BLINK",
+        bindings = &macro_tap &kp KP_NUMLOCK,
             BLINK_SEQ(N_BLINK_ON, N_BLINK_OFF, 80);
         )
 
