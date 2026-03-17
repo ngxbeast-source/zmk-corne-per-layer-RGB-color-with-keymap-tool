@@ -1,0 +1,14 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build ZMK firmware (corne_left)",
+			"type": "shell",
+			"command": "west build -d build -b nice_nano_v2 -- -DSHIELD=corne_left",
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build"
+		}
+	]
+}

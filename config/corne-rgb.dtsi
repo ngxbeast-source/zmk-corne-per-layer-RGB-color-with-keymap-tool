@@ -1,41 +1,27 @@
 /* ---- STEP 1: DEFINE LAYERS ---- */
-#define LAYER_ABC 0
-#define LAYER_NMRW 1
-#define LAYER_KPAD 2
-#define LAYER_XTRA 3
-#define LAYER_XTR2 4
-#define LAYER_GAME 5
-#define LAYER_GFUN 6
-#define LAYER_GAMETGL 7
-#define LAYER_GAME2 8
 
-#define LAYER_GAME2_SUBLR1 9
+// Macro-based layer/color definition for compactness and maintainability
+#define LAYERS(_) \
+    _(ABC,      0, RGB_COLOR_HSB(19,100,17))\
+    _(NMRW,     1, RGB_COLOR_HSB(183,45,18))\
+    _(KPAD,     2, RGB_COLOR_HSB(230,87,26))\
+    _(XTRA,     3, RGB_COLOR_HSB(273,67,23))\
+    _(XTR2,     4, RGB_COLOR_HSB(116,67,26))\
+    _(GAME,     5, RGB_COLOR_HSB(0,100,25))\
+    _(GFUN,     6, RGB_COLOR_HSB(116,67,50))\
+    _(GAMETGL,  7, RGB_COLOR_HSB(200,100,60))\
+    _(GAME2,    8, RGB_COLOR_HSB(73,67,15))\
+    _(GAME2_SUBLR1, 9, RGB_COLOR_HSB(67,55,50))\
+    _(TGL,     10, RGB_COLOR_HSB(251,67,50))\
+    _(TGLLR_1, 11, RGB_COLOR_HSB(40,100,12))\
+    _(TGLLR_1_SUBLR_1, 12, RGB_COLOR_HSB(58,45,50))\
+    _(TGLLR_2, 13, RGB_COLOR_HSB(85,100,15))\
+    _(TGLLR_2_SUBLR_1, 14, RGB_COLOR_HSB(82,100,50))
 
-#define LAYER_TGL 10
-#define LAYER_TGLLR_1 11
-
-#define LAYER_TGLLR_1_SUBLR_1 12
-
-#define LAYER_TGLLR_2 13
-#define LAYER_TGLLR_2_SUBLR_1 14
-
-/* ---- STEP 1a: DEFINE COLORS ---- */
-#define RGB_ABC         RGB_COLOR_HSB(19,100,17)      /* BASE        - Dim Yellow */
-#define RGB_NMRW        RGB_COLOR_HSB(183,45,18)      /* SUB-LAYOUT  - Teal */
-#define RGB_KPAD        RGB_COLOR_HSB(230,87,26)      /* SUB-LAYOUT  - Pale Blue */
-#define RGB_XTRA        RGB_COLOR_HSB(273,67,23)      /* SUB-LAYOUT  - Light Purple */
-#define RGB_GAME        RGB_COLOR_HSB(0,100,25)       /* SUB-BASE    - Red */
-#define RGB_GAMETGL     RGB_COLOR_HSB(200,100,60)     /* TOGGLE-LAYER- Cyan*/
-#define RGB_GAME2       RGB_COLOR_HSB(73,67,15)       /* SUB-BASE    - Dim Emerald */
-#define RGB_GFUN        RGB_COLOR_HSB(116,67,50)      /* SUB-LAYOUT  - Bright Yellow */
-#define RGB_XTRA2       RGB_COLOR_HSB(116,67,26)      /* SUB-LAYOUT  - Pale Green */
-#define RGB_TGL         RGB_COLOR_HSB(251,67,50)      /* TOGGLE-LAYER- Indigo */
-#define RGB_TGLLR_1     RGB_COLOR_HSB(40,100,12)      /* BASE COLOR  - Yellow */
-#define RGB_TGLLR_2     RGB_COLOR_HSB(85,100,15)      /* BASE COLOR  - Lime */
-#define RGB_TGLLR_2_SUBLR_1 RGB_COLOR_HSB(82,100,50) /* SUB-LAYOUT  - Bright Lime */
-
-#define RGB_TGLLR_1_SUBLR_1 RGB_COLOR_HSB(58,45,50)
-#deine RGB_GAME2_SUBLLR_1 RGB_COLOR_HSB(67,55,50)
+#define LAYER_DEF(name, idx, col)   #define LAYER_##name idx
+#define COLOR_DEF(name, idx, col)   #define RGB_##name col
+LAYERS(LAYER_DEF)
+LAYERS(COLOR_DEF)
 
 /* ---- (OPTIONAL) BLINK HELPERS ---- */
 #define BLINK_ON     RGB_COLOR_HSB(39,100,75)    /* Blink On - Bright Yellow */
