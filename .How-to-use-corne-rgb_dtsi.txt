@@ -1,0 +1,53 @@
+/*
+*ANY new Layers get defined in `corne-rgb.dtsi`, along with an assigned color. New formats are defined below, we no longer have to use the "standard" ZMK formatting, and can add to the code much easier using these new syntaxes and variables. 
+<br>I set up a "template" for your use in the appropriate areas, so you can better understand the layouts of this file.
+
+<p>Order of Operations:
+    - Just #define a layer
+    - then #define the color for the layer
+    - Build your macros, THEN build your hold-tap behavior if needed.
+    - Then you can use these new behaviors in ZMK Studio
+
+## New modular structuring-
+ `#define MOMENTARY_RGB_MACRO(node_name, node_label, layer, NEWCOLOR, DEFAULT_COLOR)`
+    This macro defines the "new" momentary layer's color 
+       
+ `#define RGB_HOLD_TAP(node_name, node_label, macro_ref)`
+    This behavior defines the "new" momentary layer macro's function; used in conjunction with the above to get momentary LEDs
+<p>
+            Making a momentary layer: 
+                    1. Define the layer
+                    1a. Define the RGB color
+                        -Get color codes here https://colorizer.org/
+                    2. Build the MACRO using 
+                        `MOMENTARY_RGB_MACRO(node_name, "ZMK_Studio_Description", LAYER_, NEWCOLOR, DEFAULT_COLOR)`
+                    3. Build the BEHAVIOR using
+                        `RGB_HOLD_TAP(node_name, node_label, macro_ref)`
+                    4. Map the new BEHAVIOR node_name into your .keymap
+
+                - Making a TOGGLED Layer uses a similar approach (not to be confused with a "ToggleLayer" which is the "menu" to access a TOGGLED LAYER. i.e TGLR1 & 2 CANNOT be activated until we are on the ToggleLayer) but instead we use:
+                    TO_RGB_MACRO(node_name, "ZMK_Studio_Description", LAYER_, NEWCOLOR)
+                    Then map the new macro node_name to our keymap, either in your files or ZMK.Studio
+
+                - Making a ToggleLayer (GAMETGL & TGL)
+                `TO_RGB_PRESS_MACRO(node_name, "ZMK_Studio_Description", LAYER_, NEWCOLOR)`
+                 Is used mostly exclusively for ToggleLayers; since the RGB behaves differently on ToggleLayers when switching to a TOGGLED LAYER. 
+
+                I personally use these on combos, that way we can have a "hidden" out of the way ToggleLayer activation, and it makes navigation between different BaseLayers much more accessible. I was also having an isssue making the TOGGLE LAYER rgbs work properly due to my naive/no understanding of programming so I just opted for the more direct approach.
+                                    COMBO -> MENU -> SELECTED LAYER
+                                    SAME COMBO -> BACK MENU OR PRESS AGAIN -> "BASE" LAYER 
+                                    
+                                    (In the base layer there's a gameCombo, then in the game combo we can go back to the base layer, OR press the ToggleLayer Combo to access the GAMEToggleLayer, then from the GAMEToggleLayer we can press the gameCombo again to go back to the game layer and if the same combo is pressed again from the game it will bring us back to our BaseLayer. Showcasing same combos providing different functions depending on how we code the layer conditons for the combo; which is an important design for getting the RGBs to change fluidly and to not over convolute the keypresses. Path the combos to fit your layouts)
+
+
+So now we can think about our layers in 3 ways: Is it a BaseLayer? (a layer that you want to "stay on")
+                                                Is it a ToggleLayer? (a layer that's only function is exclusively used as a Gateway to "toggle" a different BaseLayer)
+                                                Is it a MomentaryLayer? (a layer that acts only on a BaseLayer when a key press is held)
+                                        This will help you understand which Macros, Behaviors, and Combos to utilize building your RGB Layers
+
+     * NOTES:
+ * ToggleLayer shouldn't be confused with ZMK's &to, we are redefining the definitons for lack of better definitions.
+ * DO NOT HAVE "HIGHER LAYERS" GO TO LOWER LAYERS. (i.e., 12 -> 2)
+ * EVEN IN YOUR .KEYMAP!
+ * IT'S GOOD PRACTICE TO HAVE "SUB-LAYOUTS" BELOW THE "BASE" (e.g., GAME -> GFUN)
+*/
