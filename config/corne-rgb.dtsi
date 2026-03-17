@@ -63,10 +63,8 @@
   _(T2,      11, RGB_COLOR_HSB(85,100,15))\
   _(T2S1,    12, RGB_COLOR_HSB(82,100,50))\
 
-#define LAYER_DEF(name, idx, col)  
-#define LAYER_NAME(name) LAYER##name
-#define COLOR_DEF(name, idx, col)  
-#define RGB_NAME(name) RGB##name
+#define LAYER_DEF(name, idx, col)  #define LAYER_NAME(name) LAYER##name
+#define COLOR_DEF(name, idx, col)  #define RGB_NAME(name) RGB##name
 LAYERS(LAYER_DEF)
 LAYERS(COLOR_DEF)
 
