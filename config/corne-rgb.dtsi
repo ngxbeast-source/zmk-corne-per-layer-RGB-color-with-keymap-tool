@@ -14,13 +14,13 @@
 #define LAYER_TGLLR_2_SUBLLR_1 12
 
 /* ---- STEP 1a: DEFINE COLORS ---- */
-#define RGB_ABC         RGB_COLOR_HSB(19,100,17)      /* BASE        - Yellow */
+#define RGB_ABC         RGB_COLOR_HSB(19,100,17)      /* BASE        - Dim Yellow */
 #define RGB_NMRW        RGB_COLOR_HSB(183,45,18)      /* SUB-LAYOUT  - Teal */
 #define RGB_KPAD        RGB_COLOR_HSB(230,87,26)      /* SUB-LAYOUT  - Pale Blue */
 #define RGB_XTRA        RGB_COLOR_HSB(273,67,23)      /* SUB-LAYOUT  - Light Purple */
 #define RGB_GAME        RGB_COLOR_HSB(0,100,25)       /* SUB-BASE    - Red */
-#define RGB_GAMETGL     RGB_COLOR_HSB(200,100,60)     /* TOGGLE-LAYER- Cyan */
-#define RGB_GAME2       RGB_COLOR_HSB(73,67,15)       /* SUB-BASE    - Emerald */
+#define RGB_GAMETGL     RGB_COLOR_HSB(200,100,60)     /* TOGGLE-LAYER- Cyan*/
+#define RGB_GAME2       RGB_COLOR_HSB(73,67,15)       /* SUB-BASE    - Dim Emerald */
 #define RGB_GFUN        RGB_COLOR_HSB(116,67,50)      /* SUB-LAYOUT  - Bright Yellow */
 #define RGB_XTRA2       RGB_COLOR_HSB(116,67,26)      /* SUB-LAYOUT  - Pale Green */
 #define RGB_TGL         RGB_COLOR_HSB(251,67,50)      /* TOGGLE-LAYER- Indigo */
@@ -129,27 +129,28 @@
             BLINK_SEQ(BLINK_ON, BLINK_OFF, 100)
         >;
     };
-    caps_blink: caps_blink {
-        compatible = "zmk,behavior-macro";
+    ZMK_MACRO(caps_blink 
         label = "CAPS TOGGLE + BLINK";
-        #binding-cells = <0>;
-        bindings = <
-            &macro_tap &kp CAPS
-            BLINK_SEQ(C_BLINK_ON, C_BLINK_OFF, 80)
-        >;
-    };
-    num_blink: num_blink {
-        compatible = "zmk,behavior-macro";
+        bindings = &macro_tap &kp CAPS;
+            BLINK_SEQ(C_BLINK_ON, C_BLINK_OFF, 80);
+        )
+    ZMK_MACRO(num_blink 
         label = "NUM TOGGLE + BLINK";
-        #binding-cells = <0>;
-        bindings = <
-            &macro_tap &kp KP_NUMLOCK
-            BLINK_SEQ(N_BLINK_ON, N_BLINK_OFF, 80)
-        >;
-    };
+        bindings =
+            &macro_tap &kp KP_NUMLOCK;
+            BLINK_SEQ(N_BLINK_ON, N_BLINK_OFF, 80);
+        )
 
     /* ---- STEP 4: BEHAVIORS - HOLD-TAP DEFINITIONS ---- */
     behaviors {
+/* STEP 4: Build behaviors for momentary layers here using the macros you built above */
+        RGB_HOLD_TAP(hold_tap_nmrw, "HOLD_TAP_NMRW", nmrw_led)
+        RGB_HOLD_TAP(hold_tap_xtra2, "HOLD_TAP_XTRA2", xtra2_led)
+        RGB_HOLD_TAP(hold_tap_kpad, "HOLD_TAP_KPAD", kpad_led)
+        RGB_HOLD_TAP(hold_tap_xtra, "HOLD_TAP_XTRA", xtra_led)
+        RGB_HOLD_TAP(hold_tap_gfun, "HOLD_TAP_GFUN", gfun_led)
+        RGB_HOLD_TAP(hold_tap_t2_s1, "HOLD_TAP_layer2_sublayer1", t2_s1_led)
+
         hm: homerow_mods {
             compatible = "zmk,behavior-hold-tap";
             label = "HOMEROW_MODS";
@@ -170,14 +171,6 @@
             global-quick-tap;
             quick-tap-ms = <400>;
         };
-
-        /* STEP 4: Build behaviors for momentary layers using the macro above */
-        RGB_HOLD_TAP(hold_tap_nmrw, "HOLD_TAP_NMRW", nmrw_led)
-        RGB_HOLD_TAP(hold_tap_xtra2, "HOLD_TAP_XTRA2", xtra2_led)
-        RGB_HOLD_TAP(hold_tap_kpad, "HOLD_TAP_KPAD", kpad_led)
-        RGB_HOLD_TAP(hold_tap_xtra, "HOLD_TAP_XTRA", xtra_led)
-        RGB_HOLD_TAP(hold_tap_gfun, "HOLD_TAP_GFUN", gfun_led)
-        RGB_HOLD_TAP(hold_tap_t2_s1, "HOLD_TAP_layer2_sublayer1", t2_s1_led)
     };
 
     /* ---- STEP 5: COMBOS ---- */
