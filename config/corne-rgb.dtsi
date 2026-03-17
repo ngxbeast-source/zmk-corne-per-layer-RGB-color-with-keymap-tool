@@ -97,73 +97,85 @@ So now we can think about our layers in 3 ways: Is it a BaseLayer? (a layer that
     &macro_tap &rgb_ug OFF
 
 /* ---- STEP 2: MACRO HELPERS (Templates for building new macros) ---- */
-#define MOMENTARY_RGB_MACRO(node, label, layer, on, off) \
-    ZMK_MACRO(node, \
-        bindings = <&macro_press>, \
-        <&mo layer>, \
-        <&macro_tap>, \
-        <&rgb_ug on>, \
-        <&macro_pause_for_release>, \
-        <&macro_release>, \ 
-        <&mo layer>, \
-        <&macro_tap>, \
-        <&rgb_ug off>; \
-        label = label; 
-    )
+#define MOMENTARY_RGB_MACRO(node_name, node_label, layer, active_color, release_color) \
+        ZMK_MACRO(node_name, \
+            bindings = \
+                <&macro_press>, \
+                <&mo layer>, \
+                <&macro_tap>, \
+                <&rgb_ug active_color>, \
+                <&macro_pause_for_release>, \
+                <&macro_release>, \
+                <&mo layer>, \
+                <&macro_tap>, \
+                <&rgb_ug release_color>; \
+            label = node_label; \
+        )
 
-#define TO_RGB_MACRO(node, label, layer, color) \
-    ZMK_MACRO(node, \
-        bindings = <&macro_tap>, \
-        <&to layer>, \
-        <&macro_tap>, \
-        <&rgb_ug color>; \
-        label = label; 
-    )
+#define TO_RGB_MACRO(node_name, node_label, layer, color) \
+        ZMK_MACRO(node_name, \
+            bindings = \
+                <&macro_tap>, \
+                <&to layer>, \
+                <&macro_tap>, \
+                <&rgb_ug color>; \
+            label = node_label; \
+        )
 
-#define TO_RGB_PRESS_MACRO(node, label, layer, color) \
-    ZMK_MACRO(node, \
-        bindings = <&macro_tap>, \
-        <&to layer>, \
-        <&macro_press>, \
-        <&rgb_ug color>; \
-        label = label; 
-    )
+#define TO_RGB_PRESS_MACRO(node_name, node_label, layer, color) \
+        ZMK_MACRO(node_name, \
+            bindings = \
+                <&macro_tap>, \
+                <&to layer>, \
+                <&macro_press>, \
+                <&rgb_ug color>; \
+            label = node_label; \
+        )   
 
-/* ---- STEP 3: HOLD-TAP BEHAVIOR TEMPLATE ---- */
-#define RGB_HOLD_TAP(node, label, macro_ref) \
-    node: node { \
-        compatible = "zmk,behavior-hold-tap"; \
-        label = label; \
-        bindings = <&macro_ref>, <&kp>; \
-        #binding-cells = <2>; \
-        tapping-term-ms = <180>; \
-        flavor = "tap-preferred"; 
-    }
+/* ---- HOLD-TAP BEHAVIOR TEMPLATE ---- */
+#define RGB_HOLD_TAP(node_name, node_label, macro_ref) \
+        node_name: node_name { \
+            compatible = "zmk,behavior-hold-tap"; \
+            label = node_label; \
+            bindings = <&macro_ref>, <&kp>; \
+            #binding-cells = <2>; \
+            tapping-term-ms = <180>; \
+            flavor = "tap-preferred"; \
+        };
 
 /* ---- STEP 5: (optional) COMBO HELPER ---- */
 #define COMBO(name, bind, p1, p2, ...) \
     name { bindings = <bind>; key-positions = <p1 p2>; layers = <__VA_ARGS__>; timeout-ms = <50>; }
-
-
-/* ==== ZMK OVERLAY BLOCK ==== */
  /{
     /* ---- STEP 2+3: MACROS (build macros for all needed behaviors/layers) ---- */
     macros {
         /* Toggled and momentary macros for RGB layers */
-        TO_RGB_MACRO(game_led,      "GameLayer LED Macro", LAYER_GAME,  RGB_GAME)
-        TO_RGB_MACRO(default_led,   "Base Layer LED",      LAYER_ABC,   RGB_ABC)
-        TO_RGB_MACRO(t1_led,        "ToggleLayer1 LED",    LAYER_TGLLR_1, RGB_TGLLR_1)
-        TO_RGB_MACRO(to_t2_led,     "ToggleLayer2 LED",    LAYER_TGLLR_2, RGB_TGLLR_2)
-        TO_RGB_MACRO(g2_led,        "Game2 LED Macro",     LAYER_GAME2,  RGB_GAME2)
-        TO_RGB_PRESS_MACRO(toglayers_leds, "ToggleLayer LED", LAYER_TGL,    RGB_TGL)
-        TO_RGB_PRESS_MACRO(gtgl_led,      "gametoggle LED Macro", LAYER_GAMETGL, RGB_GAMETGL)
+        TO_RGB_MACRO(game_led, "GameLayer LED Macro", LAYER_GAME, RGB_GAME)
 
         MOMENTARY_RGB_MACRO(xtra2_led, "xtra2Layer Momentary LED Macro", LAYER_XTR2, RGB_XTRA2, RGB_ABC)
-        MOMENTARY_RGB_MACRO(kpad_led,  "KeyPadLayer Momentary LED Macro", LAYER_KPAD, RGB_KPAD, RGB_ABC)
-        MOMENTARY_RGB_MACRO(xtra_led,  "ExtraLayer Momentary LED Macro", LAYER_XTRA, RGB_XTRA, RGB_ABC)
-        MOMENTARY_RGB_MACRO(nmrw_led,  "NumberRowLayer Momentary LED Macro", LAYER_NMRW, RGB_NMRW, RGB_ABC)
-        MOMENTARY_RGB_MACRO(gfun_led,  "GameLayer Sublayer Momentary LED Macro", LAYER_GFUN, RGB_GFUN, RGB_GAME)
+
+        MOMENTARY_RGB_MACRO(kpad_led, "KeyPadLayer Momentary LED Macro", LAYER_KPAD, RGB_KPAD, RGB_ABC)
+
+        MOMENTARY_RGB_MACRO(xtra_led, "ExtraLayer Momentary LED Macro", LAYER_XTRA, RGB_XTRA, RGB_ABC)
+
+        MOMENTARY_RGB_MACRO(nmrw_led, "NumberRowLayer Momentary LED Macro", LAYER_NMRW, RGB_NMRW, RGB_ABC)
+
+        MOMENTARY_RGB_MACRO(gfun_led, "GameLayer Sublayer Momentary LED Macro", LAYER_GFUN, RGB_GFUN, RGB_GAME)
+
+        TO_RGB_MACRO(default_led, "Base Layer LED", LAYER_ABC, RGB_ABC)
+
+        TO_RGB_MACRO(t1_led, "ToggleLayer1 LED", LAYER_TGLLR_1, RGB_TGLLR_1)
+
+        TO_RGB_MACRO(to_t2_led, "ToggleLayer2 LED", LAYER_TGLLR_2, RGB_TGLLR_2)
+
         MOMENTARY_RGB_MACRO(t2_s1_led, "ToggleLayer2 SubLayer1 Momentary LED Macro", LAYER_TGLLR_2_SUBLLR_1, RGB_TGLLR_2_SUBLLR_1, RGB_TGLLR_2)
+
+        TO_RGB_MACRO(g2_led, "Game2 LED Macro", LAYER_GAME2, RGB_G2)
+
+        //Toggle Layers
+        TO_RGB_PRESS_MACRO(toglayers_leds, "ToggleLayer LED", LAYER_TGL, RGB_TGL)
+
+        TO_RGB_PRESS_MACRO(gtgl_led, "gametoggle LED Macro", LAYER_GAMETGL, RGB_GAMETGL)
     };
 
     /* ---- OPTIONAL: BLINK/STATUS MACROS ---- */
