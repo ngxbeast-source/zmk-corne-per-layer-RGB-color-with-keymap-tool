@@ -75,11 +75,11 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
   - You wouldnt have Layer 12 with a key to go to layer 2, since there could be layers inbetween that may "bleed" key presses through the layer you are trying to "dig" to. It's good practice to put any "sub-layouts" below  the toggled layer in your .keymap. Layer12 is the new "Sub-Base Layer", so Layer13 should be it's "sub-layout" in the sequence.
 
 ![combos](corneCombos.png)
-  - Red Bring Us To the Game Layer (MUST BE ON BASE LAYER TO ACCESS)
+  - Red Bring Us To the Game Layer **(MUST BE ON BASE LAYER TO ACCESS)**
     - To leave the Game Layer press the combo twice until you return to the BASE layer
-  - Blue Brings Us To the "Toggle-Layer" Layer (MUST BE ON BASE LAYER TO ACCESS)
+  - Blue Brings Us To the "Toggle-Layer" Layer **(MUST BE ON BASE LAYER TO ACCESS)**
     - To return to the BASE layer you can press the thumb buttons twice until you return to the BASE layer
-  - Purple Brings Us to the "Game Toggle-Layer" Layer (MUST BE ON GAME LAYER TO ACCESS)
+  - Purple Brings Us to the "Game Toggle-Layer" Layer **(MUST BE ON GAME LAYER TO ACCESS)**
 
 ---
 
