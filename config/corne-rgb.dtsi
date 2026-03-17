@@ -160,7 +160,7 @@
         RGB_HOLD_TAP(hold_tap_gfun, "HOLD_TAP_GFUN", gfun_led)
         RGB_HOLD_TAP(hold_tap_t2_s1, "HOLD_TAP_layer2_sublayer1", t2_s1_led)
         RGB_HOLD_TAP(hold_tap_g2_s1, "HOLD_TAP_GAME2_SUBLAYER1", g2_s1_led)
-        RGB_HOLD_TAP(hold_tap_t1_s1, "HOLD_TAP_TOGGLELAYER2_SUBLAYER1", t1_s1_led)
+        RGB_HOLD_TAP(hold_tap_t1_s1, "HOLD_TAP_TOGGLELAYER1_SUBLAYER1", t1_s1_led)
 
         hm: homerow_mods {
             compatible = "zmk,behavior-hold-tap";

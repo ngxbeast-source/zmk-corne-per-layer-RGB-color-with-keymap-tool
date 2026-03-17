@@ -137,7 +137,7 @@
 &none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
 &none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
 &none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
-                     &none  &none  &hold_tap_t2_s1 0 SPACE    &none  &none  &none
+                     &none  &none  &hold_tap_t1_s1 0 SPACE    &none  &none  &none
             >;
 
             label = "T1";
