@@ -136,8 +136,7 @@
         )
     ZMK_MACRO(num_blink,
         label = "NUM TOGGLE + BLINK";
-        bindings =
-            &macro_tap &kp KP_NUMLOCK;
+        bindings = &macro_tap &kp KP_NUMLOCK;
             BLINK_SEQ(N_BLINK_ON, N_BLINK_OFF, 80);
         )
 
