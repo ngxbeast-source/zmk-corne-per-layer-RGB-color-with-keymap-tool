@@ -1,0 +1,110 @@
+/*
+ * Blank Modular RGB Layer Template for ZMK
+ *
+ * Copy this file and fill in your own layers, colors, macros, and behaviors.
+ * All sections are commented for easy customization.
+ */
+
+/* ---- STEP 1: DEFINE LAYERS ---- */
+// Example: #define LAYER_BASE 0
+// #define LAYER_FN 1
+// #define LAYER_ADJUST 2
+
+/* ---- STEP 1a: DEFINE COLORS ---- */
+// Example: #define RGB_BASE   RGB_COLOR_HSB(0,0,20)   // Dim White
+// #define RGB_FN     RGB_COLOR_HSB(200,100,60) // Cyan
+
+/* ---- (OPTIONAL) BLINK HELPERS ---- */
+// #define BLINK_ON     RGB_COLOR_HSB(39,100,75)
+// #define BLINK_OFF    RGB_COLOR_HSB(273,67,23)
+// #define BLINK_SEQ(ON, OFF, WAIT) \
+//     &macro_tap &rgb_ug ON \
+//     &macro_wait_time WAIT \
+//     &macro_tap &rgb_ug RGB_TOG \
+//     &macro_wait_time WAIT \
+//     &macro_tap &rgb_ug RGB_TOG \
+//     &macro_wait_time WAIT \
+//     &macro_tap &rgb_ug RGB_TOG \
+//     &macro_wait_time WAIT \
+//     &macro_tap &rgb_ug RGB_TOG \
+//     &macro_wait_time WAIT \
+//     &macro_tap &rgb_ug OFF
+
+/* ---- MACRO HELPERS (Templates for building new macros) ---- */
+#define MOMENTARY_RGB_MACRO(node_name, node_label, layer, active_color, release_color) \
+        ZMK_MACRO(node_name, \
+            bindings = \
+                <&macro_press>, \
+                <&mo layer>, \
+                <&macro_tap>, \
+                <&rgb_ug active_color>, \
+                <&macro_pause_for_release>, \
+                <&macro_release>, \
+                <&mo layer>, \
+                <&macro_tap>, \
+                <&rgb_ug release_color>; \
+            label = node_label; \
+        )
+
+#define TO_RGB_MACRO(node_name, node_label, layer, color) \
+        ZMK_MACRO(node_name, \
+            bindings = \
+                <&macro_tap>, \
+                <&to layer>, \
+                <&macro_tap>, \
+                <&rgb_ug color>; \
+            label = node_label; \
+        )
+
+#define TO_RGB_PRESS_MACRO(node_name, node_label, layer, color) \
+        ZMK_MACRO(node_name, \
+            bindings = \
+                <&macro_tap>, \
+                <&to layer>, \
+                <&macro_press>, \
+                <&rgb_ug color>; \
+            label = node_label; \
+        )
+
+/* ---- HOLD-TAP BEHAVIOR TEMPLATE ---- */
+#define RGB_HOLD_TAP(node_name, node_label, macro_ref) \
+        node_name: node_name { \
+            compatible = "zmk,behavior-hold-tap"; \
+            label = node_label; \
+            bindings = <&macro_ref>, <&kp>; \
+            #binding-cells = <2>; \
+            tapping-term-ms = <200>; \
+            flavor = "tap-preferred"; \
+        };
+
+/* ---- (OPTIONAL) COMBO HELPER ---- */
+#define COMBO(name, bind, p1, p2, ...) \
+    name { bindings = <bind>; key-positions = <p1 p2>; layers = <__VA_ARGS__>; timeout-ms = <50>; }
+
+/ {
+    /* ---- STEP 2+3: MACROS (define your macros for each layer/behavior) ---- */
+    macros {
+        // Example:
+        // TO_RGB_MACRO(base_led, "Base Layer LED", LAYER_BASE, RGB_BASE)
+        // MOMENTARY_RGB_MACRO(fn_led, "FN Layer Momentary LED", LAYER_FN, RGB_FN, RGB_BASE)
+    };
+
+    /* ---- (OPTIONAL) BLINK/STATUS MACROS ---- */
+    // Define blink/caps/num macros here if needed
+
+    /* ---- STEP 4: BEHAVIORS - HOLD-TAP ---- */
+    behaviors {
+        // Example:
+        // RGB_HOLD_TAP(hold_tap_fn, "HOLD_TAP_FN", fn_led)
+    };
+
+    /* ---- (OPTIONAL) STEP 5: COMBOS ---- */
+    combos {
+        compatible = "zmk,combos";
+        // Example:
+        // COMBO(my_combo, &kp ESC, 0, 1, LAYER_BASE)
+    };
+
+    /* ---- (OPTIONAL) Tap dance ---- */
+    // Define tap dance behaviors here if needed
+};
