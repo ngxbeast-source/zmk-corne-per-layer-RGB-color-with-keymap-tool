@@ -138,16 +138,16 @@
         bindings = <
             &macro_param_1to1
             &macro_tap &kp MACRO_PLACEHOLDER
-            BLINK_SEQ(BLINK_ON, BLINK_OFF, 45)
+            BLINK_SEQ(BLINK_ON, BLINK_OFF, 80)
         >;
     };
     ZMK_MACRO(caps_blink,
         label = "CAPS TOGGLE + BLINK";
-        bindings = <&macro_tap &kp CAPS BLINK_SEQ(C_BLINK_ON, C_BLINK_OFF, 45)>;
+        bindings = <&macro_tap &kp CAPS BLINK_SEQ(C_BLINK_ON, C_BLINK_OFF, 80)>;
     )
     ZMK_MACRO(num_blink,
         label = "NUM TOGGLE + BLINK";
-        bindings = <&macro_tap &kp KP_NUMLOCK BLINK_SEQ(N_BLINK_ON, N_BLINK_OFF, 45)>;
+        bindings = <&macro_tap &kp KP_NUMLOCK BLINK_SEQ(N_BLINK_ON, N_BLINK_OFF, 80)>;
     )
 
     /* ---- STEP 4: BEHAVIORS - HOLD-TAP ---- */
