@@ -32,6 +32,7 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 - Layer RGB activation uses hold-taps and combo patterns to avoid running macros on simple taps.
 - A CapsLock blink indicator has been implemented (logic can be improved); can extend to NumLock or other indicators.
 - The `config/corne-rgb.dtsi` file should in theory work in any other keyboard since it doesn't affect the key map. We can isolate the RGB functions into one file for easier editing while only worrying about the layers in the .keymap file. (ty AI)
+- **NEW** Tap Dance Blink, CapsLock, And NumLock have been intrigrated. When you "acitvate" NumLock/CapsLock the keyboard will now "flash" to indicate the press. 
 
 ---
 
@@ -46,9 +47,9 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 ## How It Works
 
 - Layer color changes are triggered by macros in conjunction with `hold-taps`. This prevents unintended LED changes on simple taps.
-- Hold-tap behavior is used to simulate home-row-mod behaviour for layer activation, while macros run only when the layer is actually activated.
+- Hold-tap behavior is used to simulate home-row-mod behaviour for layer activation, while RGB macros run only when the layer is actually activated.
 - Combos are used for deliberate multi-key activation (for example, the game layer requires a simultaneous press of two keys on separate halves).
-- Further instructions for implementing the code can be found in the `"corne-rgb.dtsi"`, I tried my best to format it to be understandable, my peanutbrain was running on bong water, cigarettes, and solder fumes at 3AM (much liek now)
+- Further instructions for implementing the code can be found in the `"corne-rgb.dtsi"` file, I tried my best to format it to be understandable, my peanutbrain was running on bong water, cigarettes, and solder fumes at 3AM (much liek now) 
 
 ---
 
@@ -98,8 +99,12 @@ I used Copilot to help modularize and refine the macros and combos. The modular 
 
 ## To Do
 
-- Improve the CapsLock blink logic and add a similar blink/indicator for NumLock and other toggles.
-- Optional: document exact combo key positions for common Corne layouts (for clarity).
+~~- Improve the CapsLock blink logic and add a similar blink/indicator for NumLock and other toggles.~~
+~~- Optional: document exact combo key positions for common Corne layouts (for clarity).~~
+- I will probably clean up the code more since it's boasting a whooping 700kb of memory.
+- I think I'm "done", most of the "framework" is now there, all that's left is to implement the new structured code onto any new layers.
+- If anyone can think of something I'm open to suggetions but I "think" I maximized the capabilities of the basic upstreamed ZMK RGB functions.  
+
 
 ---
 
