@@ -108,7 +108,17 @@
                      &none  &none  &none    &none  &none  &none
             >;
 
-            label = "GAME2";
+            label = "G2";
+        };
+        game2_sublayer1 {
+            bindings = <
+&none  &none  &none  &none  &none  &none                      &none  &none  &none  &none  &none  &none
+&none  &none  &none  &none  &none  &none                      &none  &none  &none  &none  &none  &none
+&none  &none  &none  &none  &none  &none                      &none  &none  &none  &none  &none  &none
+                     &none  &none  &hold_tap_t2_s1 0 SPACE    &none  &none  &none
+            >;
+
+            label = "G2.1";
         };
 
         Toggle_Layers {
@@ -127,12 +137,21 @@
 &none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
 &none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
 &none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
-                     &none  &none  &none    &none  &none  &none
+                     &none  &none  &hold_tap_t2_s1 0 SPACE    &none  &none  &none
             >;
 
             label = "T1";
         };
+        toggle1_sublayer1 {
+            bindings = <
+&trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans
+&trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans
+&trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans
+                        &trans  &trans  &trans    &trans  &trans  &trans
+            >;
 
+            label = "T1.1";
+        };
         toggle_2 {
             bindings = <
 &none  &none  &none  &none  &none  &none                      &none  &none  &none  &none  &none  &none
