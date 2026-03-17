@@ -36,25 +36,35 @@
  *   Momentary   = active while held (focus for sub-layouts and quick access)
  */
 
-#define LAYERS(_)                                                          \
-  _(ABC,      0, RGB_COLOR_HSB(19,100,17))   /* BASE */                    \
-  _(NMRW,     1, RGB_COLOR_HSB(183,45,18))   /* SUB-LAYOUT */              \
-  _(KPAD,     2, RGB_COLOR_HSB(230,87,26))   /* SUB-LAYOUT */              \
-  _(XTRA,     3, RGB_COLOR_HSB(273,67,23))   /* SUB-LAYOUT */              \
-  _(XTR2,     4, RGB_COLOR_HSB(116,67,26))   /* SUB-LAYOUT */              \
-  _(GAME,     5, RGB_COLOR_HSB(0,100,25))    /* SUB-BASE */                \
-  _(GFUN,     6, RGB_COLOR_HSB(116,67,50))   /* SUB-LAYOUT */              \
-  _(GAMETGL,  7, RGB_COLOR_HSB(200,100,60))  /* TOGGLE-LAYER */            \
-  _(GAME2,    8, RGB_COLOR_HSB(73,67,15))    /* SUB-BASE */                \
-  _(TGL,      9, RGB_COLOR_HSB(251,67,50))   /* TOGGLE-LAYER */            \
-  _(T1,      10, RGB_COLOR_HSB(40,100,12))   /* SUB-BASE */                \
-  _(T2,      11, RGB_COLOR_HSB(85,100,15))   /* SUB-BASE */                \
-  _(T2S1,    12, RGB_COLOR_HSB(82,100,50))   /* SUB-LAYOUT */
+// ---- LAYER DEFINITIONS ----
+#define LAYER_ABC      0
+#define LAYER_NMRW     1
+#define LAYER_KPAD     2
+#define LAYER_XTRA     3
+#define LAYER_XTR2     4
+#define LAYER_GAME     5
+#define LAYER_GFUN     6
+#define LAYER_GAMETGL  7
+#define LAYER_GAME2    8
+#define LAYER_TGL      9
+#define LAYER_T1      10
+#define LAYER_T2      11
+#define LAYER_T2S1    12
 
-// #define LAYER_XXX n
-#define LAYER_DEF(name, idx, col)  #define LAYER_##name idx
-#define COLOR_DEF(name, idx, col)  #define RGB_##name   col
-
+// ---- COLOR DEFINITIONS ----
+#define RGB_ABC      RGB_COLOR_HSB(19,100,17)   /* BASE */
+#define RGB_NMRW     RGB_COLOR_HSB(183,45,18)   /* SUB-LAYOUT */
+#define RGB_KPAD     RGB_COLOR_HSB(230,87,26)   /* SUB-LAYOUT */
+#define RGB_XTRA     RGB_COLOR_HSB(273,67,23)   /* SUB-LAYOUT */
+#define RGB_XTR2     RGB_COLOR_HSB(116,67,26)   /* SUB-LAYOUT */
+#define RGB_GAME     RGB_COLOR_HSB(0,100,25)    /* SUB-BASE */
+#define RGB_GFUN     RGB_COLOR_HSB(116,67,50)   /* SUB-LAYOUT */
+#define RGB_GAMETGL  RGB_COLOR_HSB(200,100,60)  /* TOGGLE-LAYER */
+#define RGB_GAME2    RGB_COLOR_HSB(73,67,15)    /* SUB-BASE */
+#define RGB_TGL      RGB_COLOR_HSB(251,67,50)   /* TOGGLE-LAYER */
+#define RGB_T1       RGB_COLOR_HSB(40,100,12)   /* SUB-BASE */
+#define RGB_T2       RGB_COLOR_HSB(85,100,15)   /* SUB-BASE */
+#define RGB_T2S1     RGB_COLOR_HSB(82,100,50)   /* SUB-LAYOUT */
 #define BLINK_ON   RGB_COLOR_HSB(39,100,75)
 #define BLINK_OFF  RGB_COLOR_HSB(273,67,23)
 #define BLINK_SEQ(ON, OFF, WAIT)                                     \
@@ -66,50 +76,74 @@
   &macro_wait_time WAIT                                              \
   &macro_tap &rgb_ug OFF
 
-// Macro builders
-#define MOMENTARY_RGB_MACRO(node, label, layer, on, off)             \
-  ZMK_MACRO(node,                                                    \
-    bindings = <&macro_press>, <&mo layer>, <&macro_tap>, <&rgb_ug on>, \
-               <&macro_pause_for_release>, <&macro_release>, <&mo layer>,  \
-               <&macro_tap>, <&rgb_ug off>;                          \
-    label = label;                                                   \
-  )
-
-#define TO_RGB_MACRO(node, label, layer, color)                      \
-  ZMK_MACRO(node, bindings = <&macro_tap>, <&to layer>, <&macro_tap>, <&rgb_ug color>; label = label;)
-
-#define TO_RGB_PRESS_MACRO(node, label, layer, color)                \
-  ZMK_MACRO(node, bindings = <&macro_tap>, <&to layer>, <&macro_press>, <&rgb_ug color>; label = label;)
-
-// Behavior helper
-#define RGB_HOLD_TAP(node, label, macro_ref)                         \
-  node: node { compatible = "zmk,behavior-hold-tap"; label = label;  \
-    bindings = <&macro_ref>, <&kp>; #binding-cells = <2>; tapping-term-ms = <180>; flavor = "tap-preferred"; }
-
-// Combo helper
-#define COMBO(name, bind, p1, p2, ...)                              \
-  name { bindings = <bind>; key-positions = <p1 p2>; layers = <__VA_ARGS__>; timeout-ms = <50>; }
-
-/
-{
-  // Macro expansions for layers and colors
-  LAYERS(LAYER_DEF)
-  LAYERS(COLOR_DEF)
+// ---- MACRO DEFINITIONS ----
+/ {
   macros {
-    TO_RGB_MACRO(default_led, "Base",    LAYER_ABC,   RGB_ABC)
-    TO_RGB_MACRO(game_led,    "Game",    LAYER_GAME,  RGB_GAME)
-    TO_RGB_MACRO(g2_led,      "Game2",   LAYER_GAME2, RGB_GAME2)   /* FIXED: use RGB_GAME2, not RGB_G2 */
-    TO_RGB_MACRO(t1_led,      "T1",      LAYER_T1,    RGB_T1)
-    TO_RGB_MACRO(to_t2_led,   "T2",      LAYER_T2,    RGB_T2)
-    TO_RGB_PRESS_MACRO(toglayers_leds, "TGL",  LAYER_TGL,    RGB_TGL)
-    TO_RGB_PRESS_MACRO(gtgl_led,      "GTGL", LAYER_GAMETGL, RGB_GAMETGL)
-
-    MOMENTARY_RGB_MACRO(xtra2_led, "X2 MO",  LAYER_XTR2, RGB_XTR2, RGB_ABC)
-    MOMENTARY_RGB_MACRO(kpad_led,  "KP MO",  LAYER_KPAD, RGB_KPAD, RGB_ABC)
-    MOMENTARY_RGB_MACRO(xtra_led,  "X MO",   LAYER_XTRA, RGB_XTRA, RGB_ABC)
-    MOMENTARY_RGB_MACRO(nmrw_led,  "NR MO",  LAYER_NMRW, RGB_NMRW, RGB_ABC)
-    MOMENTARY_RGB_MACRO(gfun_led,  "GF MO",  LAYER_GFUN, RGB_GFUN, RGB_GAME)
-    MOMENTARY_RGB_MACRO(t2_s1_led, "T2S1MO", LAYER_T2S1, RGB_T2S1, RGB_T2)
+    default_led: default_led {
+      compatible = "zmk,behavior-macro";
+      label = "Base";
+      bindings = <&macro_tap &to LAYER_ABC &macro_tap &rgb_ug RGB_ABC>;
+    };
+    game_led: game_led {
+      compatible = "zmk,behavior-macro";
+      label = "Game";
+      bindings = <&macro_tap &to LAYER_GAME &macro_tap &rgb_ug RGB_GAME>;
+    };
+    g2_led: g2_led {
+      compatible = "zmk,behavior-macro";
+      label = "Game2";
+      bindings = <&macro_tap &to LAYER_GAME2 &macro_tap &rgb_ug RGB_GAME2>;
+    };
+    t1_led: t1_led {
+      compatible = "zmk,behavior-macro";
+      label = "T1";
+      bindings = <&macro_tap &to LAYER_T1 &macro_tap &rgb_ug RGB_T1>;
+    };
+    to_t2_led: to_t2_led {
+      compatible = "zmk,behavior-macro";
+      label = "T2";
+      bindings = <&macro_tap &to LAYER_T2 &macro_tap &rgb_ug RGB_T2>;
+    };
+    toglayers_leds: toglayers_leds {
+      compatible = "zmk,behavior-macro";
+      label = "TGL";
+      bindings = <&macro_tap &to LAYER_TGL &macro_press &rgb_ug RGB_TGL>;
+    };
+    gtgl_led: gtgl_led {
+      compatible = "zmk,behavior-macro";
+      label = "GTGL";
+      bindings = <&macro_tap &to LAYER_GAMETGL &macro_press &rgb_ug RGB_GAMETGL>;
+    };
+    xtra2_led: xtra2_led {
+      compatible = "zmk,behavior-macro";
+      label = "X2 MO";
+      bindings = <&macro_press &mo LAYER_XTR2 &macro_tap &rgb_ug RGB_XTR2 &macro_pause_for_release &macro_release &mo LAYER_XTR2 &macro_tap &rgb_ug RGB_ABC>;
+    };
+    kpad_led: kpad_led {
+      compatible = "zmk,behavior-macro";
+      label = "KP MO";
+      bindings = <&macro_press &mo LAYER_KPAD &macro_tap &rgb_ug RGB_KPAD &macro_pause_for_release &macro_release &mo LAYER_KPAD &macro_tap &rgb_ug RGB_ABC>;
+    };
+    xtra_led: xtra_led {
+      compatible = "zmk,behavior-macro";
+      label = "X MO";
+      bindings = <&macro_press &mo LAYER_XTRA &macro_tap &rgb_ug RGB_XTRA &macro_pause_for_release &macro_release &mo LAYER_XTRA &macro_tap &rgb_ug RGB_ABC>;
+    };
+    nmrw_led: nmrw_led {
+      compatible = "zmk,behavior-macro";
+      label = "NR MO";
+      bindings = <&macro_press &mo LAYER_NMRW &macro_tap &rgb_ug RGB_NMRW &macro_pause_for_release &macro_release &mo LAYER_NMRW &macro_tap &rgb_ug RGB_ABC>;
+    };
+    gfun_led: gfun_led {
+      compatible = "zmk,behavior-macro";
+      label = "GF MO";
+      bindings = <&macro_press &mo LAYER_GFUN &macro_tap &rgb_ug RGB_GFUN &macro_pause_for_release &macro_release &mo LAYER_GFUN &macro_tap &rgb_ug RGB_GAME>;
+    };
+    t2_s1_led: t2_s1_led {
+      compatible = "zmk,behavior-macro";
+      label = "T2S1MO";
+      bindings = <&macro_press &mo LAYER_T2S1 &macro_tap &rgb_ug RGB_T2S1 &macro_pause_for_release &macro_release &mo LAYER_T2S1 &macro_tap &rgb_ug RGB_T2>;
+    };
   };
 
   combos {
