@@ -2,10 +2,8 @@
  * ANY new layers go here, each with an assigned color. The helpers below let you
  * avoid the “standard” ZMK formatting and add RGB logic with a few definitions.
  *
- * Refactored Order of the code so you can work from the "Top-Down".
- *
  * Order of operations (do these in order):
- *   1) #define the layer ID (number used in your keymap) to the #define LAYERS(_) section.
+ *   1) #define the layer ID (number used in your keymap).
  *   1a) #define the layer color with RGB_COLOR_HSB(H, S, B).
  *   2) Build the MACRO:
  *        - Momentary layer RGB:   MOMENTARY_RGB_MACRO(node, "label", LAYER_, NEWCOLOR, DEFAULT_COLOR)
@@ -20,113 +18,89 @@
  *         stays active only while held and shows its NEWCOLOR)
  *   4) Map the macro/behavior into your keymap or combos.
  *
- *
- *
- * Making a momentary layer (common case for “sub-layouts”, aka
+ * Making a momentary layer (common case for “sub-layouts” like GAME2, T1, T2, or
  * momentary toggled layers like NMRW, KPAD, XTRA, XTRA2, GFUN, T2S1):
  *   - Define layer ID and color (steps 1, 1a)
  *   - MOMENTARY_RGB_MACRO(...) for that layer
  *   - RGB_HOLD_TAP(...) pointing to that macro
  *   - Bind the hold-tap in your base layer.
  *
- * Making a toggled layer (common for Layers accessed from the "LayerToggle"(GAMETGL, TGL) gateway; such as GAME2, T1, T2):
+ * Making a toggled layer:
  *   - Define layer ID and color
  *   - TO_RGB_MACRO(...) for that layer
  *   - Bind the macro to a key or combo; tap to switch and set the color
  *
  * Layer roles to keep in mind:
- *   BaseLayer   = RGBs stay on while "active" (e.g., ABC)
- *   ToggleLayer = only used to jump to other bases/TOGGLEDLAYER (e.g., the menu layers with PRESS macros)
+ *   BaseLayer   = stays on (e.g., ABC)
+ *   ToggleLayer = only used to jump to other bases (e.g., the menu layers with PRESS macros)
  *   Momentary   = active while held (focus for sub-layouts and quick access)
- * 
- * NOTES:
- * ToggleLayer shouldn't be confused with ZMK's &to, we are redefining the definitons for lack of better definitions.
- * DO NOT HAVE "HIGHER LAYERS" GO TO LOWER LAYERS. (i.e., 12 -> 2)
- * EVEN IN YOUR .KEYMAP!
- * IT'S GOOD PRACTICE TO HAVE "SUB-LAYOUTS" BELOW THE "BASE" (e.g., GAME -> GFUN)
  */
-// STEP 1 & 2: Assign Layers & A Color
-// Get color codes here https://colorizer.org/
-// Layers + colors (single source of truth)
-#define LAYERS(_) \
-  _(ABC,      0, RGB_COLOR_HSB(19,100,17))\
-  _(NMRW,     1, RGB_COLOR_HSB(183,45,18))\
-  _(KPAD,     2, RGB_COLOR_HSB(230,87,26))\
-  _(XTRA,     3, RGB_COLOR_HSB(273,67,23))\
-  _(XTR2,     4, RGB_COLOR_HSB(116,67,26))\
-  _(GAME,     5, RGB_COLOR_HSB(0,100,25))\
-  _(GFUN,     6, RGB_COLOR_HSB(116,67,50))\
-  _(GAMETGL,  7, RGB_COLOR_HSB(200,100,60))\
-  _(GAME2,    8, RGB_COLOR_HSB(73,67,15))\
-  _(TGL,      9, RGB_COLOR_HSB(251,67,50))\
-  _(T1,      10, RGB_COLOR_HSB(40,100,12))\
-  _(T2,      11, RGB_COLOR_HSB(85,100,15))\
-  _(T2S1,    12, RGB_COLOR_HSB(82,100,50))\
 
-#define LAYER_DEF(name, idx, col)  #define LAYER_NAME(name) LAYER##name
-#define COLOR_DEF(name, idx, col)  #define RGB_NAME(name) RGB##name
+// Layers + colors (single source of truth)
+// (Don't put a trailing backslash after the last entry,
+// and use block comments, not line comments, after macro items.)
+#define LAYERS(_)                                                          \
+  _(ABC,      0, RGB_COLOR_HSB(19,100,17))   /* BASE */                    \
+  _(NMRW,     1, RGB_COLOR_HSB(183,45,18))   /* SUB-LAYOUT */              \
+  _(KPAD,     2, RGB_COLOR_HSB(230,87,26))   /* SUB-LAYOUT */              \
+  _(XTRA,     3, RGB_COLOR_HSB(273,67,23))   /* SUB-LAYOUT */              \
+  _(XTR2,     4, RGB_COLOR_HSB(116,67,26))   /* SUB-LAYOUT */              \
+  _(GAME,     5, RGB_COLOR_HSB(0,100,25))    /* SUB-BASE */                \
+  _(GFUN,     6, RGB_COLOR_HSB(116,67,50))   /* SUB-LAYOUT */              \
+  _(GAMETGL,  7, RGB_COLOR_HSB(200,100,60))  /* TOGGLE-LAYER */            \
+  _(GAME2,    8, RGB_COLOR_HSB(73,67,15))    /* SUB-BASE */                \
+  _(TGL,      9, RGB_COLOR_HSB(251,67,50))   /* TOGGLE-LAYER */            \
+  _(T1,      10, RGB_COLOR_HSB(40,100,12))   /* SUB-BASE */                \
+  _(T2,      11, RGB_COLOR_HSB(85,100,15))   /* SUB-BASE */                \
+  _(T2S1,    12, RGB_COLOR_HSB(82,100,50))   /* SUB-LAYOUT */
+
+// #define LAYER_XXX n
+#define LAYER_DEF(name, idx, col)  #define LAYER_##name idx
+#define COLOR_DEF(name, idx, col)  #define RGB_##name   col
 LAYERS(LAYER_DEF)
 LAYERS(COLOR_DEF)
 
-// Optional; we dont have to add anything here anymore we can build a separate color now that will run in the same  "blink sequence".
 // Blink helpers
-#define BLINK_ON   RGB_COLOR_HSB(39,100,75) // Bright Yellow
-#define BLINK_OFF  RGB_COLOR_HSB(273,67,23) // Returns to Previous Color, here it Returns XTRA. Can make multiple "on off"
-#define BLINK_SEQ(ON, OFF, WAIT) \
-  &macro_tap &rgb_ug ON \
-  &macro_wait_time WAIT \
-  &macro_tap &rgb_ug RGB_TOG \
-  &macro_wait_time WAIT \
-  &macro_tap &rgb_ug RGB_TOG \
-  &macro_wait_time WAIT \
-  &macro_tap &rgb_ug OFF \
+#define BLINK_ON   RGB_COLOR_HSB(39,100,75)
+#define BLINK_OFF  RGB_COLOR_HSB(273,67,23)
+#define BLINK_SEQ(ON, OFF, WAIT)                                     \
+  &macro_tap &rgb_ug ON                                              \
+  &macro_wait_time WAIT                                              \
+  &macro_tap &rgb_ug RGB_TOG                                         \
+  &macro_wait_time WAIT                                              \
+  &macro_tap &rgb_ug RGB_TOG                                         \
+  &macro_wait_time WAIT                                              \
+  &macro_tap &rgb_ug OFF
 
-// Use the helpers for structure reference; everything should be streamlined now.
 // Macro builders
-#define MOMENTARY_RGB_MACRO(node, label, layer, on, off) \
-  ZMK_MACRO(node, \
+#define MOMENTARY_RGB_MACRO(node, label, layer, on, off)             \
+  ZMK_MACRO(node,                                                    \
     bindings = <&macro_press>, <&mo layer>, <&macro_tap>, <&rgb_ug on>, \
-               <&macro_pause_for_release>, <&macro_release>, <&mo layer>, \
-               <&macro_tap>, <&rgb_ug off>; \
-    label = label; \
+               <&macro_pause_for_release>, <&macro_release>, <&mo layer>,  \
+               <&macro_tap>, <&rgb_ug off>;                          \
+    label = label;                                                   \
   )
 
-#define TO_RGB_MACRO(node, label, layer, color) \
-  ZMK_MACRO(node, \
-  bindings = <&macro_tap>, <&to layer>, <&macro_tap>, <&rgb_ug color>; \
-  label = label; \
-  )
+#define TO_RGB_MACRO(node, label, layer, color)                      \
+  ZMK_MACRO(node, bindings = <&macro_tap>, <&to layer>, <&macro_tap>, <&rgb_ug color>; label = label;)
 
-#define TO_RGB_PRESS_MACRO(node, label, layer, color) \
-  ZMK_MACRO(node, \
-  bindings = <&macro_tap>, <&to layer>, <&macro_press>, <&rgb_ug color>; \
-  label = label; \
-  )
+#define TO_RGB_PRESS_MACRO(node, label, layer, color)                \
+  ZMK_MACRO(node, bindings = <&macro_tap>, <&to layer>, <&macro_press>, <&rgb_ug color>; label = label;)
 
 // Behavior helper
-#define RGB_HOLD_TAP(node, label, macro_ref) \
-  node: node { compatible = "zmk,behavior-hold-tap"; label = label; \
-    bindings = <&macro_ref>, <&kp>; \
-    #binding-cells = <2>; \
-    tapping-term-ms = <180>; \
-    flavor = "tap-preferred"; \
-    };
+#define RGB_HOLD_TAP(node, label, macro_ref)                         \
+  node: node { compatible = "zmk,behavior-hold-tap"; label = label;  \
+    bindings = <&macro_ref>, <&kp>; #binding-cells = <2>; tapping-term-ms = <180>; flavor = "tap-preferred"; }
 
 // Combo helper
-#define COMBO(name, bind, p1, p2, ...) \
-  name \
-  { bindings = <bind>; \
-  key-positions = <p1 p2>; \
-  layers = <__VA_ARGS__>; \
-  timeout-ms = <50>; \
-  };
+#define COMBO(name, bind, p1, p2, ...)                              \
+  name { bindings = <bind>; key-positions = <p1 p2>; layers = <__VA_ARGS__>; timeout-ms = <50>; }
 
  /{
-  /* Macros come first so behaviors below can reference them */
   macros {
     TO_RGB_MACRO(default_led, "Base",    LAYER_ABC,   RGB_ABC)
     TO_RGB_MACRO(game_led,    "Game",    LAYER_GAME,  RGB_GAME)
-    TO_RGB_MACRO(g2_led,      "Game2",   LAYER_GAME2, RGB_GAME2)
+    TO_RGB_MACRO(g2_led,      "Game2",   LAYER_GAME2, RGB_GAME2)   /* FIXED: use RGB_GAME2, not RGB_G2 */
     TO_RGB_MACRO(t1_led,      "T1",      LAYER_T1,    RGB_T1)
     TO_RGB_MACRO(to_t2_led,   "T2",      LAYER_T2,    RGB_T2)
     TO_RGB_PRESS_MACRO(toglayers_leds, "TGL",  LAYER_TGL,    RGB_TGL)
@@ -148,7 +122,7 @@ LAYERS(COLOR_DEF)
     COMBO(right_par,  &kp RIGHT_PARENTHESIS,19,20, LAYER_ABC);
     COMBO(left_brace, &kp LEFT_BRACE,     27,28, LAYER_ABC);
     COMBO(right_brace,&kp RIGHT_BRACE,    32,31, LAYER_ABC);
-    COMBO(bac,        &kp BACKSLASH,      5,  6,  LAYER_ABC);
+    COMBO(bac,        &kp BACKSLASH,      5,  6, LAYER_ABC);
     COMBO(pipe,       &kp PIPE,           17,18, LAYER_ABC);
     COMBO(gameLayer,  &game_led,           0,11, LAYER_ABC LAYER_TGL LAYER_GAME2);
     COMBO(gameLayer_2_BaseLayer, &default_led, 0,11, LAYER_GAME);
@@ -174,17 +148,20 @@ LAYERS(COLOR_DEF)
     bindings = < &macro_param_1to1 &macro_tap &kp MACRO_PLACEHOLDER BLINK_SEQ(BLINK_ON, BLINK_OFF, 100) >;
   };
 
-  ZMK_MACRO(caps_blink, 
+  caps_blink: caps_blink {
+    compatible = "zmk,behavior-macro";
     label = "CAPS BLINK";
+    #binding-cells = <0>;
     bindings = < &macro_tap &kp CAPS BLINK_SEQ(RGB_COLOR_HSB(200,100,60), RGB_ABC, 80) >;
-  )
+  };
 
-  ZMK_MACRO(num_blink, 
+  num_blink: num_blink {
+    compatible = "zmk,behavior-macro";
     label = "NUM BLINK";
+    #binding-cells = <0>;
     bindings = < &macro_tap &kp KP_NUMLOCK BLINK_SEQ(RGB_COLOR_HSB(0,100,60), RGB_ABC, 80) >;
-  )
+  };
 
-  /* Behaviors moved to the bottom for clarity; forward references above are ok */
   behaviors {
     hm: homerow_mods {
       compatible = "zmk,behavior-hold-tap";
