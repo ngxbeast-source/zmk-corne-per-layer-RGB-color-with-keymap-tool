@@ -61,7 +61,7 @@
   _(TGL,      9, RGB_COLOR_HSB(251,67,50)) \              
   _(T1,      10, RGB_COLOR_HSB(40,100,12)) \              
   _(T2,      11, RGB_COLOR_HSB(85,100,15)) \                 
-  _(T2S1,    12, RGB_COLOR_HSB(82,100,50))                      
+  _(T2S1,    12, RGB_COLOR_HSB(82,100,50))  \                    
 
 #define LAYER_DEF(name, idx, col)  
 #define LAYER_NAME(name) LAYER_##name
@@ -81,7 +81,7 @@ LAYERS(COLOR_DEF)
   &macro_wait_time WAIT \
   &macro_tap &rgb_ug RGB_TOG \
   &macro_wait_time WAIT \
-  &macro_tap &rgb_ug OFF
+  &macro_tap &rgb_ug OFF \
 
 // Use the helpers for structure reference; everything should be streamlined now.
 // Macro builders
@@ -94,19 +94,34 @@ LAYERS(COLOR_DEF)
   )
 
 #define TO_RGB_MACRO(node, label, layer, color) \
-  ZMK_MACRO(node, bindings = <&macro_tap>, <&to layer>, <&macro_tap>, <&rgb_ug color>; label = label;)
+  ZMK_MACRO(node, \
+  bindings = <&macro_tap>, <&to layer>, <&macro_tap>, <&rgb_ug color>; \
+  label = label; \
+  )
 
 #define TO_RGB_PRESS_MACRO(node, label, layer, color) \
-  ZMK_MACRO(node, bindings = <&macro_tap>, <&to layer>, <&macro_press>, <&rgb_ug color>; label = label;)
+  ZMK_MACRO(node, \
+  bindings = <&macro_tap>, <&to layer>, <&macro_press>, <&rgb_ug color>; \
+  label = label; \
+  )
 
 // Behavior helper
 #define RGB_HOLD_TAP(node, label, macro_ref) \
   node: node { compatible = "zmk,behavior-hold-tap"; label = label; \
-    bindings = <&macro_ref>, <&kp>; #binding-cells = <2>; tapping-term-ms = <180>; flavor = "tap-preferred"; }
+    bindings = <&macro_ref>, <&kp>; \
+    #binding-cells = <2>; \
+    tapping-term-ms = <180>; \
+    flavor = "tap-preferred"; \
+    };
 
 // Combo helper
 #define COMBO(name, bind, p1, p2, ...) \
-  name { bindings = <bind>; key-positions = <p1 p2>; layers = <__VA_ARGS__>; timeout-ms = <50>; }
+  name \
+  { bindings = <bind>; \
+  key-positions = <p1 p2>; \
+  layers = <__VA_ARGS__>; \
+  timeout-ms = <50>; \
+  };
 
  /{
   /* Macros come first so behaviors below can reference them */
