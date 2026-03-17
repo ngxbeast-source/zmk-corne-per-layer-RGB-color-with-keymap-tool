@@ -32,7 +32,7 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 - Layer RGB activation uses hold-taps and combo patterns to avoid running macros on simple taps.
 - A CapsLock blink indicator has been implemented (logic can be improved); can extend to NumLock or other indicators.
 - The `config/corne-rgb.dtsi` file should in theory work in any other keyboard since it doesn't affect the key map. We can isolate the RGB functions into one file for easier editing while only worrying about the layers in the .keymap file. (ty AI)
-- **NEW** Tap Dance Blink, CapsLock, And NumLock have been intrigrated. When you "acitvate" NumLock/CapsLock the keyboard will now "flash" to indicate the press. 
+- **NEW** Tap Dance Blink, CapsLock, And NumLock have been intrigrated. When you "acitvate" NumLock/CapsLock using the tap-dance function the keyboard will now "flash" an appropriate color to indicate the press. 
 
 ---
 
