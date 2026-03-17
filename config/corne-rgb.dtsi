@@ -49,19 +49,19 @@
 // Get color codes here https://colorizer.org/
 // Layers + colors (single source of truth)
 #define LAYERS(_) \
-  _(ABC,      0, RGB_COLOR_HSB(19,100,17)) \
-  _(NMRW,     1, RGB_COLOR_HSB(183,45,18)) \
-  _(KPAD,     2, RGB_COLOR_HSB(230,87,26)) \
-  _(XTRA,     3, RGB_COLOR_HSB(273,67,23)) \
-  _(XTR2,     4, RGB_COLOR_HSB(116,67,26)) \
-  _(GAME,     5, RGB_COLOR_HSB(0,100,25)) \
-  _(GFUN,     6, RGB_COLOR_HSB(116,67,50)) \
-  _(GAMETGL,  7, RGB_COLOR_HSB(200,100,60)) \
-  _(GAME2,    8, RGB_COLOR_HSB(73,67,15)) \
-  _(TGL,      9, RGB_COLOR_HSB(251,67,50)) \
-  _(T1,      10, RGB_COLOR_HSB(40,100,12)) \
-  _(T2,      11, RGB_COLOR_HSB(85,100,15)) \
-  _(T2S1,    12, RGB_COLOR_HSB(82,100,50))  \
+  _(ABC,      0, RGB_COLOR_HSB(19,100,17))\
+  _(NMRW,     1, RGB_COLOR_HSB(183,45,18))\
+  _(KPAD,     2, RGB_COLOR_HSB(230,87,26))\
+  _(XTRA,     3, RGB_COLOR_HSB(273,67,23))\
+  _(XTR2,     4, RGB_COLOR_HSB(116,67,26))\
+  _(GAME,     5, RGB_COLOR_HSB(0,100,25))\
+  _(GFUN,     6, RGB_COLOR_HSB(116,67,50))\
+  _(GAMETGL,  7, RGB_COLOR_HSB(200,100,60))\
+  _(GAME2,    8, RGB_COLOR_HSB(73,67,15))\
+  _(TGL,      9, RGB_COLOR_HSB(251,67,50))\
+  _(T1,      10, RGB_COLOR_HSB(40,100,12))\
+  _(T2,      11, RGB_COLOR_HSB(85,100,15))\
+  _(T2S1,    12, RGB_COLOR_HSB(82,100,50))\
 
 #define LAYER_DEF(name, idx, col)  
 #define LAYER_NAME(name) LAYER_##name
