@@ -1,0 +1,219 @@
+/*
+ * ANY new layers go here, each with an assigned color. The helpers below let you
+ * avoid the “standard” ZMK formatting and add RGB logic with a few definitions.
+ *
+ * Refactored Order of the code so you can work from the "Top-Down".
+ *
+ * Order of operations (do these in order):
+ *   1) #define the layer ID (number used in your keymap) to the #define LAYERS(_) section.
+ *   1a) #define the layer color with RGB_COLOR_HSB(H, S, B).
+ *   2) Build the MACRO:
+ *        - Momentary layer RGB:   MOMENTARY_RGB_MACRO(node, "label", LAYER_, NEWCOLOR, DEFAULT_COLOR)
+ *          (Press -> NEWCOLOR on that layer; Release -> DEFAULT_COLOR back on the previous layer)
+ *        - Toggled layer RGB:     TO_RGB_MACRO(node, "label", LAYER_, NEWCOLOR)
+ *          (Tap to switch layers and set NEWCOLOR)
+ *        - Toggle-menu RGB:       TO_RGB_PRESS_MACRO(node, "label", LAYER_, NEWCOLOR)
+ *          (Press to switch; used only by the two menu layers—rarely needed)
+ *   3) For momentary layers, add the HOLD-TAP behavior:
+ *        RGB_HOLD_TAP(node, "label", macro_ref_from_step_2)
+ *        (Tap = normal key you bind later; Hold = runs the RGB macro so the layer
+ *         stays active only while held and shows its NEWCOLOR)
+ *   4) Map the macro/behavior into your keymap or combos.
+ *
+ *
+ *
+ * Making a momentary layer (common case for “sub-layouts”, aka
+ * momentary toggled layers like NMRW, KPAD, XTRA, XTRA2, GFUN, T2S1):
+ *   - Define layer ID and color (steps 1, 1a)
+ *   - MOMENTARY_RGB_MACRO(...) for that layer
+ *   - RGB_HOLD_TAP(...) pointing to that macro
+ *   - Bind the hold-tap in your base layer.
+ *
+ * Making a toggled layer (common for Layers accessed from the "LayerToggle"(GAMETGL, TGL) gateway; such as GAME2, T1, T2):
+ *   - Define layer ID and color
+ *   - TO_RGB_MACRO(...) for that layer
+ *   - Bind the macro to a key or combo; tap to switch and set the color
+ *
+ * Layer roles to keep in mind:
+ *   BaseLayer   = RGBs stay on while "active" (e.g., ABC)
+ *   ToggleLayer = only used to jump to other bases/TOGGLEDLAYER (e.g., the menu layers with PRESS macros)
+ *   Momentary   = active while held (focus for sub-layouts and quick access)
+ * 
+ * NOTES:
+ * ToggleLayer shouldn't be confused with ZMK's &to, we are redefining the definitons for lack of better definitions.
+ * DO NOT HAVE "HIGHER LAYERS" GO TO LOWER LAYERS. (i.e., 12 -> 2)
+ * EVEN IN YOUR .KEYMAP!
+ * IT'S GOOD PRACTICE TO HAVE "SUB-LAYOUTS" BELOW THE "BASE" (e.g., GAME -> GFUN)
+ */
+// STEP 1 & 2: Assign Layers & A Color
+// Get color codes here https://colorizer.org/
+// Layers + colors (single source of truth)
+#define LAYERS(_) \
+  _(ABC,      0, RGB_COLOR_HSB(19,100,17))\
+  _(NMRW,     1, RGB_COLOR_HSB(183,45,18))\
+  _(KPAD,     2, RGB_COLOR_HSB(230,87,26))\
+  _(XTRA,     3, RGB_COLOR_HSB(273,67,23))\
+  _(XTR2,     4, RGB_COLOR_HSB(116,67,26))\
+  _(GAME,     5, RGB_COLOR_HSB(0,100,25))\
+  _(GFUN,     6, RGB_COLOR_HSB(116,67,50))\
+  _(GAMETGL,  7, RGB_COLOR_HSB(200,100,60))\
+  _(GAME2,    8, RGB_COLOR_HSB(73,67,15))\
+  _(TGL,      9, RGB_COLOR_HSB(251,67,50))\
+  _(T1,      10, RGB_COLOR_HSB(40,100,12))\
+  _(T2,      11, RGB_COLOR_HSB(85,100,15))\
+  _(T2S1,    12, RGB_COLOR_HSB(82,100,50))\
+
+#define LAYER_DEF(name, idx, col)  #define LAYER_NAME(name) LAYER##name
+#define COLOR_DEF(name, idx, col)  #define RGB_NAME(name) RGB##name
+LAYERS(LAYER_DEF)
+LAYERS(COLOR_DEF)
+
+// Optional; we dont have to add anything here anymore we can build a separate color now that will run in the same  "blink sequence".
+// Blink helpers
+#define BLINK_ON   RGB_COLOR_HSB(39,100,75) // Bright Yellow
+#define BLINK_OFF  RGB_COLOR_HSB(273,67,23) // Returns to Previous Color, here it Returns XTRA. Can make multiple "on off"
+#define BLINK_SEQ(ON, OFF, WAIT) \
+  &macro_tap &rgb_ug ON \
+  &macro_wait_time WAIT \
+  &macro_tap &rgb_ug RGB_TOG \
+  &macro_wait_time WAIT \
+  &macro_tap &rgb_ug RGB_TOG \
+  &macro_wait_time WAIT \
+  &macro_tap &rgb_ug OFF \
+
+// Use the helpers for structure reference; everything should be streamlined now.
+// Macro builders
+#define MOMENTARY_RGB_MACRO(node, label, layer, on, off) \
+  ZMK_MACRO(node, \
+    bindings = <&macro_press>, <&mo layer>, <&macro_tap>, <&rgb_ug on>, \
+               <&macro_pause_for_release>, <&macro_release>, <&mo layer>, \
+               <&macro_tap>, <&rgb_ug off>; \
+    label = label; \
+  )
+
+#define TO_RGB_MACRO(node, label, layer, color) \
+  ZMK_MACRO(node, \
+  bindings = <&macro_tap>, <&to layer>, <&macro_tap>, <&rgb_ug color>; \
+  label = label; \
+  )
+
+#define TO_RGB_PRESS_MACRO(node, label, layer, color) \
+  ZMK_MACRO(node, \
+  bindings = <&macro_tap>, <&to layer>, <&macro_press>, <&rgb_ug color>; \
+  label = label; \
+  )
+
+// Behavior helper
+#define RGB_HOLD_TAP(node, label, macro_ref) \
+  node: node { compatible = "zmk,behavior-hold-tap"; label = label; \
+    bindings = <&macro_ref>, <&kp>; \
+    #binding-cells = <2>; \
+    tapping-term-ms = <180>; \
+    flavor = "tap-preferred"; \
+    };
+
+// Combo helper
+#define COMBO(name, bind, p1, p2, ...) \
+  name \
+  { bindings = <bind>; \
+  key-positions = <p1 p2>; \
+  layers = <__VA_ARGS__>; \
+  timeout-ms = <50>; \
+  };
+
+ /{
+  /* Macros come first so behaviors below can reference them */
+  macros {
+    TO_RGB_MACRO(default_led, "Base",    LAYER_ABC,   RGB_ABC)
+    TO_RGB_MACRO(game_led,    "Game",    LAYER_GAME,  RGB_GAME)
+    TO_RGB_MACRO(g2_led,      "Game2",   LAYER_GAME2, RGB_GAME2)
+    TO_RGB_MACRO(t1_led,      "T1",      LAYER_T1,    RGB_T1)
+    TO_RGB_MACRO(to_t2_led,   "T2",      LAYER_T2,    RGB_T2)
+    TO_RGB_PRESS_MACRO(toglayers_leds, "TGL",  LAYER_TGL,    RGB_TGL)
+    TO_RGB_PRESS_MACRO(gtgl_led,      "GTGL", LAYER_GAMETGL, RGB_GAMETGL)
+
+    MOMENTARY_RGB_MACRO(xtra2_led, "X2 MO",  LAYER_XTR2, RGB_XTR2, RGB_ABC)
+    MOMENTARY_RGB_MACRO(kpad_led,  "KP MO",  LAYER_KPAD, RGB_KPAD, RGB_ABC)
+    MOMENTARY_RGB_MACRO(xtra_led,  "X MO",   LAYER_XTRA, RGB_XTRA, RGB_ABC)
+    MOMENTARY_RGB_MACRO(nmrw_led,  "NR MO",  LAYER_NMRW, RGB_NMRW, RGB_ABC)
+    MOMENTARY_RGB_MACRO(gfun_led,  "GF MO",  LAYER_GFUN, RGB_GFUN, RGB_GAME)
+    MOMENTARY_RGB_MACRO(t2_s1_led, "T2S1MO", LAYER_T2S1, RGB_T2S1, RGB_T2)
+  };
+
+  combos {
+    compatible = "zmk,combos";
+    COMBO(left_bkt,   &kp LEFT_BRACKET,   4,  3,  LAYER_ABC);
+    COMBO(right_bkt,  &kp RBKT,           7,  8,  LAYER_ABC);
+    COMBO(left_par,   &kp LEFT_PARENTHESIS,15,16, LAYER_ABC);
+    COMBO(right_par,  &kp RIGHT_PARENTHESIS,19,20, LAYER_ABC);
+    COMBO(left_brace, &kp LEFT_BRACE,     27,28, LAYER_ABC);
+    COMBO(right_brace,&kp RIGHT_BRACE,    32,31, LAYER_ABC);
+    COMBO(bac,        &kp BACKSLASH,      5,  6,  LAYER_ABC);
+    COMBO(pipe,       &kp PIPE,           17,18, LAYER_ABC);
+    COMBO(gameLayer,  &game_led,           0,11, LAYER_ABC LAYER_TGL LAYER_GAME2);
+    COMBO(gameLayer_2_BaseLayer, &default_led, 0,11, LAYER_GAME);
+    COMBO(toggleLayer, &toglayers_leds,  38,39, LAYER_ABC LAYER_T1 LAYER_T2);
+    COMBO(toggleLayer_2_defaultLayer, &default_led, 39,38, LAYER_TGL);
+    COMBO(game_toggle, &gtgl_led,        38,39, LAYER_GAME LAYER_GAME2);
+    COMBO(game_toggle_2_game, &game_led, 38,39, LAYER_GAMETGL);
+  };
+
+  td_numcaps: td_numcapsBLINK {
+    compatible = "zmk,behavior-tap-dance";
+    #binding-cells = <0>;
+    tapping-term-ms = <300>;
+    bindings = <&kp LSFT>, <&caps_blink>, <&num_blink>;
+  };
+
+  blnk: blnk {
+    compatible = "zmk,behavior-macro-one-param";
+    label = "BLINK";
+    #binding-cells = <1>;
+    wait-ms = <0>;
+    tap-ms  = <0>;
+    bindings = < &macro_param_1to1 &macro_tap &kp MACRO_PLACEHOLDER BLINK_SEQ(BLINK_ON, BLINK_OFF, 100) >;
+  };
+
+  ZMK_MACRO(caps_blink, 
+    label = "CAPS BLINK";
+    bindings = < &macro_tap &kp CAPS BLINK_SEQ(RGB_COLOR_HSB(200,100,60), RGB_ABC, 80) >;
+  )
+
+  ZMK_MACRO(num_blink, 
+    label = "NUM BLINK";
+    bindings = < &macro_tap &kp KP_NUMLOCK BLINK_SEQ(RGB_COLOR_HSB(0,100,60), RGB_ABC, 80) >;
+  )
+
+  /* Behaviors moved to the bottom for clarity; forward references above are ok */
+  behaviors {
+    hm: homerow_mods {
+      compatible = "zmk,behavior-hold-tap";
+      label = "HM";
+      #binding-cells = <2>;
+      tapping-term-ms = <200>;
+      quick_tap_ms = <0>;
+      flavor = "tap-preferred";
+      bindings = <&kp>, <&kp>;
+      quick-tap-ms = <180>;
+      global-quick-tap;
+    };
+
+    ltq: ltq {
+      compatible = "zmk,behavior-hold-tap";
+      label = "LTQ";
+      bindings = <&mo>, <&kp>;
+      #binding-cells = <2>;
+      tapping-term-ms = <600>;
+      global-quick-tap;
+      quick-tap-ms = <400>;
+    };
+
+    // Momentary layer hold-taps
+    RGB_HOLD_TAP(hold_tap_nmrw, "HT NMRW", nmrw_led)
+    RGB_HOLD_TAP(hold_tap_xtra2,"HT X2",   xtra2_led)
+    RGB_HOLD_TAP(hold_tap_kpad, "HT KP",   kpad_led)
+    RGB_HOLD_TAP(hold_tap_xtra, "HT X",    xtra_led)
+    RGB_HOLD_TAP(hold_tap_gfun, "HT GF",   gfun_led)
+    RGB_HOLD_TAP(hold_tap_t2_s1,"HT T2S1", t2_s1_led)
+  };
+};
