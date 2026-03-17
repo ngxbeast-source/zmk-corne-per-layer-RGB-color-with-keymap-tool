@@ -101,7 +101,7 @@ LAYERS(COLOR_DEF)
         MOMENTARY_RGB_MACRO(gfun_led, "GameLayer Sublayer Momentary LED Macro", LAYER_GFUN, RGB_GFUN, RGB_GAME)
         MOMENTARY_RGB_MACRO(t2_s1_led, "ToggleLayer2 SubLayer1 Momentary LED Macro", LAYER_TGLLR_2_SUBLR_1, RGB_TGLLR_2_SUBLR_1, RGB_TGLLR_2)
         MOMENTARY_RGB_MACRO(t1_s1_led, "ToggleLayer1 Sublayer1 Momentary LED Macro", LAYER_TGLLR_1_SUBLR_1, RGB_TGLLR_1_SUBLR_1, RGB_TGLLR_1)
-        MOMENTARY_RGB_MACRO(g2_s1_led, "GameLayer2 SubLayer1 Momentary LED Macro", LAYER_GAME2_SUBLR1, RGB_GAME2_SUBLLR_1, RGB_GAME2) 
+        MOMENTARY_RGB_MACRO(g2_s1_led, "GameLayer2 SubLayer1 Momentary LED Macro", LAYER_GAME2_SUBLR1, RGB_GAME2_SUBLR_1, RGB_GAME2) 
 
         TO_RGB_MACRO(default_led, "Base Layer LED", LAYER_ABC, RGB_ABC)
         TO_RGB_MACRO(t1_led, "ToggleLayer1 LED", LAYER_TGLLR_1, RGB_TGLLR_1)
