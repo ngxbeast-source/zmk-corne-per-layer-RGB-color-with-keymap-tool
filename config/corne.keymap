@@ -105,7 +105,7 @@
 &none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
 &none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
 &none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
-                     &none  &none  &none    &none  &none  &none
+                     &none  &none  &hold_tap_g2_s1   &none  &none  &none
             >;
 
             label = "G2";
@@ -115,7 +115,7 @@
 &none  &none  &none  &none  &none  &none                      &none  &none  &none  &none  &none  &none
 &none  &none  &none  &none  &none  &none                      &none  &none  &none  &none  &none  &none
 &none  &none  &none  &none  &none  &none                      &none  &none  &none  &none  &none  &none
-                     &none  &none  &hold_tap_t2_s1 0 SPACE    &none  &none  &none
+                     &none  &none  &none    &none  &none  &none
             >;
 
             label = "G2.1";
