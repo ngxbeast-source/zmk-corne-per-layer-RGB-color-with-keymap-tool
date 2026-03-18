@@ -150,7 +150,7 @@
     )
         ZMK_MACRO(f_blinktest,
         label = "F KEYS LAYER BLINK";
-        bindings = <&macro_press &mo LAYER_FKEYS BLINK_SEQ(F_BLINK_ON, RGB_NMRW, 80)>,
+        bindings = <&macro_press &mo LAYER_FKEYS BLINK_SEQ(F_BLINK_ON, RGB_NMRW, 80)>;
     )
     /* ---- STEP 4: BEHAVIORS - HOLD-TAP ---- */
     behaviors {
