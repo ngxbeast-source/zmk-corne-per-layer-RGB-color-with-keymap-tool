@@ -103,7 +103,7 @@ I used Copilot to help modularize and refine the macros and combos. The modular 
 ~~- Optional: document exact combo key positions for common Corne layouts (for clarity).~~
 - I will probably clean up the code more since it's boasting a whooping 700kb of memory.
 - I think I'm "done", most of the "framework" is now there, all that's left is to implement the new structured code onto any new layers.
-- If anyone can think of something I'm open to suggetions but I "think" I maximized the capabilities of the basic upstreamed ZMK RGB functions.  
+- If anyone can think of something I'm open to suggetions but I "think" I maximized the capabilities of the basic 3.0 ZMK RGB functions.  
 
 
 ---
