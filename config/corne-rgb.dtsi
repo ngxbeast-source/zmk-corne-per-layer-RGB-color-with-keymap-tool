@@ -204,9 +204,16 @@
         tapping-term-ms = <300>;
         bindings = <&kp LSFT>, <&caps_blink>, <&num_blink>;
     };
-    td_fkey: td_fkeyBLINK
+    td_fkey: td_fkeyBLINK {
         compatible = "zmk,behavior-tap-dance";
         #binding-cells = <0>;
         tapping-term-ms = <300>;
         bindings = <&kp ESC>, <&f_blink>;
     };
+    td_ctrlA: td_ctrlA {
+        compatible = "zmk,behavior-tap-dance";
+        #binding-cells = <0>;
+        tapping-term-ms = <300>;
+        bindings = <&kp A>, <&kp LC(A)>;
+    };
+ };
