@@ -28,12 +28,24 @@
         nmrw {
             display-name = "NMRW";
             bindings = <
-&kp ESC  &kp N1  &kp N2         &kp N3       &kp N4       &kp N5    &kp N6     &kp N7        &kp N8         &kp N9         &kp N0    &kp BSPC
+&td_fkey  &kp N1  &kp N2         &kp N3       &kp N4       &kp N5    &kp N6     &kp N7        &kp N8         &kp N9         &kp N0    &kp BSPC
 &trans   &none   &kp PAGE_DOWN  &kp UP       &kp PAGE_UP  &none     &kp MINUS  &kp EQUAL     &none          &none          &kp SQT   &kp GRAVE
 &trans   &none   &kp LEFT       &kp DOWN     &kp RIGHT    &none     &kp LBKT   &kp RBKT      &kp RS(PG_UP)  &kp RS(PG_DN)  &kp BSLH  &kp DEL
                                 &bootloader  &none        &none     &trans     &kp LC(LEFT)  &kp LC(RIGHT)
             >;
         };
+        FKEY {
+            display-name = "FKEY";
+            bindings = <
+&trans  &kp F1  &kp F2  &kp F3  &kp F4  &kp F5    &kp F6  &kp F7  &kp F8  &kp F9  &kp F10 &kp F11
+&trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans
+&trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans  
+                     &none  &trans  &trans    &trans  &trans  &trans
+            >;
+
+            label = "FKEY";
+        };
+
 
         k_pd {
             display-name = "KPAD";

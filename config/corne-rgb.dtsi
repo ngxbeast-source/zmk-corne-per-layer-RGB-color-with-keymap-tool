@@ -1,19 +1,20 @@
 /* ---- STEP 1: DEFINE LAYERS ---- */
 #define LAYER_ABC 0
 #define LAYER_NMRW 1
-#define LAYER_KPAD 2
-#define LAYER_XTRA 3
-#define LAYER_XTR2 4
-#define LAYER_GAME 5
-#define LAYER_GFUN 6
-#define LAYER_GAMETGL 7
-#define LAYER_GAME2 8
-#define LAYER_GAME2_SUBLR1 9
-#define LAYER_TGL 10
-#define LAYER_TGLLR_1 11
-#define LAYER_TGLLR_1_SUBLR_1 12
-#define LAYER_TGLLR_2 13
-#define LAYER_TGLLR_2_SUBLR_1 14
+#define LAYER_FKEYS 2
+#define LAYER_KPAD 3
+#define LAYER_XTRA 4
+#define LAYER_XTR2 5
+#define LAYER_GAME 6
+#define LAYER_GFUN 7
+#define LAYER_GAMETGL 8
+#define LAYER_GAME2 9
+#define LAYER_GAME2_SUBLR1 10
+#define LAYER_TGL 11
+#define LAYER_TGLLR_1 12
+#define LAYER_TGLLR_1_SUBLR_1 13
+#define LAYER_TGLLR_2 14
+#define LAYER_TGLLR_2_SUBLR_1 15
 
 /* ---- STEP 1a: DEFINE COLORS ---- */
 #define RGB_ABC         RGB_COLOR_HSB(19,100,17)      /* BASE        - Dim Yellow */
@@ -34,11 +35,9 @@
 
 /* ---- (OPTIONAL) BLINK HELPERS ---- */
 #define BLINK_ON     RGB_COLOR_HSB(39,100,75)    /* Blink On - Bright Yellow */
-#define BLINK_OFF    RGB_COLOR_HSB(273,67,23)    /* Blink Off - Light Purple */
 #define N_BLINK_ON   RGB_COLOR_HSB(0,100,60)     /* Num On - Bright Red */
-#define N_BLINK_OFF  RGB_COLOR_HSB(19,100,17)    /* Num Off - Yellow */
 #define C_BLINK_ON   RGB_COLOR_HSB(200,100,60)   /* Caps On - Cyan */
-#define C_BLINK_OFF  RGB_COLOR_HSB(19,100,17)    /* Caps Off - Yellow */
+#define F_BLINK_ON   RGB_COLOR_HSB(73,67,60)     /* Functions Mo = Bright Emerald */
 #define BLINK_SEQ(ON, OFF, WAIT) \
     &macro_tap &rgb_ug ON \
     &macro_wait_time WAIT \
@@ -132,16 +131,20 @@
         bindings = <
             &macro_param_1to1
             &macro_tap &kp MACRO_PLACEHOLDER
-            BLINK_SEQ(BLINK_ON, BLINK_OFF, 80)
+            BLINK_SEQ(BLINK_ON, RGB_XTRA, 80)
         >;
     };
     ZMK_MACRO(caps_blink,
         label = "CAPS TOGGLE + BLINK";
-        bindings = <&macro_tap &kp CAPS BLINK_SEQ(C_BLINK_ON, C_BLINK_OFF, 80)>;
+        bindings = <&macro_tap &kp CAPS BLINK_SEQ(C_BLINK_ON, RGB_ABC, 80)>;
     )
     ZMK_MACRO(num_blink,
         label = "NUM TOGGLE + BLINK";
-        bindings = <&macro_tap &kp KP_NUMLOCK BLINK_SEQ(N_BLINK_ON, N_BLINK_OFF, 80)>;
+        bindings = <&macro_tap &kp KP_NUMLOCK BLINK_SEQ(N_BLINK_ON, RGB_ABC, 80)>;
+    )
+    ZMK_MACRO(f_blink,
+        label = "F KEYS BLINK";
+        bindings = <&macro_tap &mo LAYER_FKEYS BLINK_SEQ(F_BLINK_ON, RGB_NMRW, 80)>;
     )
     /* ---- STEP 4: BEHAVIORS - HOLD-TAP ---- */
     behaviors {
@@ -201,4 +204,9 @@
         tapping-term-ms = <300>;
         bindings = <&kp LSFT>, <&caps_blink>, <&num_blink>;
     };
-};
+    td_fkey: td_fkeyBLINK
+        compatible = "zmk,behavior-tap-dance";
+        #binding-cells = <0>;
+        tapping-term-ms = <300>;
+        bindings = <&kp ESC>, <&f_blink>;
+    };
