@@ -49,7 +49,7 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 - Layer color changes are triggered by macros in conjunction with `hold-taps`. This prevents unintended LED changes on simple taps.
 - Hold-tap behavior is used to simulate home-row-mod behaviour for layer activation, while RGB macros run only when the layer is actually activated.
 - Combos are used for deliberate multi-key activation (for example, the game layer requires a simultaneous press of two keys on separate halves).
-- Further instructions for implementing the code can be found in the `"corne-rgb.dtsi"` file, I tried my best to format it to be understandable, my peanutbrain was running on bong water, cigarettes, and solder fumes at 3AM (much liek now) 
+- Further instructions for implementing the code can be found in the `"How_to_use_corne-rgb.dtsi"` file, I tried my best to format it to be understandable, my peanutbrain was running on bong water, cigarettes, and solder fumes at 3AM (much liek now) 
 
 ---
 
