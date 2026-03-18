@@ -51,8 +51,7 @@
     &macro_tap &rgb_ug RGB_TOG \
     &macro_wait_time WAIT \
     &macro_tap &rgb_ug OFF
-
-/* ----MACRO HELPERS (Templates for building new macros) ---- */
+/* ----MACRO HELPERS ---- */
 #define MOMENTARY_RGB_MACRO(node_name, node_label, layer, active_color, release_color) \
         ZMK_MACRO(node_name, \
             bindings = \
@@ -67,7 +66,6 @@
                 <&rgb_ug release_color>; \
             label = node_label; \
         )
-
 #define TO_RGB_MACRO(node_name, node_label, layer, color) \
         ZMK_MACRO(node_name, \
             bindings = \
@@ -77,7 +75,6 @@
                 <&rgb_ug color>; \
             label = node_label; \
         )
-
 #define TO_RGB_PRESS_MACRO(node_name, node_label, layer, color) \
         ZMK_MACRO(node_name, \
             bindings = \
@@ -87,7 +84,6 @@
                 <&rgb_ug color>; \
             label = node_label; \
         )   
-
 /* ---- HOLD-TAP BEHAVIOR TEMPLATE ---- */
 #define RGB_HOLD_TAP(node_name, node_label, macro_ref) \
         node_name: node_name { \
@@ -98,8 +94,7 @@
             tapping-term-ms = <200>; \
             flavor = "tap-preferred"; \
         };
-
-/* ---- STEP 5: (optional) COMBO HELPER ---- */
+/* ---- (optional) COMBO HELPER ---- */
 #define COMBO(name, bind, p1, p2, ...) \
     name { bindings = <bind>; key-positions = <p1 p2>; layers = <__VA_ARGS__>; timeout-ms = <50>; }
  /{
@@ -127,8 +122,7 @@
         TO_RGB_PRESS_MACRO(toglayers_leds, "ToggleLayer LED", LAYER_TGL, RGB_TGL)
         TO_RGB_PRESS_MACRO(gtgl_led, "gametoggle LED Macro", LAYER_GAMETGL, RGB_GAMETGL)
     };
-
-    /* ---- OPTIONAL: BLINK/STATUS MACROS ---- */
+    /* ---- (optional) BLINK/STATUS MACROS ---- */
     blnk: blnk {
         compatible = "zmk,behavior-macro-one-param";
         label = "BLINK (key param)";
@@ -149,9 +143,7 @@
         label = "NUM TOGGLE + BLINK";
         bindings = <&macro_tap &kp KP_NUMLOCK BLINK_SEQ(N_BLINK_ON, N_BLINK_OFF, 80)>;
     )
-
     /* ---- STEP 4: BEHAVIORS - HOLD-TAP ---- */
-/* Build behaviors for momentary layers here using the macros you built above */
     behaviors {
         RGB_HOLD_TAP(hold_tap_nmrw, "HOLD_TAP_NMRW", nmrw_led)
         RGB_HOLD_TAP(hold_tap_xtra2, "HOLD_TAP_XTRA2", xtra2_led)
@@ -183,7 +175,6 @@
             quick-tap-ms = <400>;
         };
     };
-
     /* ---- (OPTIONAL) STEP 5: COMBOS ---- */
     combos {
         compatible = "zmk,combos";
@@ -203,7 +194,6 @@
         COMBO(game_toggle, &gtgl_led,        38,39, LAYER_GAME LAYER_GAME2);
         COMBO(game_toggle_2_game, &game_led, 38,39, LAYER_GAMETGL);
     };
-
     /* Tap dance */
     td_numcaps: td_numcapsBLINK {
         compatible = "zmk,behavior-tap-dance";
