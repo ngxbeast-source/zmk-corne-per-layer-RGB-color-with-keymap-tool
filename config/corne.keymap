@@ -15,7 +15,7 @@
     keymap {
         compatible = "zmk,keymap";
 
-        abc {
+        abc_0 {
             display-name = "ABC";
             bindings = <
 &kp ESC         &kp Q  &kp W           &kp E        &kp R                   &kp T                     &kp Y                 &kp U                   &kp I          &kp O            &kp P               &kp BSPC
@@ -25,7 +25,7 @@
             >;
         };
 
-        nmrw {
+        nmrw_1 {
             display-name = "NMRW";
             bindings = <
 &td_fkey  &kp N1  &kp N2         &kp N3       &kp N4       &kp N5    &kp N6     &kp N7        &kp N8         &kp N9         &kp N0    &kp BSPC
@@ -34,7 +34,7 @@
                                 &bootloader  &none        &none     &trans     &kp LC(LEFT)  &kp LC(RIGHT)
             >;
         };
-        FKEY {
+        FKEY_2 {
             display-name = "FKEY";
             bindings = <
 &trans  &kp F1  &kp F2  &kp F3  &kp F4  &kp F5    &kp F6  &kp F7  &kp F8  &kp F9  &kp F10 &kp F11
@@ -47,7 +47,7 @@
         };
 
 
-        k_pd {
+        k_pd_3 {
             display-name = "KPAD";
             bindings = <
 &kp ESCAPE         &none      &kp F2            &none       &none              &kp F5           &kp KP_N7       &kp KP_N8  &kp KP_N9  &none     &none     &kp BSPC
@@ -57,7 +57,7 @@
             >;
         };
 
-        xtra {
+        xtra_4 {
             display-name = "XTRA";
             bindings = <
 &bt BT_CLR          &bt BT_SEL 0     &bt BT_SEL 1      &bt BT_SEL 2  &bt BT_SEL 3    &none             &rgb_ug RGB_EFF  &none            &hm C_PLAY_PAUSE C_REWIND  &kp C_FAST_FORWARD  &none     &rgb_ug RGB_TOG
@@ -67,7 +67,7 @@
             >;
         };
 
-        xtr2 {
+        xtr2_5 {
             display-name = "XTR2";
             bindings = <
 &none  &none  &none  &none  &none  &none    &none  &none  &none        &none  &none  &none
@@ -79,7 +79,7 @@
             label = "xtr2";
         };
 
-        game {
+        game_6 {
             display-name = "GAME";
             bindings = <
 &kp TAB    &kp Q  &kp W  &kp E         &kp R      &kp T                     &kp Y  &kp U  &kp I            &kp O              &kp P     &kp BSPC
@@ -89,7 +89,7 @@
             >;
         };
 
-        gfun {
+        gfun_7 {
             display-name = "GFUN";
             bindings = <
 &kp ESCAPE     &kp N1  &kp W   &kp N2      &kp N3  &none    &kp KP_N7   &kp KP_N8  &kp KP_N9     &kp KP_DIVIDE  &kp KP_MULTIPLY  &kp KP_MINUS
@@ -99,7 +99,7 @@
             >;
         };
 
-        game_toggle {
+        game_toggle_8 {
             display-name = "GTGL";
             bindings = <
 &g2_led  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
@@ -111,7 +111,7 @@
             label = "GTGL";
         };
 
-        game2 {
+        game2_9 {
             display-name = "GME2";
             bindings = <
 &none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
@@ -122,7 +122,7 @@
 
             label = "G2";
         };
-        game2_sublayer1 {
+        game2_sublayer1_10 {
             bindings = <
 &none  &none  &none  &none  &none  &none                      &none  &none  &none  &none  &none  &none
 &none  &none  &none  &none  &none  &none                      &none  &none  &none  &none  &none  &none
@@ -133,7 +133,7 @@
             label = "G2.1";
         };
 
-        Toggle_Layers {
+        Toggle_Layers_11 {
             bindings = <
 &t1_led  &to_t2_led  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
 &none    &none       &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
@@ -144,7 +144,7 @@
             label = "TOG";
         };
 
-        toggle_1 {
+        toggle_1_12 {
             bindings = <
 &none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
 &none  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
@@ -154,7 +154,7 @@
 
             label = "T1";
         };
-        toggle1_sublayer1 {
+        toggle1_sublayer1_13 {
             bindings = <
 &trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans
 &trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans
@@ -164,7 +164,7 @@
 
             label = "T1.1";
         };
-        toggle_2 {
+        toggle_2_14 {
             bindings = <
 &none  &none  &none  &none  &none  &none                      &none  &none  &none  &none  &none  &none
 &none  &none  &none  &none  &none  &none                      &none  &none  &none  &none  &none  &none
@@ -175,7 +175,7 @@
             label = "T2";
         };
 
-        toggle2_sublayer1 {
+        toggle2_sublayer1_15 {
             bindings = <
 &trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans
 &trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans  &trans
@@ -186,12 +186,12 @@
             label = "T2.1";
         };
 
-        extra1 { status = "reserved"; };
+        extra1_16 { status = "reserved"; };
 
-        extra2 { status = "reserved"; };
+        extra2_17 { status = "reserved"; };
 
-        extra3 { status = "reserved"; };
+        extra3_18 { status = "reserved"; };
 
-        extra4 { status = "reserved"; };
+        extra4_19 { status = "reserved"; };
     };
 };
