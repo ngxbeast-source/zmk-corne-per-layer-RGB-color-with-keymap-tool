@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a **VERY AMATEUR** attempt at implementing "Per-layer RGB colors into the firmware". There were a couple of roadblocks, but after much further reading, and thought, I came up with my own, albeit very messy, firmware utilizing macros and hold-taps to get this effect. This was just a small weekend project to help me understand ZMK a little bit more and to have a little "fun" with my build. I have the macros and hold-taps the way I like it, you're free to change the code if you wish, I'm sure there are ways I could simplify this code even more since I dont really know much at all; but for now it functions. This is more explained for someone, like myself, who has no background in ANY coding.
+This is a **VERY AMATEUR** attempt at implementing "Per-layer RGB colors into the firmware" (NOT PER-KEY, 1 COLOR PER LAYER). There were a couple of roadblocks, but after much further reading, and thought, I came up with my own, albeit very messy, firmware utilizing macros and hold-taps to get this effect. This was just a small weekend project to help me understand ZMK a little bit more and to have a little "fun" with my build. I have the macros and hold-taps the way I like it, you're free to change the code if you wish, I'm sure there are ways I could simplify this code even more since I dont really know much at all; but for now it functions. This is more explained for someone, like myself, who has no background in ANY coding.
 ## Attribution
 - Thanks to Nick Coutsos with his keymap editor (https://nickcoutsos.github.io/keymap-editor/) for helping me create macros and hold-taps. His website helped a total noob like myself the "right" way to structure this for my first time ever digging into code.
 - And surprisingly CoPilot as well, for being able to work with my framework and show me some new tricks that I'm sure more seasoned veteran coders know about.
@@ -49,7 +49,7 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 - Layer color changes are triggered by macros in conjunction with `hold-taps`. This prevents unintended LED changes on simple taps.
 - Hold-tap behavior is used to simulate home-row-mod behaviour for layer activation, while RGB macros run only when the layer is actually activated.
 - Combos are used for deliberate multi-key activation (for example, the game layer requires a simultaneous press of two keys on separate halves).
-- Further instructions for implementing the code can be found in the `"corne-rgb.dtsi"` file, I tried my best to format it to be understandable, my peanutbrain was running on bong water, cigarettes, and solder fumes at 3AM (much liek now) 
+- Further instructions for implementing the code can be found in the `"How_to_use_corne-rgb.dtsi"` file, I tried my best to format it to be understandable, my peanutbrain was running on bong water, cigarettes, and solder fumes at 3AM (much liek now) 
 
 ---
 
@@ -64,7 +64,7 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 ---
 
 ## "Toggle-Layer" Layer System
-- How to use: press the inward thumb keys to enter the Toggle Layer on both halves, then press a top-row key (or other assigned key) to switch to one of the toggled sub-layers. Press the gateway combo again to return to the Toggle Layer, then press it a second time to go back to the Base Layer.
+- How to use: press the inward thumb keys to enter the Toggle Layer on both halves, then press a top-row key (or other assigned key) to switch to one of the toggled sub-layers. Press the gateway combo again to return to the Toggle Layer, then press it a second time to go back to the Base Layer. 
 
 - A separate "Toggle Layer" is activated by a pair of inward thumb keys (both halves). This acts as the gateway to multiple "Toggeled Layers".
 - Toggled layers selected from the gateway can house their own "Sub-layer" with an individual RGB color. These sub-layers let you create dedicated small sub-layouts (each with its own distinct RGB setting), think momentary layers.
