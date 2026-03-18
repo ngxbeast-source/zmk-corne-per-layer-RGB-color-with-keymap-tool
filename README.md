@@ -72,7 +72,7 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 
 - When making a Toggled Layer it's ***IMPORTANT*** that you add all sub-layouts, you'll be using in the Toggled Layer, BELOW the Toggled Layer! To avoid any "layer meshing"; Layers can get "stuck" on top of each other [See zmk.dev #Layers(https://zmk.dev/docs/keymaps#layers)]
 - or, look at my layout/keymap, or layer numbers in `corne-rgb.dtsi` for an idea of how I pathed the layers.
-  - You wouldnt have Layer 12 with a key to go to layer 2, since there could be layers inbetween that may "bleed" key presses through the layer you are trying to "dig" to. It's good practice to put any "sub-layouts" below  the toggled layer in your .keymap. Layer12 is the new "Sub-Base Layer", so Layer13 should be it's "sub-layout" in the sequence.
+  - You wouldnt have Layer 12 with a key to go to layer 2, since there could be layers inbetween that may "bleed" key presses through the layer you are trying to "dig" to; or vice versa. It's good practice to put any "sub-layouts" below the toggled layer in your .keymap. Layer12 is the new "Sub-Base Layer", so Layer13 should be it's "sub-layout" in the sequence.
 
 ![combos](corneCombos.png)
   - Red Bring Us To the Game Layer **(MUST BE ON BASE LAYER TO ACCESS)**
