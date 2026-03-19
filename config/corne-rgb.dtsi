@@ -190,7 +190,7 @@
             #binding-cells = <2>;
             flavor = "tap-preferred";
             tapping-term-ms = <300>;
-            bindings = <&f_blink2>, <&kp ESC>;
+            bindings = <&f_blink2 &kp ESC>;
             display-name = "'Tap-Hold' For Functions Blink";
         };
     };
