@@ -147,6 +147,12 @@
         bindings = <&macro_press &mo LAYER_FKEYS BLINK_SEQ(F_BLINK_ON, RGB_NMRW, 80)>,
                    <&macro_pause_for_release>,
                    <&macro_release &mo LAYER_FKEYS>;
+        )
+    ZMK_MACRO(f_blink2,
+        label = "F KEYS BLINK2";
+        bindings = <&macro_press &mo LAYER_FKEYS BLINK_SEQ(F_BLINK_ON, RGB_NMRW, 80)>,
+                   <&macro_pause_for_release>,
+                   <&macro_release &mo LAYER_FKEYS>;
     )
     /* ---- STEP 4: BEHAVIORS - HOLD-TAP ---- */
     behaviors {
@@ -178,6 +184,14 @@
             tapping-term-ms = <600>;
             global-quick-tap;
             quick-tap-ms = <400>;
+        };
+            f_blink_test:  {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "tap-preferred";
+            tapping-term-ms = <300>;
+            bindings = <&f_blink2>, <&kp ESC>;
+            display-name = "'Tap-Hold' For KPs";
         };
     };
     /* ---- (OPTIONAL) STEP 5: COMBOS ---- */
@@ -211,11 +225,5 @@
         #binding-cells = <0>;
         tapping-term-ms = <300>;
         bindings = <&kp ESC>, <&f_blink>;
-    };
-    td_ctrlA: td_ctrlA {
-        compatible = "zmk,behavior-tap-dance";
-        #binding-cells = <0>;
-        tapping-term-ms = <300>;
-        bindings = <&kp A>, <&kp LC(A)>;
     };
  };
