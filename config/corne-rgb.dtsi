@@ -25,19 +25,21 @@
 #define RGB_GAMETGL     RGB_COLOR_HSB(200,100,60)     /* TOGGLE-LAYER- Cyan*/
 #define RGB_GAME2       RGB_COLOR_HSB(73,67,15)       /* SUB-BASE    - Dim Emerald */
 #define RGB_GFUN        RGB_COLOR_HSB(116,67,50)      /* SUB-LAYOUT  - Bright Yellow */
-#define RGB_XTRA2       RGB_COLOR_HSB(116,67,26)      /* SUB-LAYOUT  - Pale Green */
+#define RGB_XTR2       RGB_COLOR_HSB(116,67,26)      /* SUB-LAYOUT  - Pale Green */
 #define RGB_TGL         RGB_COLOR_HSB(251,67,60)      /* TOGGLE-LAYER- Indigo */
 #define RGB_TGLLR_1     RGB_COLOR_HSB(40,100,12)      /* SUB-BASE  - Yellow */
 #define RGB_TGLLR_2     RGB_COLOR_HSB(85,100,15)      /* SUB-BASE  - Lime */
 #define RGB_TGLLR_2_SUBLR_1 RGB_COLOR_HSB(82,100,20) /* SUB-LAYOUT  - Bright Lime */
 #define RGB_TGLLR_1_SUBLR_1 RGB_COLOR_HSB(58,45,20) /* SUB-LAYOUT */
-#define RGB_GAME2_SUBLR_1 RGB_COLOR_HSB(67,55,20)   /* SUB-LAYOUT */
+#define RGB_GAME2_SUBLR1 RGB_COLOR_HSB(67,55,20)   /* SUB-LAYOUT */
 
 /* ---- (OPTIONAL) BLINK HELPERS ---- */
 #define BLINK_ON     RGB_COLOR_HSB(39,100,75)    /* Blink On - Bright Yellow */
 #define N_BLINK_ON   RGB_COLOR_HSB(0,100,60)     /* Num On - Bright Red */
 #define C_BLINK_ON   RGB_COLOR_HSB(200,100,60)   /* Caps On - Cyan */
-#define F_BLINK_ON   RGB_COLOR_HSB(73,67,60)     /* Functions Mo = Bright Emerald */
+
+#define F_BLINK_ON   RGB_COLOR_HSB(73,67,60)     /* Functions - Bright Emerald */
+
 #define BLINK_SEQ(ON, OFF, WAIT) \
     &macro_tap &rgb_ug ON \
     &macro_wait_time WAIT \
@@ -102,14 +104,14 @@
         /* Toggled and momentary macros for RGB layers */
         // Momentary Layers
         TO_RGB_MACRO(game_led, "GameLayer LED Macro", LAYER_GAME, RGB_GAME)
-        MOMENTARY_RGB_MACRO(xtra2_led, "xtra2Layer Momentary LED Macro", LAYER_XTR2, RGB_XTRA2, RGB_ABC)
+        MOMENTARY_RGB_MACRO(xtra2_led, "xtra2Layer Momentary LED Macro", LAYER_XTR2, RGB_XTR2, RGB_ABC)
         MOMENTARY_RGB_MACRO(kpad_led, "KeyPadLayer Momentary LED Macro", LAYER_KPAD, RGB_KPAD, RGB_ABC)
         MOMENTARY_RGB_MACRO(xtra_led, "ExtraLayer Momentary LED Macro", LAYER_XTRA, RGB_XTRA, RGB_ABC)
         MOMENTARY_RGB_MACRO(nmrw_led, "NumberRowLayer Momentary LED Macro", LAYER_NMRW, RGB_NMRW, RGB_ABC)
         MOMENTARY_RGB_MACRO(gfun_led, "GameLayer Sublayer Momentary LED Macro", LAYER_GFUN, RGB_GFUN, RGB_GAME)
         MOMENTARY_RGB_MACRO(t2_s1_led, "ToggleLayer2 SubLayer1 Momentary LED Macro", LAYER_TGLLR_2_SUBLR_1, RGB_TGLLR_2_SUBLR_1, RGB_TGLLR_2)
         MOMENTARY_RGB_MACRO(t1_s1_led, "ToggleLayer1 Sublayer1 Momentary LED Macro", LAYER_TGLLR_1_SUBLR_1, RGB_TGLLR_1_SUBLR_1, RGB_TGLLR_1)
-        MOMENTARY_RGB_MACRO(g2_s1_led, "GameLayer2 SubLayer1 Momentary LED Macro", LAYER_GAME2_SUBLR1, RGB_GAME2_SUBLR_1, RGB_GAME2) 
+        MOMENTARY_RGB_MACRO(g2_s1_led, "GameLayer2 SubLayer1 Momentary LED Macro", LAYER_GAME2_SUBLR1, RGB_GAME2_SUBLR1, RGB_GAME2) 
 
         //TOGGLED Layers
         TO_RGB_MACRO(default_led, "Base Layer LED", LAYER_ABC, RGB_ABC)
@@ -117,7 +119,7 @@
         TO_RGB_MACRO(to_t2_led, "ToggleLayer2 LED", LAYER_TGLLR_2, RGB_TGLLR_2)
         TO_RGB_MACRO(g2_led, "Game2 LED Macro", LAYER_GAME2, RGB_GAME2)
         
-        TO_RGB_MACRO(to_g2_s1_led, "Toggle Game2 SubLayer1 LED", LAYER_GAME2_SUBLR1, RGB_GAME2_SUBLR_1)
+        TO_RGB_MACRO(to_g2_s1_led, "Toggle Game2 SubLayer1 LED", LAYER_GAME2_SUBLR1, RGB_GAME2_SUBLR1)
         TO_RGB_MACRO(to_g2_led, "Toggle Game2 LED", LAYER_GAME2, RGB_GAME2)
 
         //Toggle Layers/Gateways
@@ -151,12 +153,6 @@
                    <&macro_pause_for_release>,
                    <&macro_release &mo LAYER_FKEYS>;
     )
-    ZMK_MACRO(f_blink2,
-        label = "F KEYS BLINK2";
-        bindings = <&macro_press &mo LAYER_FKEYS BLINK_SEQ(F_BLINK_ON, RGB_NMRW, 80)>,
-                   <&macro_pause_for_release>,
-                   <&macro_release &mo LAYER_FKEYS>;
-    )
     /* ---- STEP 4: BEHAVIORS - HOLD-TAP ---- */
     behaviors {
         RGB_HOLD_TAP(hold_tap_nmrw, "HOLD_TAP_NMRW", nmrw_led)
@@ -168,7 +164,7 @@
         RGB_HOLD_TAP(hold_tap_g2_s1, "HOLD_TAP_GAME2_SUBLAYER1", g2_s1_led)
         RGB_HOLD_TAP(hold_tap_t1_s1, "HOLD_TAP_TOGGLELAYER1_SUBLAYER1", t1_s1_led)
 
-        RGB_HOLD_TAP(f_blink_test, "f blink test", f_blink2)
+        RGB_HOLD_TAP(f_blink_test, "f blink test", f_blink)
 
         hm: homerow_mods {
             compatible = "zmk,behavior-hold-tap";
@@ -216,11 +212,5 @@
         #binding-cells = <0>;
         tapping-term-ms = <300>;
         bindings = <&kp LSFT>, <&caps_blink>, <&num_blink>;
-    };
-    td_fkey: td_fkeyBLINK {
-        compatible = "zmk,behavior-tap-dance";
-        #binding-cells = <0>;
-        tapping-term-ms = <300>;
-        bindings = <&kp ESC>, <&f_blink>;
     };
  };
