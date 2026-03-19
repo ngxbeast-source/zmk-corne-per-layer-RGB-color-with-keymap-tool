@@ -187,10 +187,10 @@
         };
             f_blink_test: f_blink_test {
             compatible = "zmk,behavior-hold-tap";
-            #binding-cells = <2>;
+            #binding-cells = <0>;
             flavor = "tap-preferred";
             tapping-term-ms = <300>;
-            bindings = <&f_blink2 &kp ESC>;
+            bindings = <&f_blink2>, <&kp ESC>;
             display-name = "'Tap-Hold' For Functions Blink";
         };
     };
