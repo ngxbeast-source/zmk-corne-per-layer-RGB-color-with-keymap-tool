@@ -165,6 +165,8 @@
         RGB_HOLD_TAP(hold_tap_g2_s1, "HOLD_TAP_GAME2_SUBLAYER1", g2_s1_led)
         RGB_HOLD_TAP(hold_tap_t1_s1, "HOLD_TAP_TOGGLELAYER1_SUBLAYER1", t1_s1_led)
 
+        RGB_HOLD_TAP(f_blink_test, "f blink test", f_blink2)
+
         hm: homerow_mods {
             compatible = "zmk,behavior-hold-tap";
             label = "HOMEROW_MODS";
@@ -184,14 +186,6 @@
             tapping-term-ms = <600>;
             global-quick-tap;
             quick-tap-ms = <400>;
-        };
-            f_blink_test: f_blink_test {
-            compatible = "zmk,behavior-hold-tap";
-            #binding-cells = <0>;
-            flavor = "tap-preferred";
-            tapping-term-ms = <300>;
-            bindings = <&f_blink2>, <&kp ESC>;
-            display-name = "'Tap-Hold' For Functions Blink";
         };
     };
     /* ---- (OPTIONAL) STEP 5: COMBOS ---- */
