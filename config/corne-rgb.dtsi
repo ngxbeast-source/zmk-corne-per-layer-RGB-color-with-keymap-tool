@@ -116,6 +116,9 @@
         TO_RGB_MACRO(t1_led, "ToggleLayer1 LED", LAYER_TGLLR_1, RGB_TGLLR_1)
         TO_RGB_MACRO(to_t2_led, "ToggleLayer2 LED", LAYER_TGLLR_2, RGB_TGLLR_2)
         TO_RGB_MACRO(g2_led, "Game2 LED Macro", LAYER_GAME2, RGB_GAME2)
+        
+        TO_RGB_MACRO(to_g2_s1_led, "Toggle Game2 SubLayer1 LED", LAYER_GAME2_SUBLR1, RGB_GAME2_SUBLR_1)
+        TO_RGB_MACR(to_g2_led, "Toggle Game2 LED', LAYER_GAME2, RGB_GAME2)
 
         //Toggle Layers/Gateways
         TO_RGB_PRESS_MACRO(toglayers_leds, "ToggleLayer LED", LAYER_TGL, RGB_TGL)
