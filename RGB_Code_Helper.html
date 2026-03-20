@@ -106,8 +106,8 @@
     .km-output { width: 420px; min-width: 260px; max-width: 700px; background: var(--output-bg); display: flex; flex-direction: column; }
 
     /* SVG keyboard */
-    .keyboard-container { background: var(--svg-bg); border-radius: 10px; border: 1px solid var(--border); padding: 1em; margin-bottom: 0.7em; overflow: visible; }
-    .keyboard-svg { width: 100%; display: block; }
+    .keyboard-container { background: var(--svg-bg); border-radius: 10px; border: 1px solid var(--border); padding: 1em; margin-bottom: 0.7em; overflow: hidden; }
+    .keyboard-svg { width: 100%; max-height: 340px; display: block; margin: 0 auto; }
     .keyboard-svg .key-group { cursor: pointer; }
     .keyboard-svg .key-rect { fill: var(--key-bg); stroke: var(--key-border); stroke-width: 1.5; rx: 4; ry: 4; transition: fill 0.1s, stroke 0.1s; }
     .keyboard-svg .key-group:hover .key-rect { fill: var(--key-hover); stroke: var(--accent); }
@@ -482,6 +482,7 @@
           <div class="input-row" style="margin-bottom:0.3em;">
             <button id="kmLoadLayoutBtn">Load Layout JSON</button>
             <button id="kmUseDefaultLayoutBtn">Use Default Corne</button>
+            <button id="kmUseLotus58Btn">Use Lotus58</button>
             <span id="kmLayoutStatus" class="status-msg" style="display:none;"></span>
           </div>
           <textarea id="kmKeymapPaste" rows="6" placeholder="Paste your .keymap file content here..."></textarea>
@@ -1059,6 +1060,42 @@ var DEFAULT_CORNE_LAYOUT = {
 };
 
 // ================================================
+// DEFAULT LOTUS58 LAYOUT (60 keys: 58 + 2 encoders)
+// ================================================
+var DEFAULT_LOTUS58_LAYOUT = {
+  "id": "lotus58",
+  "layouts": {
+    "default_layout": {
+      "layout": [
+        {"row":0,"col":0,"x":0,"y":0.52},{"row":0,"col":1,"x":1,"y":0.26},{"row":0,"col":2,"x":2,"y":0},
+        {"row":0,"col":3,"x":3,"y":0.06},{"row":0,"col":4,"x":4,"y":0.18},{"row":0,"col":5,"x":5,"y":0.3},
+        {"row":0,"col":10,"x":10,"y":0.3},{"row":0,"col":11,"x":11,"y":0.18},{"row":0,"col":12,"x":12,"y":0.06},
+        {"row":0,"col":13,"x":13,"y":0},{"row":0,"col":14,"x":14,"y":0.26},{"row":0,"col":15,"x":15,"y":0.52},
+        {"row":1,"col":0,"x":0,"y":1.52},{"row":1,"col":1,"x":1,"y":1.26},{"row":1,"col":2,"x":2,"y":1},
+        {"row":1,"col":3,"x":3,"y":1.06},{"row":1,"col":4,"x":4,"y":1.18},{"row":1,"col":5,"x":5,"y":1.3},
+        {"row":1,"col":10,"x":10,"y":1.3},{"row":1,"col":11,"x":11,"y":1.18},{"row":1,"col":12,"x":12,"y":1.06},
+        {"row":1,"col":13,"x":13,"y":1},{"row":1,"col":14,"x":14,"y":1.26},{"row":1,"col":15,"x":15,"y":1.52},
+        {"row":2,"col":0,"x":0,"y":2.52},{"row":2,"col":1,"x":1,"y":2.26},{"row":2,"col":2,"x":2,"y":2},
+        {"row":2,"col":3,"x":3,"y":2.06},{"row":2,"col":4,"x":4,"y":2.18},{"row":2,"col":5,"x":5,"y":2.3},
+        {"row":2,"col":6,"x":6.3,"y":2.1},{"row":2,"col":9,"x":8.7,"y":2.1},
+        {"row":2,"col":10,"x":10,"y":2.3},{"row":2,"col":11,"x":11,"y":2.18},{"row":2,"col":12,"x":12,"y":2.06},
+        {"row":2,"col":13,"x":13,"y":2},{"row":2,"col":14,"x":14,"y":2.26},{"row":2,"col":15,"x":15,"y":2.52},
+        {"row":3,"col":0,"x":0,"y":3.52},{"row":3,"col":1,"x":1,"y":3.26},{"row":3,"col":2,"x":2,"y":3},
+        {"row":3,"col":3,"x":3,"y":3.06},{"row":3,"col":4,"x":4,"y":3.18},{"row":3,"col":5,"x":5,"y":3.3},
+        {"row":3,"col":6,"x":6.3,"y":3.1},{"row":3,"col":9,"x":8.7,"y":3.1},
+        {"row":3,"col":10,"x":10,"y":3.3},{"row":3,"col":11,"x":11,"y":3.18},{"row":3,"col":12,"x":12,"y":3.06},
+        {"row":3,"col":13,"x":13,"y":3},{"row":3,"col":14,"x":14,"y":3.26},{"row":3,"col":15,"x":15,"y":3.52},
+        {"row":4,"col":2,"x":3,"y":4.35},{"row":4,"col":3,"x":4,"y":4.1},
+        {"row":4,"col":4,"x":5,"y":3.7,"r":15,"rx":0,"ry":0},{"row":4,"col":5,"x":5.6,"y":3.1,"r":28,"rx":0,"ry":0},
+        {"row":4,"col":10,"x":9.4,"y":3.1,"r":-28,"rx":0,"ry":0},{"row":4,"col":11,"x":10,"y":3.7,"r":-15,"rx":0,"ry":0},
+        {"row":4,"col":12,"x":11,"y":4.1},{"row":4,"col":13,"x":12,"y":4.35}
+      ]
+    }
+  },
+  "sensors": []
+};
+
+// ================================================
 // ZMK KEYCODES DATABASE
 // ================================================
 var ZMK_KEYCODES = {
@@ -1340,7 +1377,7 @@ function parseUserCode() {
     combos.push({ name: cargs[0], bind: cargs[1], pos: pos, layers: layersStr });
   }
 
-  var blinkBlockRe = /ZMK_MACRO\(\s*([A-Za-z0-9_]+)\s*,([\s\S]*?)\)/g;
+  var blinkBlockRe = /ZMK_MACRO\(\s*([A-Za-z0-9_]+)\s*,([\s\S]*?)\n\s*\)/g;
   var seenBlinkNames = {};
   var bb;
   while ((bb = blinkBlockRe.exec(code))) {
@@ -3343,7 +3380,7 @@ function updateKeymapOutput() {
   out += '\n';
 
   // Custom behaviors
-  var nativeKeymapBehaviors = keymapBehaviors.filter(function(b) { return !b._fromRgb; });
+  var nativeKeymapBehaviors = keymapBehaviors.filter(function(b) { return !b._fromRgb && !b._fromDtsi; });
   if (nativeKeymapBehaviors.length) {
     out += '/ {\n    behaviors {\n';
     nativeKeymapBehaviors.forEach(function(b) {
@@ -3390,20 +3427,64 @@ function updateKeymapOutput() {
     out += '    };\n};\n\n';
   }
 
-  // Blink macros (ZMK_MACRO format with BLINK_SEQ helper from RGB tab)
+  // Blink macros — output expanded ZMK macro definitions (no helper dependency)
   if (blinkMacros.length) {
-    out += '/* Blink/Status Macros */\n';
+    var blinkEntries = [];
     var seenBlink = {};
     blinkMacros.forEach(function(bm) {
       if (!bm.color || !bm.returnColor) return;
       if (seenBlink[bm.name]) return;
       seenBlink[bm.name] = true;
-      out += 'ZMK_MACRO(' + bm.name + ',\n';
-      if (bm.label) out += '    label = "' + bm.label + '";\n';
-      out += '    bindings = <&macro_tap &kp ' + bm.key + ' BLINK_SEQ(' + bm.color + ', ' + bm.returnColor + ', ' + (bm.wait || '80') + ')>;\n';
-      out += ')\n';
+      blinkEntries.push(bm);
     });
-    out += '\n';
+    if (blinkEntries.length) {
+      // Output color defines needed by blink macros
+      var blinkColors = {};
+      blinkEntries.forEach(function(bm) {
+        blinkColors[bm.color] = true;
+        blinkColors[bm.returnColor] = true;
+      });
+      var colorDefines = [];
+      Object.keys(blinkColors).forEach(function(cname) {
+        // Look up HSB values from RGB tab's colorValueMap
+        var hsb = colorValueMap[cname];
+        if (hsb) {
+          colorDefines.push('#define ' + cname + ' RGB_COLOR_HSB(' + hsb.h + ',' + hsb.s + ',' + hsb.b + ')');
+        }
+      });
+      if (colorDefines.length) {
+        out += '/* Blink Color Defines */\n';
+        colorDefines.forEach(function(d) { out += d + '\n'; });
+        out += '\n';
+      }
+      // BLINK_SEQ helper macro
+      out += '#define BLINK_SEQ(ON, OFF, WAIT) \\\n';
+      out += '    &macro_tap &rgb_ug ON \\\n';
+      out += '    &macro_wait_time WAIT \\\n';
+      out += '    &macro_tap &rgb_ug RGB_TOG \\\n';
+      out += '    &macro_wait_time WAIT \\\n';
+      out += '    &macro_tap &rgb_ug RGB_TOG \\\n';
+      out += '    &macro_wait_time WAIT \\\n';
+      out += '    &macro_tap &rgb_ug RGB_TOG \\\n';
+      out += '    &macro_wait_time WAIT \\\n';
+      out += '    &macro_tap &rgb_ug RGB_TOG \\\n';
+      out += '    &macro_wait_time WAIT \\\n';
+      out += '    &macro_tap &rgb_ug OFF\n\n';
+      out += '/* Blink/Status Macros */\n';
+      blinkEntries.forEach(function(bm) {
+        out += 'ZMK_MACRO(' + bm.name + ',\n';
+        if (bm.label) out += '    label = "' + bm.label + '";\n';
+        if (bm.key.indexOf('&mo') === 0) {
+          out += '    bindings = <&macro_press ' + bm.key + ' BLINK_SEQ(' + bm.color + ', ' + bm.returnColor + ', ' + (bm.wait || '80') + ')>,\n';
+          out += '               <&macro_pause_for_release>,\n';
+          out += '               <&macro_release ' + bm.key + '>;\n';
+        } else {
+          out += '    bindings = <&macro_tap &kp ' + bm.key + ' BLINK_SEQ(' + bm.color + ', ' + bm.returnColor + ', ' + (bm.wait || '80') + ')>;\n';
+        }
+        out += ')\n';
+      });
+      out += '\n';
+    }
   }
 
   // Keymap — track layer positions for highlighting
@@ -3421,31 +3502,139 @@ function updateKeymapOutput() {
     }
     out += '            bindings = <\n';
 
-    // Format bindings in rows matching the keyboard layout
-    var numCols = keyboardLayout ? Math.max.apply(null, keyboardLayout.map(function(k) { return k.col; })) + 1 : 12;
-    var rows = {};
+    // Format bindings in rows matching the keyboard layout with column alignment
+    var layoutRows = {};
     if (keyboardLayout) {
       keyboardLayout.forEach(function(k, ki) {
-        if (!rows[k.row]) rows[k.row] = [];
-        rows[k.row].push({ col: k.col, idx: ki });
+        if (!layoutRows[k.row]) layoutRows[k.row] = [];
+        layoutRows[k.row].push({ col: k.col, idx: ki });
       });
     }
-    var rowKeys = Object.keys(rows).sort(function(a, b) { return a - b; });
+    var rowKeys = Object.keys(layoutRows).sort(function(a, b) { return a - b; });
     if (rowKeys.length > 0) {
-      rowKeys.forEach(function(rk) {
-        var rowEntries = rows[rk].sort(function(a, b) { return a.col - b.col; });
-        var line = '';
-        // Detect split: find gap in col numbers
-        var splitIdx = -1;
-        for (var si = 1; si < rowEntries.length; si++) {
-          if (rowEntries[si].col - rowEntries[si - 1].col > 2) { splitIdx = si; break; }
+      // Sort entries in each row by column
+      rowKeys.forEach(function(rk) { layoutRows[rk].sort(function(a, b) { return a.col - b.col; }); });
+
+      // Collect all unique column numbers across the entire layout
+      var colSet = {};
+      keyboardLayout.forEach(function(k) { colSet[k.col] = true; });
+      var allCols = Object.keys(colSet).map(Number).sort(function(a, b) { return a - b; });
+
+      // Find split: detect left/right halves via largest x-position gap on the fullest row
+      var splitAfterColIdx = -1;
+      var refRowForSplit = rowKeys[0];
+      rowKeys.forEach(function(rk) { if (layoutRows[rk].length > layoutRows[refRowForSplit].length) refRowForSplit = rk; });
+      var refSplitEntries = layoutRows[refRowForSplit];
+      var xLookup = {};
+      keyboardLayout.forEach(function(k) { xLookup[k.row + ',' + k.col] = k.x; });
+      var maxXGap = 2;
+      for (var gi = 1; gi < refSplitEntries.length; gi++) {
+        var xPrev = xLookup[refRowForSplit + ',' + refSplitEntries[gi - 1].col] || 0;
+        var xCurr = xLookup[refRowForSplit + ',' + refSplitEntries[gi].col] || 0;
+        if (xCurr - xPrev > maxXGap) {
+          maxXGap = xCurr - xPrev;
+          splitAfterColIdx = allCols.indexOf(refSplitEntries[gi - 1].col);
         }
-        rowEntries.forEach(function(entry, ei) {
-          if (ei === splitIdx) line += '   ';
-          var b = l.bindings[entry.idx] || '&none';
-          line += b;
-          if (ei < rowEntries.length - 1) line += '  ';
+      }
+      var leftCols = splitAfterColIdx >= 0 ? allCols.slice(0, splitAfterColIdx + 1) : allCols;
+      var rightCols = splitAfterColIdx >= 0 ? allCols.slice(splitAfterColIdx + 1) : [];
+
+      // Compute per-column binding widths across ALL layers
+      var colWidths = {};
+      allCols.forEach(function(c) { colWidths[c] = 0; });
+      keymapLayers.forEach(function(layer) {
+        if (layer.status === 'reserved') return;
+        rowKeys.forEach(function(rk) {
+          layoutRows[rk].forEach(function(entry) {
+            var b = layer.bindings[entry.idx] || '&none';
+            if (b.length > colWidths[entry.col]) colWidths[entry.col] = b.length;
+          });
         });
+      });
+
+      // Output formatted rows for this layer
+      rowKeys.forEach(function(rk) {
+        var rowE = layoutRows[rk];
+        var rowColMap = {};
+        rowE.forEach(function(e) { rowColMap[e.col] = e; });
+
+        // Build left and right halves with proper column padding
+        var leftParts = [];
+        leftCols.forEach(function(c) {
+          if (rowColMap[c]) {
+            var b = l.bindings[rowColMap[c].idx] || '&none';
+            leftParts.push({ text: b, width: colWidths[c] });
+          }
+        });
+        var rightParts = [];
+        rightCols.forEach(function(c) {
+          if (rowColMap[c]) {
+            var b = l.bindings[rowColMap[c].idx] || '&none';
+            rightParts.push({ text: b, width: colWidths[c] });
+          }
+        });
+
+        // Pad each binding to its column width
+        var padStr = function(parts, padAll) {
+          return parts.map(function(p, i) {
+            if (padAll || i < parts.length - 1) {
+              var s = p.text;
+              while (s.length < p.width) s += ' ';
+              return s;
+            }
+            return p.text;
+          }).join('  ');
+        };
+        // Pad ALL left columns (including last) so right side aligns consistently
+        var leftStr = padStr(leftParts, true);
+        // Don't pad last right column (no trailing whitespace needed)
+        var rightStr = padStr(rightParts, false);
+
+        // Calculate leading indent for rows with fewer left-side keys (e.g. thumb cluster)
+        var indent = '';
+        // Also calculate trailing padding for missing end-of-left-side columns (e.g. encoder slots)
+        var tailPad = '';
+        if (leftParts.length < leftCols.length) {
+          var missingWidth = 0;
+          var foundFirst = false;
+          var tailWidth = 0;
+          // Scan forward for leading missing cols
+          leftCols.forEach(function(c) {
+            if (rowColMap[c]) { foundFirst = true; return; }
+            if (!foundFirst) {
+              missingWidth += colWidths[c] + 2;
+            }
+          });
+          // Scan backward for trailing missing cols (only if at least one col is present)
+          if (foundFirst) {
+            for (var ti = leftCols.length - 1; ti >= 0; ti--) {
+              if (rowColMap[leftCols[ti]]) break;
+              tailWidth += colWidths[leftCols[ti]] + 2;
+            }
+          }
+          indent = ' '.repeat(missingWidth);
+          tailPad = ' '.repeat(tailWidth);
+        }
+        // Calculate leading indent for missing right-side start columns (e.g. no encoder on some rows)
+        var rightIndent = '';
+        if (rightParts.length > 0 && rightParts.length < rightCols.length) {
+          var rightMissing = 0;
+          var rightFoundFirst = false;
+          rightCols.forEach(function(c) {
+            if (rowColMap[c]) { rightFoundFirst = true; return; }
+            if (!rightFoundFirst) {
+              rightMissing += colWidths[c] + 2;
+            }
+          });
+          rightIndent = ' '.repeat(rightMissing);
+        }
+
+        var line = indent;
+        if (rightParts.length > 0) {
+          line += leftStr + tailPad + '    ' + rightIndent + rightStr;
+        } else {
+          line += leftStr;
+        }
         out += '                ' + line + '\n';
       });
     } else {
@@ -4059,6 +4248,11 @@ document.addEventListener('DOMContentLoaded', function() {
     loadLayout(DEFAULT_CORNE_LAYOUT);
     renderKeyboardSvg('keyboardSvg');
     showStatus('kmLayoutStatus', 'Default Corne layout loaded (42 keys)');
+  };
+  document.getElementById('kmUseLotus58Btn').onclick = function() {
+    loadLayout(DEFAULT_LOTUS58_LAYOUT);
+    renderKeyboardSvg('keyboardSvg');
+    showStatus('kmLayoutStatus', 'Lotus58 layout loaded (60 keys)');
   };
 
   // Keymap parse
