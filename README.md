@@ -94,6 +94,12 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 ## AI Update
 
 I used Copilot to help modularize and refine the macros and combos. The modular structure now makes it easier to add new layers and corresponding RGB behaviors — add a layer color/macro in `corne-rgb.dtsi` and #include that file in your keymap.
+**NEW** AI CONSTRUCTED RGB BUILDER
+- I got lazy updating my colors and just had AI construct a tool to help streamline the process since we were mostly working with 3 macros, it just got redundant coding them.
+  - There is an intigrated keymap editor I pulled mostly from (https://nickcoutsos.github.io/keymap-editor/) for an idea. I havent really tried it out but it seems mostly functional.
+  - There are certainly bugs(its ALL AI written), I havent really used this much yet; I can say that the RGB builder does work well enough so feel free to use it you want, there are included "helpers" in the generator.
+![editor](ZMKPer-LayerColor_RGB_Tool_with_keymap_editor1.png)
+![editor2](ZMKPer-LayerColor_RGB_Tool_with_keymap_editor2.png)
 
 ---
 
