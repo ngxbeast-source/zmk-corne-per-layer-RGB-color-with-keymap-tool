@@ -237,6 +237,8 @@ let macros = [];
 let behaviors = [];
 let combos = [];
 let blinkMacros = [];
+let colorValueMap = {};
+let colorLabelMap = {};
 
 // --- Utility ---
 function hsbToHex(h,s,b) {
@@ -262,9 +264,10 @@ function parseUserCode() {
 	let foundLayerPrefix = false;
 	let tempLayers = [];
 	// Parse all RGB_ color definitions and their comments/labels into a color map
-	const colorLabelMap = {};
-	const colorValueMap = {};
-	const colorCommentRegex = /^#define\s+RGB_([A-Za-z0-9_]+)\s+RGB_COLOR_HSB\((\d+),(\d+),(\d+)\)\s*(\/\*([^*]*)\*\/)?\s*(\/\/([^\n]*))?/gm;
+	colorLabelMap = {};
+	colorValueMap = {};
+	// Match any #define <NAME> RGB_COLOR_HSB(...)
+	const colorCommentRegex = /^#define\s+([A-Za-z0-9_]+)\s+RGB_COLOR_HSB\((\d+),(\d+),(\d+)\)\s*(\/\*([^*]*)\*\/)?\s*(\/\/([^\n]*))?/gm;
 	let c;
 	while ((c = colorCommentRegex.exec(code))) {
 		let h = parseInt(c[2]), s = parseInt(c[3]), b = parseInt(c[4]);
@@ -360,6 +363,18 @@ function parseUserCode() {
 	document.getElementById('userCodeStatus').style.display = 'inline';
 	setTimeout(()=>{document.getElementById('userCodeStatus').style.display='none';},2000);
 	renderAll();
+	// Ensure global access for inline event handlers and DOM onclick
+	window.parseUserCode = parseUserCode;
+	window.addLayer = addLayer;
+	window.removeLayer = removeLayer;
+	window.addMacro = addMacro;
+	window.removeMacro = removeMacro;
+	window.addBehavior = addBehavior;
+	window.removeBehavior = removeBehavior;
+	window.addCombo = addCombo;
+	window.removeCombo = removeCombo;
+	window.addBlinkMacro = addBlinkMacro;
+	window.removeBlinkMacro = removeBlinkMacro;
 }
 
 // --- UI Renderers ---
@@ -371,6 +386,60 @@ function renderAll() {
 	renderBlinkMacroList();
 	updateDropdowns();
 	updateOutput();
+	attachDynamicHandlers();
+}
+
+// Attach all dynamic event handlers after rendering
+function attachDynamicHandlers() {
+	// Layer list
+	document.querySelectorAll('#layerList .item').forEach((div, i) => {
+		div.querySelector('input[type="number"]').addEventListener('input', e => {
+			layers[i].index = e.target.value;
+			updateColorMapFromLayer(i);
+			updateOutput();
+		});
+		const h = div.querySelectorAll('input[type="number"]')[1];
+		h.addEventListener('input', e => { layers[i].h = e.target.value; updateColorMapFromLayer(i); updateOutput(); updateColorPreview(e.target,i); });
+		const s = div.querySelectorAll('input[type="number"]')[2];
+	s.addEventListener('input', e => { layers[i].s = e.target.value; updateColorMapFromLayer(i); updateOutput(); updateColorPreview(e.target,i); });
+		const b = div.querySelectorAll('input[type="number"]')[3];
+	b.addEventListener('input', e => { layers[i].b = e.target.value; updateColorMapFromLayer(i); updateOutput(); updateColorPreview(e.target,i); });
+		const label = div.querySelector('input[type="text"]');
+		label.addEventListener('input', e => { layers[i].label = e.target.value; updateColorMapFromLayer(i); updateOutput(); });
+		div.querySelector('button').addEventListener('click', () => { removeLayer(i); });
+	});
+	// Macro list
+	document.querySelectorAll('#macroList .item').forEach((div, i) => {
+		const inputs = div.querySelectorAll('input');
+		inputs[0].addEventListener('input', e => { macros[i].layer = e.target.value; updateOutput(); });
+		inputs[1].addEventListener('input', e => { macros[i].color = e.target.value; updateOutput(); });
+		if (inputs[2]) inputs[2].addEventListener('input', e => { macros[i].releaseColor = e.target.value; updateOutput(); });
+		div.querySelector('button').addEventListener('click', () => { removeMacro(i); });
+	});
+	// Behavior list
+	document.querySelectorAll('#behaviorList .item').forEach((div, i) => {
+		const inputs = div.querySelectorAll('input');
+		inputs[0].addEventListener('input', e => { behaviors[i].label = e.target.value; updateOutput(); });
+		inputs[1].addEventListener('input', e => { behaviors[i].macro = e.target.value; updateOutput(); });
+		div.querySelector('button').addEventListener('click', () => { removeBehavior(i); });
+	});
+	// Combo list
+	document.querySelectorAll('#comboList .item').forEach((div, i) => {
+		const inputs = div.querySelectorAll('input');
+		inputs[0].addEventListener('input', e => { combos[i].bind = e.target.value; updateOutput(); });
+		inputs[1].addEventListener('input', e => { combos[i].pos = e.target.value; updateOutput(); });
+		inputs[2].addEventListener('input', e => { combos[i].layers = e.target.value; updateOutput(); });
+		div.querySelector('button').addEventListener('click', () => { removeCombo(i); });
+	});
+	// Blink macro list
+	document.querySelectorAll('#blinkMacroList .item').forEach((div, i) => {
+		const inputs = div.querySelectorAll('input');
+		inputs[0].addEventListener('input', e => { blinkMacros[i].key = e.target.value; updateOutput(); });
+		inputs[1].addEventListener('input', e => { blinkMacros[i].color = e.target.value; updateOutput(); });
+		inputs[2].addEventListener('input', e => { blinkMacros[i].returnColor = e.target.value; updateOutput(); });
+		inputs[3].addEventListener('input', e => { blinkMacros[i].wait = e.target.value; updateOutput(); });
+		div.querySelector('button').addEventListener('click', () => { removeBlinkMacro(i); });
+	});
 }
 
 function renderLayerList() {
@@ -380,16 +449,28 @@ function renderLayerList() {
 		const div = document.createElement('div');
 		div.className = 'item';
 		div.innerHTML = `
-			<b>${l.name}</b> (Index: <input type="number" value="${l.index}" min="0" style="width:50px;" onchange="layers[${i}].index=this.value;updateOutput()">)
-			H: <input type="number" min="0" max="360" value="${l.h}" style="width:50px;" onchange="layers[${i}].h=this.value;updateOutput();updateColorPreview(this,${i})">
-			S: <input type="number" min="0" max="100" value="${l.s}" style="width:50px;" onchange="layers[${i}].s=this.value;updateOutput();updateColorPreview(this,${i})">
-			B: <input type="number" min="0" max="100" value="${l.b}" style="width:50px;" onchange="layers[${i}].b=this.value;updateOutput();updateColorPreview(this,${i})">
+			<b>${l.name}</b> (Index: <input type="number" value="${l.index}" min="0" style="width:50px;" onchange="layers[${i}].index=this.value;updateColorMapFromLayer(${i});updateOutput()">)
+			H: <input type="number" min="0" max="360" value="${l.h}" style="width:50px;" onchange="layers[${i}].h=this.value;updateColorMapFromLayer(${i});updateOutput();updateColorPreview(this,${i})">
+			S: <input type="number" min="0" max="100" value="${l.s}" style="width:50px;" onchange="layers[${i}].s=this.value;updateColorMapFromLayer(${i});updateOutput();updateColorPreview(this,${i})">
+			B: <input type="number" min="0" max="100" value="${l.b}" style="width:50px;" onchange="layers[${i}].b=this.value;updateColorMapFromLayer(${i});updateOutput();updateColorPreview(this,${i})">
 			<span class="color-preview" style="background:${hsbToHex(l.h,l.s,l.b)}"></span>
-			Label: <input type="text" value="${l.label||''}" onchange="layers[${i}].label=this.value;updateOutput()">
+			Label: <input type="text" value="${l.label||''}" onchange="layers[${i}].label=this.value;updateColorMapFromLayer(${i});updateOutput()">
 			<button onclick="removeLayer(${i})">Remove</button>
 		`;
 		list.appendChild(div);
 	});
+}
+
+// Move updateColorMapFromLayer to global scope
+function updateColorMapFromLayer(i) {
+	let l = layers[i];
+	let colorKey = l.name.replace('LAYER_','');
+	colorValueMap[colorKey] = { h: parseInt(l.h), s: parseInt(l.s), b: parseInt(l.b) };
+	colorLabelMap[colorKey] = l.label;
+}
+// Ensure global access for inline event handlers
+window.updateColorMapFromLayer = updateColorMapFromLayer;
+}
 }
 function renderMacroList() {
 	const list = document.getElementById('macroList');
@@ -457,19 +538,20 @@ function updateDropdowns() {
 	const macroColor = document.getElementById('macroColor');
 	const macroReleaseColor = document.getElementById('macroReleaseColor');
 	macroLayer.innerHTML = layers.map(l=>`<option value="${l.name}">${l.name}</option>`).join('');
-	macroColor.innerHTML = layers.map(l=>`<option value="RGB_${l.name}">RGB_${l.name}</option>`).join('');
-	macroReleaseColor.innerHTML = `<option value="">(none)</option>` + layers.map(l=>`<option value="RGB_${l.name}">RGB_${l.name}</option>`).join('');
+	// Macro colors: all color defines
+	macroColor.innerHTML = Object.keys(colorValueMap).map(k=>`<option value="${k}">${k}</option>`).join('');
+	macroReleaseColor.innerHTML = `<option value="">(none)</option>` + Object.keys(colorValueMap).map(k=>`<option value="${k}">${k}</option>`).join('');
 	// Behavior Macro
 	const behaviorMacro = document.getElementById('behaviorMacro');
 	behaviorMacro.innerHTML = macros.map(m=>`<option value="${m.name}">${m.name}</option>`).join('');
 	// Combo Layers
 	const comboLayers = document.getElementById('comboLayers');
 	comboLayers.innerHTML = layers.map(l=>`<option value="${l.name}">${l.name}</option>`).join('');
-	// Blink Macro Colors
+	// Blink Macro Colors: all color defines
 	const blinkColor = document.getElementById('blinkColor');
 	const blinkReturnColor = document.getElementById('blinkReturnColor');
-	blinkColor.innerHTML = layers.map(l=>`<option value="RGB_${l.name}">RGB_${l.name}</option>`).join('');
-	blinkReturnColor.innerHTML = layers.map(l=>`<option value="RGB_${l.name}">RGB_${l.name}</option>`).join('');
+	blinkColor.innerHTML = Object.keys(colorValueMap).map(k=>`<option value="${k}">${k}</option>`).join('');
+	blinkReturnColor.innerHTML = Object.keys(colorValueMap).map(k=>`<option value="${k}">${k}</option>`).join('');
 }
 function updateColorPreview(input, idx) {
 	// No-op: color preview is live via renderLayerList
@@ -485,12 +567,22 @@ function addLayer() {
 	const label = document.getElementById('layerLabel').value.trim();
 	if (!name) return;
 	layers.push({ name, index, h, s, b, label });
+	let colorKey = name.replace('LAYER_','');
+	colorValueMap[colorKey] = { h, s, b };
+	colorLabelMap[colorKey] = label;
 	renderLayerList();
 	updateDropdowns();
 	updateOutput();
 }
 function removeLayer(i) {
+	let l = layers[i];
+	let colorKey = l.name.replace('LAYER_','');
 	layers.splice(i,1);
+	// Remove from colorValueMap and colorLabelMap if not an orphan color
+	if (!Object.keys(colorValueMap).some(k => k !== colorKey && colorValueMap[k] && colorValueMap[k].h === l.h && colorValueMap[k].s === l.s && colorValueMap[k].b === l.b)) {
+		delete colorValueMap[colorKey];
+		delete colorLabelMap[colorKey];
+	}
 	renderLayerList();
 	updateDropdowns();
 	updateOutput();
@@ -568,13 +660,27 @@ function removeBlinkMacro(i) {
 // --- Output Generation ---
 function updateOutput() {
 	let out = `/*\n * Generated Modular RGB Layer Template for ZMK\n *\n * Copy this file and fill in your own layers, colors, macros, and behaviors.\n * All sections are commented for easy customization.\n */\n\n/* ---- STEP 1: DEFINE LAYERS ---- */\n`;
+	// Output all layers and their associated RGB_ defines if both exist
+	const outputColorKeys = new Set();
 	layers.forEach(l => {
 		if (l.index !== '') out += `#define ${l.name} ${l.index}\n`;
+		// Always output RGB_<NAME> for each layer
+		let colorKey = l.name.replace('LAYER_','');
+		let label = l.label ? ` // ${l.label}` : '';
+		if (l.h !== '' && l.s !== '' && l.b !== '') {
+			out += `#define RGB_${colorKey} RGB_COLOR_HSB(${l.h},${l.s},${l.b})${label}\n`;
+			outputColorKeys.add(colorKey);
+		}
 	});
 	out += `\n/* ---- STEP 1a: DEFINE COLORS ---- */\n`;
-	layers.forEach(l => {
-		let label = l.label ? ` // ${l.label}` : '';
-		out += `#define RGB_${l.name.replace('LAYER_','')} RGB_COLOR_HSB(${l.h},${l.s},${l.b})${label}\n`;
+	// Output all other color defines (orphans and non-layer colors)
+	Object.keys(colorValueMap).forEach(colorKey => {
+		if (!outputColorKeys.has(colorKey)) {
+			let v = colorValueMap[colorKey];
+			let label = colorLabelMap[colorKey] ? ` // ${colorLabelMap[colorKey]}` : '';
+			out += `#define ${colorKey} RGB_COLOR_HSB(${v.h},${v.s},${v.b})${label}\n`;
+			outputColorKeys.add(colorKey);
+		}
 	});
 	out += `\n/* ---- MACROS ---- */\n`;
 	macros.forEach(m => {
@@ -608,13 +714,16 @@ document.getElementById('copyOutputBtn').onclick = function() {
 	document.execCommand('copy');
 };
 
-// --- Parse Button ---
-document.getElementById('parseBtn').onclick = parseUserCode;
-document.getElementById('addLayerBtn').onclick = addLayer;
-document.getElementById('addMacroBtn').onclick = addMacro;
-document.getElementById('addBehaviorBtn').onclick = addBehavior;
-document.getElementById('addComboBtn').onclick = addCombo;
-document.getElementById('addBlinkMacroBtn').onclick = addBlinkMacro;
+// --- Attach static event handlers after DOMContentLoaded ---
+document.addEventListener('DOMContentLoaded', function() {
+	document.getElementById('parseBtn').onclick = parseUserCode;
+	document.getElementById('addLayerBtn').onclick = addLayer;
+	document.getElementById('addMacroBtn').onclick = addMacro;
+	document.getElementById('addBehaviorBtn').onclick = addBehavior;
+	document.getElementById('addComboBtn').onclick = addCombo;
+	document.getElementById('addBlinkMacroBtn').onclick = addBlinkMacro;
+	syncColorInputs();
+});
 
 // --- Color Input Sync ---
 function syncColorInputs() {
@@ -656,5 +765,4 @@ function syncColorInputs() {
 	};
 	updateAll();
 }
-syncColorInputs();
 </script>
