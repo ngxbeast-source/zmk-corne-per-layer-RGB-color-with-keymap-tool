@@ -58,6 +58,11 @@
     .output-panel label { color: var(--topbar-muted); font-size: 0.8em; display: flex; align-items: center; gap: 0.3em; cursor: pointer; }
     .output-panel label input[type="checkbox"] { accent-color: var(--accent); }
     .output-textarea { flex: 1; width: 100%; border: none; background: transparent; color: var(--output-text); font-family: 'Fira Code','Fira Mono','Consolas','Menlo',monospace; font-size: 0.88em; padding: 0.8em 1em; resize: none; line-height: 1.55; outline: none; }
+    pre.output-pre { flex: 1; width: 100%; border: none; background: transparent; color: var(--output-text); font-family: 'Fira Code','Fira Mono','Consolas','Menlo',monospace; font-size: 0.88em; padding: 0.8em 1em; margin: 0; line-height: 1.55; overflow: auto; white-space: pre; tab-size: 4; user-select: text; }
+    pre.output-pre .hl-layer { background: rgba(30, 80, 180, 0.35); display: inline; border-radius: 0; }
+    pre.output-pre .hl-comment { color: #6a9955; }
+    pre.output-pre .hl-keyword { color: #c586c0; }
+    pre.output-pre .hl-string { color: #ce9178; }
     .output-stats { color: var(--output-muted); font-size: 0.75em; padding: 0.3em 1em; border-top: 1px solid var(--output-border); text-align: right; }
 
     .section { background: var(--card); border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); margin-bottom: 0.7em; border: 1px solid var(--border); overflow: hidden; }
@@ -129,6 +134,8 @@
     .layer-tab .lt-delete:hover { color: var(--danger); }
     .layer-tab:hover { background: rgba(60, 179, 113, 0.5); border-color: rgba(60, 179, 113, 0.7); color: #fff; }
     .layer-tab.active { background: rgb(60, 179, 113); color: #fff; border-color: rgb(60, 179, 113); }
+    .layer-tab .lt-color { display: inline-block; width: 8px; height: 8px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); position: absolute; top: 3px; right: 3px; }
+    .layer-sidebar:hover .layer-tab .lt-color { position: static; margin-left: auto; margin-right: 2px; flex-shrink: 0; }
     .layer-tab-add { width: 34px; height: 34px; background: none; border: 1px dashed var(--border); color: var(--muted); font-size: 1em; display: flex; align-items: center; justify-content: center; border-radius: 17px; cursor: pointer; }
     .layer-tab-add:hover { border-color: var(--accent); color: var(--accent); }
     .layer-tab[draggable="true"] { cursor: grab; user-select: none; }
@@ -232,6 +239,14 @@
     .qa-listening { display: inline-block; background: var(--success); color: #fff; font-size: 0.78em; padding: 0.15em 0.6em; border-radius: 3px; animation: qa-pulse 1.2s infinite; }
     @keyframes qa-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
     .qa-actions { display: flex; gap: 0.5em; margin-top: 0.8em; }
+
+    /* ====== MACRO EDITOR OVERLAY ====== */
+    #macroEditorOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 300; align-items: center; justify-content: center; }
+    .macro-editor-dialog { background: #1e1e2e; border: 1px solid #555; border-radius: 8px; padding: 20px; min-width: 380px; max-width: 500px; color: #e0e0e0; }
+    .macro-editor-dialog h3 { margin: 0 0 12px 0; }
+    .macro-editor-dialog .medit-fields { display: flex; flex-direction: column; gap: 8px; }
+    .macro-editor-dialog .medit-actions { margin-top: 14px; display: flex; gap: 8px; justify-content: flex-end; }
+    .macro-editor-dialog .medit-actions button { padding: 4px 14px; }
 
     /* ====== FLOATING VALUE PICKER ====== */
     .vp-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 250; background: rgba(0,0,0,0.25); }
@@ -377,9 +392,13 @@
           <div class="input-row">
             <div class="input-group"><label>Name</label><input type="text" id="comboName" placeholder="combo_name" style="width:110px;"></div>
             <div class="input-group"><label>Bind</label><input type="text" id="comboBind" placeholder="&amp;kp ESC" style="width:120px;"></div>
-            <div class="input-group"><label>Pos</label><input type="text" id="comboPos" placeholder="0 1" style="width:60px;"></div>
+            <div class="input-group"><label>Pos</label><input type="text" id="comboPos" placeholder="0 1" style="width:60px;" readonly title="Click to select on keyboard"></div>
             <div class="input-group"><label>Layers</label><input type="text" id="comboLayersInput" placeholder="LAYER_ABC LAYER_GAME" style="width:180px;"></div>
             <button id="addComboBtn">+ Add</button>
+          </div>
+          <div id="rgbComboMiniKbWrap" style="display:none;">
+            <p style="font-size:0.82em;color:var(--muted);margin:0.2em 0;">Click keys to select combo trigger positions:</p>
+            <div class="combo-mini-kb" id="rgbComboMiniKb"></div>
           </div>
           <div class="item-list" id="comboList"></div>
         </div>
@@ -405,10 +424,10 @@
       </div>
 
       <!-- MACRO EDITOR SUB-WINDOW (hidden by default) -->
-      <div id="macroEditorOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:300;align-items:center;justify-content:center;">
-        <div style="background:#1e1e2e;border:1px solid #555;border-radius:8px;padding:20px;min-width:380px;max-width:500px;color:#e0e0e0;">
-          <h3 style="margin:0 0 12px 0;">Edit Macro</h3>
-          <div style="display:flex;flex-direction:column;gap:8px;">
+      <div id="macroEditorOverlay" style="display:none;">
+        <div class="macro-editor-dialog">
+          <h3>Edit Macro</h3>
+          <div class="medit-fields">
             <div class="input-group"><label>Name</label><input type="text" id="meditName" style="width:160px;"></div>
             <div class="input-group"><label>Type</label>
               <select id="meditType">
@@ -421,9 +440,9 @@
             <div class="input-group"><label>Color</label><select id="meditColor"></select></div>
             <div class="input-group" id="meditReleaseGroup"><label>Release Color</label><select id="meditReleaseColor"></select></div>
           </div>
-          <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end;">
-            <button id="meditSaveBtn" style="padding:4px 14px;">Save</button>
-            <button id="meditCancelBtn" style="padding:4px 14px;">Cancel</button>
+          <div class="medit-actions">
+            <button id="meditSaveBtn">Save</button>
+            <button id="meditCancelBtn">Cancel</button>
           </div>
         </div>
       </div>
@@ -486,6 +505,7 @@
       <!-- SVG KEYBOARD -->
       <div class="keyboard-container" id="keyboardContainer">
         <svg class="keyboard-svg" id="keyboardSvg"></svg>
+        <div style="text-align:center;font-size:0.7em;color:var(--muted);margin-top:2px;">Click key to edit &middot; Ctrl+Z undo &middot; Ctrl+Y redo &middot; Esc close</div>
       </div>
 
       <!-- BINDING EDITOR -->
@@ -588,9 +608,12 @@
             <div class="keycode-grid" id="kcPower"></div>
           </details>
         </div>
-        <div style="margin-top:0.5em;">
+        <div style="margin-top:0.5em; display:flex; gap:0.4em; align-items:center; flex-wrap:wrap;">
           <button id="beApplyBtn">Apply</button>
           <button id="beCancelBtn" style="background:var(--muted);">Cancel</button>
+          <span style="flex:1;"></span>
+          <button id="beSetNone" title="Set binding to &amp;none" style="font-size:0.8em; padding:2px 8px; background:var(--danger); color:#fff; border:none; border-radius:3px; cursor:pointer;">&amp;none</button>
+          <button id="beSetTrans" title="Set binding to &amp;trans" style="font-size:0.8em; padding:2px 8px; background:var(--accent2); color:#fff; border:none; border-radius:3px; cursor:pointer;">&amp;trans</button>
         </div>
       </div>
 
@@ -779,7 +802,7 @@
           <h2>Generated .keymap</h2>
           <button id="kmCopyBtn">Copy</button>
         </div>
-        <textarea id="kmOutput" class="output-textarea" readonly></textarea>
+        <pre class="output-pre" id="kmOutput"></pre>
         <div class="output-stats" id="kmOutputStats">0 layers</div>
       </div>
     </div>
@@ -844,6 +867,21 @@
   <!-- Context menu (hidden, positioned dynamically) -->
   <div class="ctx-menu" id="layerCtxMenu" style="display:none;"></div>
 
+  <!-- Layer Customize Dialog -->
+  <div id="layerCustomizeOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.5em;min-width:340px;max-width:420px;color:var(--text);">
+      <h3 style="margin:0 0 1em 0;color:var(--text);">Customize Layer <code id="lcTitle" style="background:var(--item-bg);padding:2px 8px;border-radius:4px;font-size:0.9em;"></code></h3>
+      <div style="display:flex;flex-direction:column;gap:0.7em;">
+        <div class="input-group"><label style="min-width:60px;">Name</label><input type="text" id="lcName" style="width:200px;"></div>
+        <div class="input-group"><label style="min-width:60px;">Label</label><input type="text" id="lcLabel" placeholder="Default" style="width:200px;"></div>
+      </div>
+      <div style="margin-top:1.2em;display:flex;gap:0.5em;justify-content:flex-end;">
+        <button id="lcOkBtn" style="background:var(--success);color:#fff;border:none;border-radius:4px;padding:0.35em 1.2em;cursor:pointer;font-weight:600;">OK</button>
+        <button id="lcCancelBtn" style="background:none;border:1px solid var(--border);color:var(--text);border-radius:4px;padding:0.35em 1.2em;cursor:pointer;">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Hidden: Layout JSON import dialog -->
   <div id="layoutJsonOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;">
     <div style="background:var(--card);border-radius:10px;padding:1.2em;width:90%;max-width:600px;max-height:80vh;overflow:auto;border:1px solid var(--border);">
@@ -882,6 +920,8 @@ var editingComboIndex = -1;
 var editingMacroIndex = -1;
 var editingBehaviorIndex = -1;
 var comboSelectedPositions = [];
+var rgbComboSelectedPositions = [];
+var rgbEditingComboIndex = -1;
 var keymapParsedIncludes = null; // null = use defaults, [] = user had none
 
 // Undo/Redo history
@@ -1399,12 +1439,23 @@ function renderComboList() {
     div.innerHTML =
       '<b>' + esc(c.name) + '</b>' +
       '<div class="input-group"><label>Bind</label><input type="text" value="' + esc(c.bind) + '" data-field="bind" data-i="' + i + '" style="width:120px"></div>' +
-      '<div class="input-group"><label>Pos</label><input type="text" value="' + esc(c.pos) + '" data-field="pos" data-i="' + i + '" style="width:55px"></div>' +
+      '<div class="input-group"><label>Pos</label><input type="text" value="' + esc(c.pos) + '" data-field="pos" data-i="' + i + '" style="width:55px;cursor:pointer;" readonly title="Click to edit on keyboard"></div>' +
       '<div class="input-group"><label>Layers</label><input type="text" value="' + esc(c.layers) + '" data-field="layers" data-i="' + i + '" style="width:180px"></div>' +
       '<button class="btn-danger btn-sm" data-remove="combo" data-i="' + i + '">&#10005;</button>';
     list.appendChild(div);
   });
-  list.onclick = function(e) { if (e.target.dataset.remove === 'combo') { combos.splice(parseInt(e.target.dataset.i), 1); rgbRenderAll(); } };
+  list.onclick = function(e) {
+    if (e.target.dataset.remove === 'combo') { combos.splice(parseInt(e.target.dataset.i), 1); rgbRenderAll(); }
+    // Click on Pos field to open mini-kb for that combo
+    if (e.target.dataset.field === 'pos' && e.target.readOnly) {
+      var ci = parseInt(e.target.dataset.i);
+      rgbEditingComboIndex = ci;
+      var posStr = combos[ci].pos || '';
+      rgbComboSelectedPositions = posStr.split(/[\s,]+/).map(Number).filter(function(n) { return !isNaN(n); });
+      document.getElementById('rgbComboMiniKbWrap').style.display = '';
+      renderRgbComboMiniKb();
+    }
+  };
   list.oninput = function(e) {
     var idx = parseInt(e.target.dataset.i), field = e.target.dataset.field;
     if (field !== undefined && !isNaN(idx)) { combos[idx][field] = e.target.value; updateRgbOutput(); }
@@ -1473,7 +1524,15 @@ function addBehavior() {
   rgbRenderAll();
 }
 function addCombo() {
-  combos.push({ name: document.getElementById('comboName').value.trim() || 'new_combo', bind: document.getElementById('comboBind').value, pos: document.getElementById('comboPos').value, layers: document.getElementById('comboLayersInput').value });
+  var pos = document.getElementById('comboPos').value.trim();
+  if (!pos && rgbComboSelectedPositions.length) {
+    pos = rgbComboSelectedPositions.slice().sort(function(a,b) { return a-b; }).join(' ');
+  }
+  combos.push({ name: document.getElementById('comboName').value.trim() || 'new_combo', bind: document.getElementById('comboBind').value, pos: pos, layers: document.getElementById('comboLayersInput').value });
+  rgbComboSelectedPositions = [];
+  rgbEditingComboIndex = -1;
+  document.getElementById('rgbComboMiniKbWrap').style.display = 'none';
+  document.getElementById('comboPos').value = '';
   rgbRenderAll();
 }
 function addBlinkMacro() {
@@ -1599,7 +1658,7 @@ function updateRgbOutput() {
   mergedArr.forEach(function(l) { mergedBKs[l.bk] = true; });
   var orphanColors = [];
   Object.keys(colorValueMap).forEach(function(ck) {
-    if (!mergedBKs[baseKey(ck)]) orphanColors.push(ck);
+    if (!mergedBKs[baseKey(ck)] && !colorValueMap[ck]._autoSync) orphanColors.push(ck);
   });
   // Build a lookup for disabled orphans from the layers array
   var disabledOrphans = {};
@@ -2133,9 +2192,20 @@ function renderLayerTabs() {
   keymapLayers.forEach(function(l, i) {
     if (l.status === 'reserved') return;
     var cls = i === activeLayerIndex ? 'layer-tab active' : 'layer-tab';
+    // Look up matching RGB layer color
+    var colorDot = '';
+    var lName = l.name.toUpperCase();
+    var rgbMatch = layers.find(function(rl) {
+      return rl.name === l.name || rl.name === 'LAYER_' + lName;
+    });
+    if (rgbMatch && rgbMatch.h !== '' && rgbMatch.s !== '' && rgbMatch.b !== '') {
+      var dotColor = 'hsl(' + rgbMatch.h + ',' + rgbMatch.s + '%,' + Math.max(Number(rgbMatch.b), 30) + '%)';
+      colorDot = '<span class="lt-color" style="background:' + dotColor + ';"></span>';
+    }
     html += '<button class="' + cls + '" data-layer="' + i + '" draggable="true" title="' + esc(l.displayName || l.name) + '">';
     html += '<span class="lt-index">' + i + '</span>';
     html += '<span class="lt-name">' + esc(l.displayName || l.name) + '</span>';
+    html += colorDot;
     html += '<span class="lt-delete" data-delete-layer="' + i + '" title="Delete layer">&times;</span>';
     html += '</button>';
   });
@@ -2163,6 +2233,8 @@ function updateLayerHeader() {
 function showLayerContextMenu(anchorEl) {
   var menu = document.getElementById('layerCtxMenu');
   var items = [
+    { label: 'Customize Layer...', action: 'customize' },
+    { sep: true },
     { label: 'Duplicate Layer', action: 'duplicate' },
     { label: 'Delete Layer', action: 'delete', danger: true },
     { sep: true },
@@ -2200,6 +2272,10 @@ function closeCtxMenu() {
 function handleCtxAction(action) {
   closeCtxMenu();
   if (!keymapLayers[activeLayerIndex] || keymapLayers[activeLayerIndex].status === 'reserved') return;
+  if (action === 'customize') {
+    openLayerCustomizeDialog();
+    return;
+  }
   pushUndo();
   var layer = keymapLayers[activeLayerIndex];
 
@@ -2216,7 +2292,13 @@ function handleCtxAction(action) {
     if (keymapLayers.filter(function(l) { return l.status !== 'reserved'; }).length <= 1) return;
     keymapLayers.splice(activeLayerIndex, 1);
     if (activeLayerIndex >= keymapLayers.length) activeLayerIndex = keymapLayers.length - 1;
+    // Find nearest non-reserved layer
     while (activeLayerIndex > 0 && keymapLayers[activeLayerIndex].status === 'reserved') activeLayerIndex--;
+    if (keymapLayers[activeLayerIndex] && keymapLayers[activeLayerIndex].status === 'reserved') {
+      for (var fi = 0; fi < keymapLayers.length; fi++) {
+        if (keymapLayers[fi].status !== 'reserved') { activeLayerIndex = fi; break; }
+      }
+    }
   } else if (action === 'quick-kp') {
     openQuickAssign();
     return; // Don't re-render below, Quick Assign handles it
@@ -2254,6 +2336,20 @@ function handleCtxAction(action) {
   renderLayerTabs();
   renderKeyboardSvg('keyboardSvg');
   updateKeymapOutput();
+}
+
+function openLayerCustomizeDialog() {
+  var layer = keymapLayers[activeLayerIndex];
+  if (!layer) return;
+  var overlay = document.getElementById('layerCustomizeOverlay');
+  document.getElementById('lcTitle').textContent = layer.name;
+  document.getElementById('lcName').value = layer.name;
+  document.getElementById('lcLabel').value = layer.displayName || '';
+  overlay.style.display = 'flex';
+}
+
+function closeLayerCustomizeDialog() {
+  document.getElementById('layerCustomizeOverlay').style.display = 'none';
 }
 
 // ================================================
@@ -2594,6 +2690,24 @@ function renderComboMiniKb() {
   if (!keyboardLayout) { container.innerHTML = ''; return; }
   container.innerHTML = '<svg class="keyboard-svg combo-mini-kb-svg" id="comboMiniSvg"></svg>';
   renderKeyboardSvg('comboMiniSvg', { scale: 36, keySize: 33, comboMode: true, comboPositions: comboSelectedPositions });
+}
+
+function renderRgbComboMiniKb() {
+  var container = document.getElementById('rgbComboMiniKb');
+  if (!keyboardLayout) { container.innerHTML = ''; return; }
+  container.innerHTML = '<svg class="keyboard-svg combo-mini-kb-svg" id="rgbComboMiniSvg"></svg>';
+  renderKeyboardSvg('rgbComboMiniSvg', { scale: 36, keySize: 33, comboMode: true, comboPositions: rgbComboSelectedPositions });
+  // Sync positions to the relevant field
+  var posStr = rgbComboSelectedPositions.slice().sort(function(a,b) { return a-b; }).join(' ');
+  if (rgbEditingComboIndex >= 0 && combos[rgbEditingComboIndex]) {
+    combos[rgbEditingComboIndex].pos = posStr;
+    // Update the inline input
+    var posInput = document.querySelector('#comboList input[data-field="pos"][data-i="' + rgbEditingComboIndex + '"]');
+    if (posInput) posInput.value = posStr;
+    updateRgbOutput();
+  } else {
+    document.getElementById('comboPos').value = posStr;
+  }
 }
 
 function renderKeymapComboList() {
@@ -3171,13 +3285,15 @@ function updateKeymapOutput() {
     out += '\n';
   }
 
-  // Keymap
+  // Keymap — track layer positions for highlighting
+  var layerMarkers = []; // { start, end, layerIndex }
   out += '/ {\n    keymap {\n        compatible = "zmk,keymap";\n\n';
   keymapLayers.forEach(function(l, li) {
     if (l.status === 'reserved') {
       out += '        ' + l.name + ' { status = "reserved"; };\n\n';
       return;
     }
+    var layerStart = out.length;
     out += '        ' + l.name + ' {\n';
     if (l.displayName && l.displayName !== l.name) {
       out += '            display-name = "' + l.displayName + '";\n';
@@ -3225,6 +3341,7 @@ function updateKeymapOutput() {
       out += '            sensor-bindings = <' + sensorParts.join(' ') + '>;\n';
     }
     out += '        };\n\n';
+    layerMarkers.push({ start: layerStart, end: out.length, layerIndex: li });
   });
   out += '    };\n};\n';
 
@@ -3240,7 +3357,22 @@ function updateKeymapOutput() {
     out += '    };\n};\n';
   }
 
-  document.getElementById('kmOutput').value = out;
+  // Build highlighted HTML output
+  var hlOut = '';
+  var lastPos = 0;
+  layerMarkers.sort(function(a, b) { return a.start - b.start; });
+  layerMarkers.forEach(function(m) {
+    hlOut += esc(out.substring(lastPos, m.start));
+    if (m.layerIndex === activeLayerIndex) {
+      hlOut += '<span class="hl-layer">' + esc(out.substring(m.start, m.end)) + '</span>';
+    } else {
+      hlOut += esc(out.substring(m.start, m.end));
+    }
+    lastPos = m.end;
+  });
+  hlOut += esc(out.substring(lastPos));
+  document.getElementById('kmOutput').innerHTML = hlOut;
+  document.getElementById('kmOutput').dataset.rawText = out;
   var activeCount = keymapLayers.filter(function(l) { return l.status !== 'reserved'; }).length;
   document.getElementById('kmOutputStats').textContent = activeCount + ' layers \u00B7 ' + keymapCombos.length + ' combos \u00B7 ' + keymapMacros.length + ' macros \u00B7 ' + keymapConditionalLayers.length + ' cond. layers';
 }
@@ -3301,17 +3433,26 @@ function generateBehaviorCode(b) {
 // ================================================
 function syncCrossTabData() {
   // Reflect keymap editor layers into RGB generator layer dropdown
+  // Build lookup of existing RGB layer base keys to avoid duplicates
+  var existingBaseKeys = {};
+  layers.forEach(function(l) { existingBaseKeys[baseKey(l.name)] = true; });
+  Object.keys(colorValueMap).forEach(function(ck) { existingBaseKeys[baseKey(ck)] = true; });
+
   keymapLayers.forEach(function(kl, i) {
     if (kl.status === 'reserved') return;
-    var exists = layers.some(function(l) { return l.name === kl.name || l.name === 'LAYER_' + kl.name.toUpperCase(); });
-    if (!exists) {
-      var key = 'LAYER_' + kl.name.toUpperCase();
-      if (!colorValueMap[key]) {
-        var hue = (i * 60) % 360;
-        colorValueMap[key] = { h: hue, s: 100, b: 50 };
-        colorLabelMap[key] = kl.displayName || kl.name;
-      }
+    var klBase = baseKey(kl.name);
+    // Also try stripping trailing _N (e.g. abc_0 → ABC, nmrw_1 → NMRW)
+    var klBaseStripped = klBase.replace(/_\d+$/, '');
+    // Also try matching by displayName (e.g. "ABC", "KPAD")
+    var dispBase = kl.displayName ? kl.displayName.toUpperCase().replace(/[^A-Z0-9]/g, '_') : '';
+    if (existingBaseKeys[klBase] || existingBaseKeys[klBaseStripped] || (dispBase && existingBaseKeys[dispBase])) return;
+    var key = 'LAYER_' + klBase;
+    if (!colorValueMap[key]) {
+      var hue = (i * 60) % 360;
+      colorValueMap[key] = { h: hue, s: 100, b: 50, _autoSync: true };
+      colorLabelMap[key] = kl.displayName || kl.name;
     }
+    existingBaseKeys[klBase] = true;
   });
 
   // Reflect keymap behaviors into RGB behavior macro selection
@@ -3693,6 +3834,27 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('addMacroBtn').onclick = addMacro;
   document.getElementById('addBehaviorBtn').onclick = addBehavior;
   document.getElementById('addComboBtn').onclick = addCombo;
+  // Show/hide RGB combo mini-keyboard and sync positions
+  document.getElementById('comboPos').addEventListener('focus', function() {
+    var wrap = document.getElementById('rgbComboMiniKbWrap');
+    // Parse existing positions from the field
+    var val = this.value.trim();
+    if (val && rgbEditingComboIndex < 0) {
+      rgbComboSelectedPositions = val.split(/[\s,]+/).map(Number).filter(function(n) { return !isNaN(n); });
+    }
+    wrap.style.display = '';
+    renderRgbComboMiniKb();
+  });
+  document.getElementById('rgbComboMiniKb').addEventListener('click', function(e) {
+    var group = e.target.closest('.key-group');
+    if (!group) return;
+    var ki = parseInt(group.dataset.key);
+    if (isNaN(ki)) return;
+    var idx = rgbComboSelectedPositions.indexOf(ki);
+    if (idx >= 0) rgbComboSelectedPositions.splice(idx, 1);
+    else rgbComboSelectedPositions.push(ki);
+    renderRgbComboMiniKb();
+  });
   document.getElementById('addBlinkMacroBtn').onclick = addBlinkMacro;
   document.getElementById('copyOutputBtn').onclick = function() {
     var out = document.getElementById('output');
@@ -3858,6 +4020,7 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('bindingEditor').classList.remove('visible');
       renderLayerTabs();
       renderKeyboardSvg('keyboardSvg');
+      updateKeymapOutput();
     }
   });
 
@@ -4117,6 +4280,37 @@ document.addEventListener('DOMContentLoaded', function() {
     cancelBindingEditor();
   };
   document.getElementById('beCancelBtn').onclick = cancelBindingEditor;
+  // Quick-set &none / &trans
+  document.getElementById('beSetNone').onclick = function() {
+    if (selectedKeyIndex >= 0) {
+      pushUndo();
+      keymapLayers[activeLayerIndex].bindings[selectedKeyIndex] = '&none';
+      cancelBindingEditor();
+      renderKeyboardSvg('keyboardSvg');
+      updateKeymapOutput();
+    }
+  };
+  document.getElementById('beSetTrans').onclick = function() {
+    if (selectedKeyIndex >= 0) {
+      pushUndo();
+      keymapLayers[activeLayerIndex].bindings[selectedKeyIndex] = '&trans';
+      cancelBindingEditor();
+      renderKeyboardSvg('keyboardSvg');
+      updateKeymapOutput();
+    }
+  };
+
+  // --- Global keyboard shortcuts ---
+  document.addEventListener('keydown', function(e) {
+    // Only active when keymap tab is visible
+    if (document.getElementById('tabKeymap').style.display === 'none') return;
+    // Don't intercept when typing in inputs
+    var tag = (e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || tag === 'select' || e.target.isContentEditable) return;
+    if (e.ctrlKey && !e.shiftKey && e.key === 'z') { e.preventDefault(); undo(); }
+    else if ((e.ctrlKey && e.key === 'y') || (e.ctrlKey && e.shiftKey && e.key === 'z') || (e.ctrlKey && e.shiftKey && e.key === 'Z')) { e.preventDefault(); redo(); }
+    else if (e.key === 'Escape') { cancelBindingEditor(); closeValuePicker(); }
+  });
 
   // --- Floating ValuePicker events ---
   document.getElementById('vpOverlay').addEventListener('click', function(e) {
@@ -4174,6 +4368,8 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('vpCounter').addEventListener('click', function(e) {
     if (e.target.id === 'vpShowAll') {
       vpState.showAll = true;
+      vpState.query = '';
+      document.getElementById('vpSearch').value = '';
       vpRenderResults();
     }
   });
@@ -4199,9 +4395,32 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Keymap output copy
   document.getElementById('kmCopyBtn').onclick = function() {
-    var out = document.getElementById('kmOutput');
-    out.select(); document.execCommand('copy');
+    var el = document.getElementById('kmOutput');
+    var raw = el.dataset.rawText || el.textContent;
+    navigator.clipboard.writeText(raw).catch(function() {
+      // Fallback: create temporary textarea
+      var ta = document.createElement('textarea');
+      ta.value = raw; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    });
   };
+
+  // --- Layer Customize dialog ---
+  document.getElementById('lcOkBtn').onclick = function() {
+    var layer = keymapLayers[activeLayerIndex];
+    if (!layer) return;
+    pushUndo();
+    var newName = document.getElementById('lcName').value.trim();
+    var newLabel = document.getElementById('lcLabel').value.trim();
+    if (newName) layer.name = newName.toLowerCase().replace(/[^a-z0-9_]/g, '_');
+    layer.displayName = newLabel || layer.name;
+    closeLayerCustomizeDialog();
+    renderLayerTabs();
+    updateKeymapOutput();
+  };
+  document.getElementById('lcCancelBtn').onclick = closeLayerCustomizeDialog;
+  document.getElementById('layerCustomizeOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeLayerCustomizeDialog();
+  });
 
   // --- Combo editor ---
   document.getElementById('kmAddComboBtn').onclick = function() {
