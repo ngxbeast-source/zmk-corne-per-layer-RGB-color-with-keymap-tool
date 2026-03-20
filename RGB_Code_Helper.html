@@ -312,7 +312,7 @@
         <div class="section-body" id="layerBody">
           <div class="input-row">
             <div class="input-group"><label>Name</label><input type="text" id="layerName" placeholder="LAYER_ABC" style="width:120px;"></div>
-            <div class="input-group"><label>Idx</label><input type="number" id="layerIndex" min="0" value="0" style="width:42px;"></div>
+            <div class="input-group"><label>Idx</label><input type="number" id="layerIndex" min="0" placeholder="—" style="width:42px;"></div>
             <div class="input-group"><label>H</label><input type="range" id="hue" min="0" max="360" value="0"><input type="number" id="hueNum" min="0" max="360" value="0" style="width:44px;"></div>
             <div class="input-group"><label>S</label><input type="range" id="sat" min="0" max="100" value="100"><input type="number" id="satNum" min="0" max="100" value="100" style="width:44px;"></div>
             <div class="input-group"><label>B</label><input type="range" id="bri" min="0" max="100" value="50"><input type="number" id="briNum" min="0" max="100" value="50" style="width:44px;"></div>
@@ -1458,8 +1458,9 @@ function updateHeaderDropdowns() {
 }
 
 function addLayer() {
-  var name = document.getElementById('layerName').value.trim() || 'NEW_LAYER';
-  layers.push({ name: name, index: document.getElementById('layerIndex').value || String(layers.length), h: document.getElementById('hue').value, s: document.getElementById('sat').value, b: document.getElementById('bri').value, label: document.getElementById('layerLabel').value });
+  var name = document.getElementById('layerName').value.trim() || 'NEW_COLOR';
+  var idxVal = document.getElementById('layerIndex').value;
+  layers.push({ name: name, index: idxVal, h: document.getElementById('hue').value, s: document.getElementById('sat').value, b: document.getElementById('bri').value, label: document.getElementById('layerLabel').value });
   rgbRenderAll();
 }
 function addMacro() {
