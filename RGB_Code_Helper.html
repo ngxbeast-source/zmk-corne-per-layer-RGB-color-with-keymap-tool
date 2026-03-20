@@ -903,6 +903,7 @@ var macros = [];
 var behaviors = [];
 var combos = [];
 var blinkMacros = [];
+var dtsiNativeBehaviors = []; // native ZMK behaviors parsed from dtsi (hm, ltq, td_numcaps, etc.)
 var colorValueMap = {};
 var colorLabelMap = {};
 
@@ -928,32 +929,96 @@ var keymapParsedIncludes = null; // null = use defaults, [] = user had none
 var undoStack = [];
 var redoStack = [];
 var UNDO_LIMIT = 50;
-function snapshotBindings() {
-  return keymapLayers.map(function(l) { return { bindings: l.bindings.slice() }; });
+function snapshotState() {
+  return {
+    layers: keymapLayers.map(function(l) {
+      return { name: l.name, displayName: l.displayName, bindings: l.bindings.slice(), status: l.status };
+    }),
+    combos: keymapCombos.map(function(c) {
+      return { name: c.name, binding: c.binding, positions: c.positions.slice(), layers: c.layers, timeout: c.timeout };
+    }),
+    macros: keymapMacros.map(function(m) {
+      return { name: m.name, label: m.label, steps: m.steps.slice(), paramType: m.paramType, waitMs: m.waitMs, tapMs: m.tapMs, _fromRgb: m._fromRgb };
+    }),
+    behaviors: keymapBehaviors.map(function(b) {
+      var cfg = {};
+      for (var k in b.config) cfg[k] = b.config[k];
+      return { name: b.name, type: b.type, label: b.label, config: cfg, _fromRgb: b._fromRgb, _fromDtsi: b._fromDtsi };
+    }),
+    condLayers: keymapConditionalLayers.map(function(c) {
+      return { name: c.name, ifLayers: c.ifLayers.slice(), thenLayer: c.thenLayer };
+    }),
+    sensors: keymapSensorBindings.map(function(s) {
+      return { layerIndex: s.layerIndex, bindings: s.bindings.slice() };
+    }),
+    activeLayerIndex: activeLayerIndex
+  };
+}
+function restoreState(snap) {
+  keymapLayers = snap.layers.map(function(l) {
+    return { name: l.name, displayName: l.displayName, bindings: l.bindings.slice(), status: l.status };
+  });
+  keymapCombos = snap.combos.map(function(c) {
+    return { name: c.name, binding: c.binding, positions: c.positions.slice(), layers: c.layers, timeout: c.timeout };
+  });
+  keymapMacros = snap.macros.map(function(m) {
+    return { name: m.name, label: m.label, steps: m.steps.slice(), paramType: m.paramType, waitMs: m.waitMs, tapMs: m.tapMs, _fromRgb: m._fromRgb };
+  });
+  keymapBehaviors = snap.behaviors.map(function(b) {
+    var cfg = {};
+    for (var k in b.config) cfg[k] = b.config[k];
+    return { name: b.name, type: b.type, label: b.label, config: cfg, _fromRgb: b._fromRgb, _fromDtsi: b._fromDtsi };
+  });
+  keymapConditionalLayers = snap.condLayers.map(function(c) {
+    return { name: c.name, ifLayers: c.ifLayers.slice(), thenLayer: c.thenLayer };
+  });
+  keymapSensorBindings = snap.sensors.map(function(s) {
+    return { layerIndex: s.layerIndex, bindings: s.bindings.slice() };
+  });
+  activeLayerIndex = snap.activeLayerIndex;
+  if (activeLayerIndex >= keymapLayers.length) activeLayerIndex = Math.max(0, keymapLayers.length - 1);
 }
 function pushUndo() {
-  undoStack.push(snapshotBindings());
+  undoStack.push(snapshotState());
   if (undoStack.length > UNDO_LIMIT) undoStack.shift();
   redoStack = [];
   updateUndoRedoBtns();
 }
-function performUndo() {
-  if (undoStack.length === 0) return;
-  redoStack.push(snapshotBindings());
-  var snap = undoStack.pop();
-  snap.forEach(function(s, i) { if (keymapLayers[i]) keymapLayers[i].bindings = s.bindings; });
+function fullRender() {
+  selectedKeyIndex = -1;
+  editingComboIndex = -1;
+  editingMacroIndex = -1;
+  editingBehaviorIndex = -1;
+  editingCondLayerIndex = -1;
+  editingSensorIndex = -1;
+  document.getElementById('bindingEditor').classList.remove('visible');
+  var kmComboEd = document.getElementById('kmComboEditor'); if (kmComboEd) kmComboEd.style.display = 'none';
+  var kmMacroEd = document.getElementById('kmMacroEditor'); if (kmMacroEd) kmMacroEd.style.display = 'none';
+  var kmBehEd = document.getElementById('kmBehaviorEditor'); if (kmBehEd) kmBehEd.style.display = 'none';
+  var kmCondEd = document.getElementById('kmCondLayerEditor'); if (kmCondEd) kmCondEd.style.display = 'none';
+  var kmSensorEd = document.getElementById('kmSensorEditor'); if (kmSensorEd) kmSensorEd.style.display = 'none';
+  renderLayerTabs();
   renderKeyboardSvg('keyboardSvg');
+  renderKeymapComboList();
+  renderKeymapMacroList();
+  renderKeymapBehaviorList();
+  renderKeymapCondLayerList();
+  renderKeymapSensorList();
+  populateBehaviorDropdown();
   updateKeymapOutput();
   updateUndoRedoBtns();
 }
+function performUndo() {
+  if (undoStack.length === 0) return;
+  redoStack.push(snapshotState());
+  restoreState(undoStack.pop());
+  fullRender();
+}
 function performRedo() {
   if (redoStack.length === 0) return;
-  undoStack.push(snapshotBindings());
-  var snap = redoStack.pop();
-  snap.forEach(function(s, i) { if (keymapLayers[i]) keymapLayers[i].bindings = s.bindings; });
-  renderKeyboardSvg('keyboardSvg');
-  updateKeymapOutput();
-  updateUndoRedoBtns();
+  undoStack.push(snapshotState());
+  restoreState(redoStack.pop());
+  fullRender();
 }
 function updateUndoRedoBtns() {
   var ub = document.getElementById('kmUndoBtn');
@@ -1205,7 +1270,7 @@ function initResize(handleId, wrapId) {
 // RGB Parsing
 function parseUserCode() {
   var code = document.getElementById('userCodePaste').value;
-  layers = []; macros = []; behaviors = []; combos = []; blinkMacros = [];
+  layers = []; macros = []; behaviors = []; combos = []; blinkMacros = []; dtsiNativeBehaviors = [];
   colorValueMap = {}; colorLabelMap = {};
   var m;
 
@@ -1298,8 +1363,56 @@ function parseUserCode() {
     blinkMacros.push({ name: bname, key: bkey, color: bcolor, returnColor: breturnColor, wait: bwait, label: blabel });
   }
 
+  // Parse native ZMK behaviors from dtsi (hold-tap, tap-dance, mod-morph, sticky-key, sensor-rotate)
+  var dtsiBehRe = /(\w+)\s*:\s*\w+\s*\{([^}]*compatible\s*=\s*"zmk,behavior-[^"]*"[^}]*)\}/g;
+  var dbm;
+  var rgbBehNames = {};
+  behaviors.forEach(function(b) { rgbBehNames[b.name] = true; });
+  while ((dbm = dtsiBehRe.exec(code))) {
+    var dbname = dbm[1];
+    if (rgbBehNames[dbname]) continue; // skip RGB_HOLD_TAP behaviors already parsed
+    var dbbody = dbm[2];
+    var dbcompat = dbbody.match(/compatible\s*=\s*"([^"]*)"/);
+    if (!dbcompat) continue;
+    var dblabel = dbbody.match(/label\s*=\s*"([^"]*)"/);
+    var dbtype = '', dbconfig = {};
+    if (dbcompat[1] === 'zmk,behavior-hold-tap') {
+      dbtype = 'hold-tap';
+      var dtt = dbbody.match(/tapping-term-ms\s*=\s*<(\d+)>/);
+      var dfl = dbbody.match(/flavor\s*=\s*"([^"]*)"/);
+      var dbn = dbbody.match(/bindings\s*=\s*<([^>]*)>\s*,\s*<([^>]*)>/);
+      dbconfig = { tappingTerm: dtt ? dtt[1] : '200', flavor: dfl ? dfl[1] : 'tap-preferred', holdBinding: dbn ? dbn[1].trim() : '', tapBinding: dbn ? dbn[2].trim() : '' };
+    } else if (dbcompat[1] === 'zmk,behavior-tap-dance') {
+      dbtype = 'tap-dance';
+      var dtt2 = dbbody.match(/tapping-term-ms\s*=\s*<(\d+)>/);
+      var dbn2 = dbbody.match(/bindings\s*=\s*(<[^;]*);/);
+      var dtdBindStr = dbn2 ? dbn2[1].trim() : '';
+      dbconfig = { tappingTerm: dtt2 ? dtt2[1] : '200', bindings: dtdBindStr };
+    } else if (dbcompat[1] === 'zmk,behavior-mod-morph') {
+      dbtype = 'mod-morph';
+      var dbn3 = dbbody.match(/bindings\s*=\s*<([^>]*)>\s*,\s*<([^>]*)>/);
+      var dmods = dbbody.match(/mods\s*=\s*<\(([^)]*)\)>/);
+      dbconfig = { normalBinding: dbn3 ? dbn3[1].trim() : '', morphedBinding: dbn3 ? dbn3[2].trim() : '', mods: dmods ? dmods[1].trim() : '' };
+    } else if (dbcompat[1] === 'zmk,behavior-sticky-key') {
+      dbtype = 'sticky-key';
+      var dra = dbbody.match(/release-after-ms\s*=\s*<(\d+)>/);
+      var dbn4 = dbbody.match(/bindings\s*=\s*<([^>]*)>/);
+      dbconfig = { releaseAfter: dra ? dra[1] : '1000', binding: dbn4 ? dbn4[1].trim() : '' };
+    } else if (dbcompat[1] === 'zmk,behavior-sensor-rotate') {
+      dbtype = 'sensor-rotate';
+      var dbn5 = dbbody.match(/bindings\s*=\s*<([^>]*)>\s*,\s*<([^>]*)>/);
+      var dst = dbbody.match(/tap-ms\s*=\s*<(\d+)>/);
+      dbconfig = { sensorCW: dbn5 ? dbn5[1].trim() : '', sensorCCW: dbn5 ? dbn5[2].trim() : '', sensorTap: dst ? dst[1] : '' };
+    } else if (dbcompat[1] === 'zmk,behavior-macro-one-param' || dbcompat[1] === 'zmk,behavior-macro-two-param') {
+      continue; // macros handled separately
+    } else {
+      continue;
+    }
+    dtsiNativeBehaviors.push({ name: dbname, type: dbtype, label: dblabel ? dblabel[1] : '', config: dbconfig, _fromDtsi: true });
+  }
+
   var status = document.getElementById('userCodeStatus');
-  status.textContent = 'Parsed: ' + layers.length + ' layers, ' + macros.length + ' macros, ' + behaviors.length + ' behaviors, ' + combos.length + ' combos, ' + blinkMacros.length + ' blink macros.';
+  status.textContent = 'Parsed: ' + layers.length + ' layers, ' + macros.length + ' macros, ' + behaviors.length + ' behaviors, ' + dtsiNativeBehaviors.length + ' native behaviors, ' + combos.length + ' combos, ' + blinkMacros.length + ' blink macros.';
   status.style.display = 'inline';
   setTimeout(function() { status.style.display = 'none'; }, 4000);
   rgbRenderAll();
@@ -1712,7 +1825,14 @@ function updateRgbOutput() {
       seenBlink[bm.name] = true;
       out += 'ZMK_MACRO(' + bm.name + ',\n';
       if (bm.label) out += '    label = "' + bm.label + '";\n';
-      out += '    bindings = <&macro_tap &kp ' + bm.key + ' BLINK_SEQ(' + bm.color + ', ' + bm.returnColor + ', ' + bm.wait + ')>;\n';
+      if (bm.key.indexOf('&mo') === 0) {
+        // Momentary-style blink: press + pause + release
+        out += '    bindings = <&macro_press ' + bm.key + ' BLINK_SEQ(' + bm.color + ', ' + bm.returnColor + ', ' + bm.wait + ')>,\n';
+        out += '               <&macro_pause_for_release>,\n';
+        out += '               <&macro_release ' + bm.key + '>;\n';
+      } else {
+        out += '    bindings = <&macro_tap &kp ' + bm.key + ' BLINK_SEQ(' + bm.color + ', ' + bm.returnColor + ', ' + bm.wait + ')>;\n';
+      }
       out += ')\n';
     });
   }
@@ -2128,8 +2248,9 @@ function parseKeymap(text) {
       } else if (bcompat[1] === 'zmk,behavior-tap-dance') {
         btype = 'tap-dance';
         var tt2 = bbody.match(/tapping-term-ms\s*=\s*<(\d+)>/);
-        var bn2 = bbody.match(/bindings\s*=\s*<([^>]*)>/);
-        config = { tappingTerm: tt2 ? tt2[1] : '200', bindings: bn2 ? bn2[1].trim() : '' };
+        var bn2 = bbody.match(/bindings\s*=\s*(<[^;]*);/);
+        var tdBindStr = bn2 ? bn2[1].trim() : '';
+        config = { tappingTerm: tt2 ? tt2[1] : '200', bindings: tdBindStr };
       } else if (bcompat[1] === 'zmk,behavior-mod-morph') {
         btype = 'mod-morph';
         var bn3 = bbody.match(/bindings\s*=\s*<([^>]*)>\s*,\s*<([^>]*)>/);
@@ -3392,7 +3513,7 @@ function generateBehaviorCode(b) {
     if (b.label) out += '            label = "' + b.label + '";\n';
     out += '            #binding-cells = <0>;\n';
     out += '            tapping-term-ms = <' + (b.config.tappingTerm || 200) + '>;\n';
-    out += '            bindings = <' + (b.config.bindings || '') + '>;\n';
+    out += '            bindings = ' + (b.config.bindings || '<>') + ';\n';
   } else if (b.type === 'mod-morph') {
     out += '            compatible = "zmk,behavior-mod-morph";\n';
     if (b.label) out += '            label = "' + b.label + '";\n';
@@ -3525,6 +3646,20 @@ function syncRgbToKeymap() {
           tapBinding: '&kp'
         },
         _fromRgb: true
+      });
+    }
+  });
+
+  // Sync dtsi native behaviors (hm, ltq, td_numcaps, etc.) into keymap behaviors
+  dtsiNativeBehaviors.forEach(function(db) {
+    if (!existingBehNames[db.name]) {
+      existingBehNames[db.name] = true;
+      keymapBehaviors.push({
+        name: db.name,
+        type: db.type,
+        label: db.label || db.name,
+        config: db.config,
+        _fromDtsi: true
       });
     }
   });
@@ -3985,6 +4120,7 @@ document.addEventListener('DOMContentLoaded', function() {
         function finishInlineRename() {
           var val = input.value.trim();
           if (val && val !== currentName) {
+            pushUndo();
             layer.displayName = val;
             layer.name = val.toLowerCase().replace(/[^a-z0-9_]/g, '_');
           }
@@ -4003,6 +4139,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var tab = e.target.closest('.layer-tab');
     if (!tab) return;
     if (tab.id === 'addLayerTabBtn') {
+      pushUndo();
       var newName = 'new_layer_' + keymapLayers.length;
       var numKeys = keyboardLayout ? keyboardLayout.length : 42;
       var newBindings = [];
@@ -4059,6 +4196,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!tab) return;
     var dropIndex = parseInt(tab.dataset.layer);
     if (isNaN(dropIndex) || dragSrcIndex === null || dragSrcIndex === dropIndex) return;
+    pushUndo();
     // Move the layer in the array
     var moving = keymapLayers.splice(dragSrcIndex, 1)[0];
     keymapLayers.splice(dropIndex, 0, moving);
@@ -4097,6 +4235,7 @@ document.addEventListener('DOMContentLoaded', function() {
       committed = true;
       var newName = input.value.trim();
       if (newName && newName !== currentName) {
+        pushUndo();
         layer.displayName = newName;
         layer.name = newName.toLowerCase().replace(/[^a-z0-9_]/g, '_');
         updateKeymapOutput();
@@ -4300,6 +4439,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   };
 
+  // --- Undo/Redo button clicks ---
+  document.getElementById('kmUndoBtn').onclick = performUndo;
+  document.getElementById('kmRedoBtn').onclick = performRedo;
+
   // --- Global keyboard shortcuts ---
   document.addEventListener('keydown', function(e) {
     // Only active when keymap tab is visible
@@ -4307,8 +4450,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Don't intercept when typing in inputs
     var tag = (e.target.tagName || '').toLowerCase();
     if (tag === 'input' || tag === 'textarea' || tag === 'select' || e.target.isContentEditable) return;
-    if (e.ctrlKey && !e.shiftKey && e.key === 'z') { e.preventDefault(); undo(); }
-    else if ((e.ctrlKey && e.key === 'y') || (e.ctrlKey && e.shiftKey && e.key === 'z') || (e.ctrlKey && e.shiftKey && e.key === 'Z')) { e.preventDefault(); redo(); }
+    if (e.ctrlKey && !e.shiftKey && e.key === 'z') { e.preventDefault(); performUndo(); }
+    else if ((e.ctrlKey && e.key === 'y') || (e.ctrlKey && e.shiftKey && e.key === 'z') || (e.ctrlKey && e.shiftKey && e.key === 'Z')) { e.preventDefault(); performRedo(); }
     else if (e.key === 'Escape') { cancelBindingEditor(); closeValuePicker(); }
   });
 
@@ -4438,6 +4581,7 @@ document.addEventListener('DOMContentLoaded', function() {
     editingComboIndex = -1;
   };
   document.getElementById('kmComboSaveBtn').onclick = function() {
+    pushUndo();
     var combo = {
       name: document.getElementById('kmComboName').value || 'combo_' + keymapCombos.length,
       binding: document.getElementById('kmComboBind').value,
@@ -4471,6 +4615,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Combo list events
   document.getElementById('kmComboList').addEventListener('click', function(e) {
     if (e.target.dataset.removeCombo !== undefined) {
+      pushUndo();
       keymapCombos.splice(parseInt(e.target.dataset.removeCombo), 1);
       renderKeymapComboList();
       updateKeymapOutput();
@@ -4490,7 +4635,10 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // --- Macro editor ---
+  var macroAddedViaButton = false;
   document.getElementById('kmAddMacroBtn').onclick = function() {
+    pushUndo();
+    macroAddedViaButton = true;
     editingMacroIndex = -1;
     keymapMacros.push({ name: 'macro_' + keymapMacros.length, label: '', steps: ['&macro_tap', '&kp A'], paramType: 0, waitMs: '', tapMs: '' });
     editingMacroIndex = keymapMacros.length - 1;
@@ -4504,14 +4652,18 @@ document.addEventListener('DOMContentLoaded', function() {
     renderMacroSteps();
   };
   document.getElementById('kmMacroCancelBtn').onclick = function() {
-    if (editingMacroIndex >= 0 && keymapMacros[editingMacroIndex].steps.length === 0) {
-      keymapMacros.splice(editingMacroIndex, 1);
+    if (macroAddedViaButton && undoStack.length > 0) {
+      // Revert the add-macro action
+      performUndo();
     }
+    macroAddedViaButton = false;
     document.getElementById('kmMacroEditor').style.display = 'none';
     editingMacroIndex = -1;
     renderKeymapMacroList();
   };
   document.getElementById('kmMacroSaveBtn').onclick = function() {
+    pushUndo();
+    macroAddedViaButton = false;
     if (editingMacroIndex >= 0) {
       keymapMacros[editingMacroIndex].name = document.getElementById('kmMacroName').value || 'macro_' + editingMacroIndex;
       keymapMacros[editingMacroIndex].label = document.getElementById('kmMacroLabel').value;
@@ -4609,6 +4761,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Macro list events
   document.getElementById('kmMacroList').addEventListener('click', function(e) {
     if (e.target.dataset.removeMacro !== undefined) {
+      pushUndo();
       keymapMacros.splice(parseInt(e.target.dataset.removeMacro), 1);
       renderKeymapMacroList();
       populateBehaviorDropdown();
@@ -4644,6 +4797,7 @@ document.addEventListener('DOMContentLoaded', function() {
     editingBehaviorIndex = -1;
   };
   document.getElementById('kmBehaviorSaveBtn').onclick = function() {
+    pushUndo();
     var type = document.getElementById('kmBehaviorType').value;
     var config = {};
     if (type === 'hold-tap') {
@@ -4704,6 +4858,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Behavior list events
   document.getElementById('kmBehaviorList').addEventListener('click', function(e) {
     if (e.target.dataset.removeBehavior !== undefined) {
+      pushUndo();
       keymapBehaviors.splice(parseInt(e.target.dataset.removeBehavior), 1);
       renderKeymapBehaviorList();
       populateBehaviorDropdown();
@@ -4779,6 +4934,7 @@ document.addEventListener('DOMContentLoaded', function() {
     editingCondLayerIndex = -1;
   };
   document.getElementById('kmCondSaveBtn').onclick = function() {
+    pushUndo();
     var ifSel = document.getElementById('kmCondIfLayers');
     var ifLayers = [];
     for (var oi = 0; oi < ifSel.options.length; oi++) {
@@ -4799,6 +4955,7 @@ document.addEventListener('DOMContentLoaded', function() {
   };
   document.getElementById('kmCondLayerList').addEventListener('click', function(e) {
     if (e.target.dataset.removeCondlayer !== undefined) {
+      pushUndo();
       keymapConditionalLayers.splice(parseInt(e.target.dataset.removeCondlayer), 1);
       renderKeymapCondLayerList();
       updateKeymapOutput();
@@ -4838,6 +4995,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('kmSensorParams').style.display = custom ? 'none' : '';
   });
   document.getElementById('kmSensorSaveBtn').onclick = function() {
+    pushUndo();
     var layerIdx = parseInt(document.getElementById('kmSensorLayer').value);
     var behavior = document.getElementById('kmSensorBehavior').value;
     var bindingStr;
@@ -4862,6 +5020,7 @@ document.addEventListener('DOMContentLoaded', function() {
   };
   document.getElementById('kmSensorList').addEventListener('click', function(e) {
     if (e.target.dataset.removeSensor !== undefined) {
+      pushUndo();
       keymapSensorBindings.splice(parseInt(e.target.dataset.removeSensor), 1);
       renderKeymapSensorList();
       updateKeymapOutput();
