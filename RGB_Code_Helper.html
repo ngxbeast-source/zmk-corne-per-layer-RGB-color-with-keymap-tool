@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZMK RGB &amp; Keymap Editor v4</title>
+  <title>ZMK RGB &amp; Keymap Editor v8</title>
   <style>
     /* ====== THEME VARIABLES ====== */
     :root {
@@ -46,10 +46,10 @@
     /* ====== RGB GENERATOR TAB (from test_v3) ====== */
     .main-layout { height: calc(100vh - 44px); overflow: hidden; }
     .editor-panel { flex: 1; min-width: 0; padding: 0.8em; overflow-y: auto; }
-    .output-panel { width: 420px; min-width: 260px; max-width: 700px; background: var(--output-bg); display: flex; flex-direction: column; }
+    .output-panel { width: 420px; min-width: 260px; max-width: 60vw; background: var(--output-bg); display: flex; flex-direction: column; }
     .resize-handle { width: 5px; cursor: col-resize; background: var(--topbar-bg); flex-shrink: 0; transition: background 0.15s; }
     .resize-handle:hover, .resize-handle.active { background: var(--accent); }
-    .output-wrap { width: 420px; min-width: 260px; max-width: 700px; display: flex; flex-shrink: 0; background: var(--output-bg); }
+    .output-wrap { width: 420px; min-width: 260px; max-width: 60vw; display: flex; flex-shrink: 0; background: var(--output-bg); }
     .output-inner { display: flex; flex-direction: column; flex: 1; min-width: 0; }
     .output-inner .output-header { padding: 0.6em 1em 0.4em; display: flex; align-items: center; gap: 0.5em; flex-wrap: wrap; border-bottom: 1px solid var(--output-border); }
     .output-inner .output-header h2 { color: var(--topbar-muted); font-size: 0.95em; margin: 0; font-weight: 500; }
@@ -103,11 +103,11 @@
 
     /* ====== KEYMAP EDITOR TAB ====== */
     .km-layout { display: flex; height: calc(100vh - 44px); overflow: hidden; }
-    .km-output { width: 420px; min-width: 260px; max-width: 700px; background: var(--output-bg); display: flex; flex-direction: column; }
+    .km-output { width: 420px; min-width: 260px; max-width: 60vw; background: var(--output-bg); display: flex; flex-direction: column; }
 
     /* SVG keyboard */
     .keyboard-container { background: var(--svg-bg); border-radius: 10px; border: 1px solid var(--border); padding: 1em; margin-bottom: 0.7em; overflow: hidden; }
-    .keyboard-svg { width: 100%; max-height: 340px; display: block; margin: 0 auto; }
+    .keyboard-svg { width: 100%; max-width: 880px; max-height: 340px; display: block; margin: 0 auto; }
     .keyboard-svg .key-group { cursor: pointer; }
     .keyboard-svg .key-rect { fill: var(--key-bg); stroke: var(--key-border); stroke-width: 1.5; rx: 4; ry: 4; transition: fill 0.1s, stroke 0.1s; }
     .keyboard-svg .key-group:hover .key-rect { fill: var(--key-hover); stroke: var(--accent); }
@@ -151,6 +151,43 @@
     .layer-name-input { font-size: 1.1em; font-weight: 600; color: var(--text); padding: 0.15em 0.4em; border-radius: 4px; border: 1px solid var(--accent); background: var(--card); outline: none; width: 200px; }
     .layer-ctx-btn { background: var(--item-bg); border: 1px solid var(--border); border-radius: 4px; padding: 0.2em 0.5em; font-size: 0.9em; cursor: pointer; color: var(--muted); line-height: 1; }
     .layer-ctx-btn:hover { background: var(--key-hover); border-color: var(--accent); color: var(--text); }
+
+    /* Sensor bindings display */
+    .sensor-bindings-area { margin-top: 0.6em; }
+    .sensor-bindings-area h4 { font-size: 0.85em; color: var(--muted); margin: 0 0 0.4em; font-weight: 600; }
+    .sensor-cards { display: flex; gap: 1em; flex-wrap: wrap; }
+    .sensor-card { display: flex; flex-direction: column; align-items: center; gap: 0.3em; cursor: pointer; padding: 0.5em 0.8em; border-radius: 8px; border: 1px solid var(--border); background: var(--item-bg); transition: border-color 0.15s, background 0.15s; min-width: 100px; position: relative; }
+    .sensor-card:hover { border-color: var(--accent); background: var(--key-hover); }
+    .sensor-card .sensor-label { font-size: 0.75em; font-weight: 600; color: var(--text); font-family: 'Consolas', 'Fira Code', monospace; }
+    .sensor-card .sensor-icon { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--item-bg), #2a2a3a); border: 2px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; position: relative; }
+    .sensor-card:hover .sensor-icon { border-color: var(--accent); }
+    .sensor-card .sensor-behavior { font-size: 0.6em; color: var(--accent2); position: absolute; top: -1px; left: 50%; transform: translateX(-50%); white-space: nowrap; opacity: 0.75; }
+    .sensor-card .sensor-cw, .sensor-card .sensor-ccw { font-size: 0.65em; color: var(--text); display: flex; align-items: center; gap: 2px; }
+    .sensor-card .sensor-cw::before { content: '\21BB'; font-size: 0.9em; color: var(--accent); }
+    .sensor-card .sensor-ccw::before { content: '\21BA'; font-size: 0.9em; color: var(--accent); }
+    .sensor-card .sensor-delete { position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; border-radius: 50%; background: var(--danger, #e55); color: #fff; border: none; font-size: 0.7em; cursor: pointer; display: none; align-items: center; justify-content: center; line-height: 1; }
+    .sensor-card:hover .sensor-delete { display: flex; }
+    .sensor-add-btn { display: flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 50%; border: 2px dashed var(--border); background: transparent; color: var(--muted); font-size: 1.5em; cursor: pointer; transition: border-color 0.15s, color 0.15s; }
+    .sensor-add-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Sensor edit modal */
+    .sensor-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.55); z-index: 300; display: flex; align-items: center; justify-content: center; }
+    .sensor-modal { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.2em 1.5em; min-width: 380px; max-width: 480px; color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+    .sensor-modal h3 { margin: 0 0 0.8em; font-size: 1.05em; display: flex; align-items: center; gap: 0.5em; }
+    .sensor-modal h3 code { background: var(--item-bg); padding: 0.15em 0.5em; border-radius: 4px; font-size: 0.9em; border: 1px solid var(--border); }
+    .sensor-modal h3 .sensor-icon-sm { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--item-bg), #2a2a3a); border: 2px solid var(--border); display: inline-flex; flex-direction: column; align-items: center; justify-content: center; margin-left: auto; }
+    .sensor-modal .sm-row { margin-bottom: 0.6em; }
+    .sensor-modal .sm-row label { display: block; font-size: 0.75em; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.2em; }
+    .sensor-modal .sm-row select, .sensor-modal .sm-row input { width: 100%; padding: 0.35em 0.5em; border: 1px solid var(--border); border-radius: 4px; background: var(--item-bg); color: var(--text); font-size: 0.9em; box-sizing: border-box; }
+    .sensor-modal .sm-row select:focus, .sensor-modal .sm-row input:focus { border-color: var(--accent); outline: none; }
+    .sensor-modal .sm-params { border: 1px solid var(--border); border-radius: 6px; padding: 0.6em; background: rgba(0,0,0,0.1); margin-top: 0.4em; }
+    .sensor-modal .sm-params .sm-param-label { font-size: 0.7em; font-weight: 700; text-transform: uppercase; color: var(--accent2); margin-bottom: 0.15em; }
+    .sensor-modal .sm-actions { margin-top: 1em; display: flex; gap: 0.5em; justify-content: flex-end; }
+    .sensor-modal .sm-actions button { padding: 0.35em 1.2em; border-radius: 4px; border: 1px solid var(--border); cursor: pointer; font-size: 0.9em; }
+    .sensor-modal .sm-actions .sm-apply { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+    .sensor-modal .sm-actions .sm-apply:hover { opacity: 0.9; }
+    .sensor-modal .sm-actions .sm-cancel { background: var(--item-bg); color: var(--text); }
+    .sensor-modal .sm-actions .sm-cancel:hover { background: var(--key-hover); }
 
     /* Context menu */
     .ctx-menu { position: absolute; z-index: 150; background: var(--card); border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); min-width: 220px; padding: 0.3em 0; }
@@ -287,7 +324,7 @@
 
   <!-- ====== TOPBAR ====== -->
   <div class="topbar">
-    <h1>ZMK Per-Layer Color and Keymap Editor <small>v7</small></h1>
+    <h1>ZMK Per-Layer Color and Keymap Editor <small>v8</small></h1>
     <div class="tab-bar">
       <button class="tab-btn active" data-tab="tabRgb">RGB Generator</button>
       <button class="tab-btn" data-tab="tabKeymap">Keymap Editor</button>
@@ -313,6 +350,7 @@
           <textarea id="userCodePaste" rows="6" placeholder="Paste your .dtsi code here (layers, colors, macros, behaviors, combos, blink macros)..."></textarea>
           <div style="margin-top:0.4em;display:flex;align-items:center;gap:0.5em;">
             <button id="parseBtn">Parse &amp; Reflect</button>
+            <button id="rgbClearSyncBtn" title="Remove data synced from Keymap tab" style="background:#6a3030;color:#eee;border:1px solid #944;font-size:0.85em;padding:0.25em 0.7em;border-radius:4px;cursor:pointer;">Clear Keymap Data</button>
             <span id="userCodeStatus" class="status-msg" style="display:none;"></span>
           </div>
         </div>
@@ -488,6 +526,7 @@
           <textarea id="kmKeymapPaste" rows="6" placeholder="Paste your .keymap file content here..."></textarea>
           <div style="margin-top:0.4em;display:flex;align-items:center;gap:0.5em;">
             <button id="kmParseBtn">Parse Keymap</button>
+            <button id="kmClearSyncBtn" title="Remove data synced from RGB tab" style="background:#6a3030;color:#eee;border:1px solid #944;font-size:0.85em;padding:0.25em 0.7em;border-radius:4px;cursor:pointer;">Clear RGB Data</button>
             <span id="kmParseStatus" class="status-msg" style="display:none;"></span>
           </div>
         </div>
@@ -507,6 +546,12 @@
       <div class="keyboard-container" id="keyboardContainer">
         <svg class="keyboard-svg" id="keyboardSvg"></svg>
         <div style="text-align:center;font-size:0.7em;color:var(--muted);margin-top:2px;">Click key to edit &middot; Ctrl+Z undo &middot; Ctrl+Y redo &middot; Esc close</div>
+      </div>
+
+      <!-- SENSOR BINDINGS VISUAL DISPLAY -->
+      <div class="sensor-bindings-area" id="sensorBindingsArea" style="display:none;">
+        <h4>Sensor bindings</h4>
+        <div class="sensor-cards" id="sensorCards"></div>
       </div>
 
       <!-- BINDING EDITOR -->
@@ -753,44 +798,43 @@
         </div>
       </div>
 
-      <!-- SENSOR BINDINGS -->
-      <div class="section">
-        <div class="section-head" data-toggle="kmSensorBody">
-          <h2>&#9881; Sensor Bindings</h2>
-          <span class="toggle-icon">&#9662;</span>
-        </div>
-        <div class="section-body" id="kmSensorBody">
-          <p style="font-size:0.82em;color:var(--muted);margin-bottom:0.4em;">Configure rotary encoder / sensor bindings per layer.</p>
-          <div class="input-row">
-            <button id="kmAddSensorBtn">+ Add Sensor Binding</button>
+      <!-- SENSOR EDIT MODAL (hidden by default) -->
+      <div class="sensor-modal-overlay" id="sensorModalOverlay" style="display:none;">
+        <div class="sensor-modal">
+          <h3>Set <code id="smEncoderName">encoder</code> bindings
+            <span class="sensor-icon-sm" id="smIconPreview"></span>
+          </h3>
+          <div class="sm-row">
+            <label>Behavior</label>
+            <select id="smBehavior">
+              <option value="&inc_dec_kp">&inc_dec_kp | Sensor Rotate (variable)</option>
+              <option value="custom">Custom behavior reference</option>
+            </select>
           </div>
-          <div id="kmSensorEditor" style="display:none;">
-            <div class="input-row">
-              <div class="input-group"><label>Sensor Name</label><input type="text" id="kmSensorName" placeholder="encoder_left" style="width:140px;"></div>
-              <div class="input-group"><label>Layer</label>
-                <select id="kmSensorLayer" style="width:160px;"></select>
+          <div id="smCustomRow" class="sm-row" style="display:none;">
+            <label>Custom binding</label>
+            <input type="text" id="smCustomBinding" placeholder="&my_sensor_behavior">
+          </div>
+          <div id="smIncDecParams">
+            <div class="sm-params">
+              <div class="sm-param-label">Increment</div>
+              <div class="sm-row">
+                <label>Key Code</label>
+                <input type="text" id="smIncrement" placeholder="C_VOL_UP">
               </div>
             </div>
-            <div class="input-row">
-              <div class="input-group"><label>Behavior</label>
-                <select id="kmSensorBehavior" style="width:200px;">
-                  <option value="&inc_dec_kp">&inc_dec_kp - Sensor Rotate (variable)</option>
-                  <option value="custom">Custom behavior reference</option>
-                </select>
+            <div class="sm-params" style="margin-top:0.4em;">
+              <div class="sm-param-label">Decrement</div>
+              <div class="sm-row">
+                <label>Key Code</label>
+                <input type="text" id="smDecrement" placeholder="C_VOL_DN">
               </div>
-            </div>
-            <div id="kmSensorParams">
-              <div class="input-row">
-                <div class="input-group"><label>Increment (CW)</label><input type="text" id="kmSensorCW" placeholder="C_VOL_UP" style="width:120px;"></div>
-                <div class="input-group"><label>Decrement (CCW)</label><input type="text" id="kmSensorCCW" placeholder="C_VOL_DN" style="width:120px;"></div>
-              </div>
-            </div>
-            <div class="input-row" style="margin-top:0.3em;">
-              <button id="kmSensorSaveBtn">Save</button>
-              <button id="kmSensorCancelBtn" style="background:var(--muted);">Cancel</button>
             </div>
           </div>
-          <div class="item-list" id="kmSensorList"></div>
+          <div class="sm-actions">
+            <button class="sm-apply" id="smApplyBtn">Apply</button>
+            <button class="sm-cancel" id="smCancelBtn">Cancel</button>
+          </div>
         </div>
       </div>
     </div>
@@ -802,8 +846,10 @@
         <div class="output-header">
           <h2>Generated .keymap</h2>
           <button id="kmCopyBtn">Copy</button>
+          <button id="kmEditToggle" style="background:var(--item-bg);color:var(--text);border:1px solid var(--border);font-size:0.82em;padding:0.3em 0.8em;border-radius:4px;cursor:pointer;">&#9998; Edit</button>
         </div>
         <pre class="output-pre" id="kmOutput"></pre>
+        <textarea id="kmOutputEdit" class="output-textarea" style="display:none;flex:1;width:100%;border:none;background:transparent;color:var(--output-text);font-family:'Fira Code','Fira Mono','Consolas','Menlo',monospace;font-size:0.88em;padding:0.8em 1em;resize:none;line-height:1.55;outline:none;tab-size:4;white-space:pre;overflow:auto;"></textarea>
         <div class="output-stats" id="kmOutputStats">0 layers</div>
       </div>
     </div>
@@ -873,8 +919,8 @@
     <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.5em;min-width:340px;max-width:420px;color:var(--text);">
       <h3 style="margin:0 0 1em 0;color:var(--text);">Customize Layer <code id="lcTitle" style="background:var(--item-bg);padding:2px 8px;border-radius:4px;font-size:0.9em;"></code></h3>
       <div style="display:flex;flex-direction:column;gap:0.7em;">
-        <div class="input-group"><label style="min-width:60px;">Name</label><input type="text" id="lcName" style="width:200px;"></div>
-        <div class="input-group"><label style="min-width:60px;">Label</label><input type="text" id="lcLabel" placeholder="Default" style="width:200px;"></div>
+        <div class="input-group"><label style="min-width:100px;">Name</label><input type="text" id="lcName" style="width:200px;"></div>
+        <div class="input-group"><label style="min-width:100px;">Display Name</label><input type="text" id="lcLabel" placeholder="OLED display name" style="width:200px;"></div>
       </div>
       <div style="margin-top:1.2em;display:flex;gap:0.5em;justify-content:flex-end;">
         <button id="lcOkBtn" style="background:var(--success);color:#fff;border:none;border-radius:4px;padding:0.35em 1.2em;cursor:pointer;font-weight:600;">OK</button>
@@ -997,7 +1043,7 @@ function fullRender() {
   var kmMacroEd = document.getElementById('kmMacroEditor'); if (kmMacroEd) kmMacroEd.style.display = 'none';
   var kmBehEd = document.getElementById('kmBehaviorEditor'); if (kmBehEd) kmBehEd.style.display = 'none';
   var kmCondEd = document.getElementById('kmCondLayerEditor'); if (kmCondEd) kmCondEd.style.display = 'none';
-  var kmSensorEd = document.getElementById('kmSensorEditor'); if (kmSensorEd) kmSensorEd.style.display = 'none';
+  var sensorOverlay = document.getElementById('sensorModalOverlay'); if (sensorOverlay) sensorOverlay.style.display = 'none';
   renderLayerTabs();
   renderKeyboardSvg('keyboardSvg');
   renderKeymapComboList();
@@ -1060,35 +1106,42 @@ var DEFAULT_CORNE_LAYOUT = {
 };
 
 // ================================================
-// DEFAULT LOTUS58 LAYOUT (60 keys: 58 + 2 encoders)
+// DEFAULT LOTUS58 LAYOUT (60 keys: 58 + 2 encoder push buttons per side)
+// Binding order matches ZMK: rows 0-1 (12 keys each), rows 2-3 (14 keys, with encoder push),
+// row 4 (8 thumb keys). Encoder rotation handled via sensor-bindings, not in layout.
 // ================================================
 var DEFAULT_LOTUS58_LAYOUT = {
   "id": "lotus58",
   "layouts": {
     "default_layout": {
       "layout": [
-        {"row":0,"col":0,"x":0,"y":0.52},{"row":0,"col":1,"x":1,"y":0.26},{"row":0,"col":2,"x":2,"y":0},
-        {"row":0,"col":3,"x":3,"y":0.06},{"row":0,"col":4,"x":4,"y":0.18},{"row":0,"col":5,"x":5,"y":0.3},
-        {"row":0,"col":10,"x":10,"y":0.3},{"row":0,"col":11,"x":11,"y":0.18},{"row":0,"col":12,"x":12,"y":0.06},
-        {"row":0,"col":13,"x":13,"y":0},{"row":0,"col":14,"x":14,"y":0.26},{"row":0,"col":15,"x":15,"y":0.52},
-        {"row":1,"col":0,"x":0,"y":1.52},{"row":1,"col":1,"x":1,"y":1.26},{"row":1,"col":2,"x":2,"y":1},
-        {"row":1,"col":3,"x":3,"y":1.06},{"row":1,"col":4,"x":4,"y":1.18},{"row":1,"col":5,"x":5,"y":1.3},
-        {"row":1,"col":10,"x":10,"y":1.3},{"row":1,"col":11,"x":11,"y":1.18},{"row":1,"col":12,"x":12,"y":1.06},
-        {"row":1,"col":13,"x":13,"y":1},{"row":1,"col":14,"x":14,"y":1.26},{"row":1,"col":15,"x":15,"y":1.52},
-        {"row":2,"col":0,"x":0,"y":2.52},{"row":2,"col":1,"x":1,"y":2.26},{"row":2,"col":2,"x":2,"y":2},
-        {"row":2,"col":3,"x":3,"y":2.06},{"row":2,"col":4,"x":4,"y":2.18},{"row":2,"col":5,"x":5,"y":2.3},
-        {"row":2,"col":6,"x":6.3,"y":2.1},{"row":2,"col":9,"x":8.7,"y":2.1},
-        {"row":2,"col":10,"x":10,"y":2.3},{"row":2,"col":11,"x":11,"y":2.18},{"row":2,"col":12,"x":12,"y":2.06},
-        {"row":2,"col":13,"x":13,"y":2},{"row":2,"col":14,"x":14,"y":2.26},{"row":2,"col":15,"x":15,"y":2.52},
-        {"row":3,"col":0,"x":0,"y":3.52},{"row":3,"col":1,"x":1,"y":3.26},{"row":3,"col":2,"x":2,"y":3},
-        {"row":3,"col":3,"x":3,"y":3.06},{"row":3,"col":4,"x":4,"y":3.18},{"row":3,"col":5,"x":5,"y":3.3},
-        {"row":3,"col":6,"x":6.3,"y":3.1},{"row":3,"col":9,"x":8.7,"y":3.1},
-        {"row":3,"col":10,"x":10,"y":3.3},{"row":3,"col":11,"x":11,"y":3.18},{"row":3,"col":12,"x":12,"y":3.06},
-        {"row":3,"col":13,"x":13,"y":3},{"row":3,"col":14,"x":14,"y":3.26},{"row":3,"col":15,"x":15,"y":3.52},
-        {"row":4,"col":2,"x":3,"y":4.35},{"row":4,"col":3,"x":4,"y":4.1},
-        {"row":4,"col":4,"x":5,"y":3.7,"r":15,"rx":0,"ry":0},{"row":4,"col":5,"x":5.6,"y":3.1,"r":28,"rx":0,"ry":0},
-        {"row":4,"col":10,"x":9.4,"y":3.1,"r":-28,"rx":0,"ry":0},{"row":4,"col":11,"x":10,"y":3.7,"r":-15,"rx":0,"ry":0},
-        {"row":4,"col":12,"x":11,"y":4.1},{"row":4,"col":13,"x":12,"y":4.35}
+        // Row 0: 6L + 6R = 12 keys (indices 0-11) — number row, no encoders
+        {"row":0,"col":0,"x":0,"y":0.75},{"row":0,"col":1,"x":1,"y":0.5},{"row":0,"col":2,"x":2,"y":0.25},
+        {"row":0,"col":3,"x":3,"y":0},{"row":0,"col":4,"x":4,"y":0.25},{"row":0,"col":5,"x":5,"y":0.5},
+        {"row":0,"col":10,"x":9,"y":0.5},{"row":0,"col":11,"x":10,"y":0.25},{"row":0,"col":12,"x":11,"y":0},
+        {"row":0,"col":13,"x":12,"y":0.25},{"row":0,"col":14,"x":13,"y":0.5},{"row":0,"col":15,"x":14,"y":0.75},
+        // Row 1: 6L + 6R = 12 keys (indices 12-23) — QWERTY row
+        {"row":1,"col":0,"x":0,"y":1.75},{"row":1,"col":1,"x":1,"y":1.5},{"row":1,"col":2,"x":2,"y":1.25},
+        {"row":1,"col":3,"x":3,"y":1},{"row":1,"col":4,"x":4,"y":1.25},{"row":1,"col":5,"x":5,"y":1.5},
+        {"row":1,"col":10,"x":9,"y":1.5},{"row":1,"col":11,"x":10,"y":1.25},{"row":1,"col":12,"x":11,"y":1},
+        {"row":1,"col":13,"x":12,"y":1.25},{"row":1,"col":14,"x":13,"y":1.5},{"row":1,"col":15,"x":14,"y":1.75},
+        // Row 2: 6L + 2 encoder push + 6R = 14 keys (indices 24-37) — home row + top encoder buttons
+        {"row":2,"col":0,"x":0,"y":2.75},{"row":2,"col":1,"x":1,"y":2.5},{"row":2,"col":2,"x":2,"y":2.25},
+        {"row":2,"col":3,"x":3,"y":2},{"row":2,"col":4,"x":4,"y":2.25},{"row":2,"col":5,"x":5,"y":2.5},
+        {"row":2,"col":6,"x":6.5,"y":2},{"row":2,"col":9,"x":7.5,"y":2},
+        {"row":2,"col":10,"x":9,"y":2.5},{"row":2,"col":11,"x":10,"y":2.25},{"row":2,"col":12,"x":11,"y":2},
+        {"row":2,"col":13,"x":12,"y":2.25},{"row":2,"col":14,"x":13,"y":2.5},{"row":2,"col":15,"x":14,"y":2.75},
+        // Row 3: 6L + 2 encoder push + 6R = 14 keys (indices 38-51) — bottom row + lower encoder buttons
+        {"row":3,"col":0,"x":0,"y":3.75},{"row":3,"col":1,"x":1,"y":3.5},{"row":3,"col":2,"x":2,"y":3.25},
+        {"row":3,"col":3,"x":3,"y":3},{"row":3,"col":4,"x":4,"y":3.25},{"row":3,"col":5,"x":5,"y":3.5},
+        {"row":3,"col":6,"x":6,"y":3},{"row":3,"col":9,"x":8,"y":3},
+        {"row":3,"col":10,"x":9,"y":3.5},{"row":3,"col":11,"x":10,"y":3.25},{"row":3,"col":12,"x":11,"y":3},
+        {"row":3,"col":13,"x":12,"y":3.25},{"row":3,"col":14,"x":13,"y":3.5},{"row":3,"col":15,"x":14,"y":3.75},
+        // Row 4: 4L + 4R thumb = 8 keys (indices 52-59) — flat, no rotation
+        {"row":4,"col":2,"x":2.5,"y":4.25},{"row":4,"col":3,"x":3.5,"y":4.25},
+        {"row":4,"col":4,"x":4.5,"y":4.5},{"row":4,"col":5,"x":6,"y":4.25},
+        {"row":4,"col":10,"x":8,"y":4.25},{"row":4,"col":11,"x":9.5,"y":4.5},
+        {"row":4,"col":12,"x":10.5,"y":4.25},{"row":4,"col":13,"x":11.5,"y":4.25}
       ]
     }
   },
@@ -1296,7 +1349,8 @@ function initResize(handleId, wrapId) {
     if (!dragging) return;
     var newWidth = window.innerWidth - e.clientX;
     if (newWidth < 260) newWidth = 260;
-    if (newWidth > 700) newWidth = 700;
+    var maxW = Math.floor(window.innerWidth * 0.6);
+    if (newWidth > maxW) newWidth = maxW;
     wrap.style.width = newWidth + 'px';
   });
   document.addEventListener('mouseup', function() {
@@ -1307,8 +1361,13 @@ function initResize(handleId, wrapId) {
 // RGB Parsing
 function parseUserCode() {
   var code = document.getElementById('userCodePaste').value;
+  // Preserve cross-tab data (items synced from Keymap tab)
+  var savedBehaviors = behaviors.filter(function(b) { return b._fromKeymap; });
+  var savedLayers = layers.filter(function(l) { return l._fromKeymap; });
   layers = []; macros = []; behaviors = []; combos = []; blinkMacros = []; dtsiNativeBehaviors = [];
   colorValueMap = {}; colorLabelMap = {};
+  // Restore cross-tab data
+  savedBehaviors.forEach(function(b) { behaviors.push(b); });
   var m;
 
   var colorRe = /^#define\s+([A-Za-z0-9_]+)\s+RGB_COLOR_HSB\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)\s*(?:\/\*([^*]*)\*\/)?(?:\s*\/\/(.*))?/gm;
@@ -1341,9 +1400,17 @@ function parseUserCode() {
   var layerBaseKeys = {};
   layers.forEach(function(l) { layerBaseKeys[baseKey(l.name)] = true; });
   Object.keys(colorValueMap).forEach(function(ck) {
-    if (!layerBaseKeys[baseKey(ck)]) {
+    if (!layerBaseKeys[baseKey(ck)] && !colorValueMap[ck]._autoSync) {
       var v = colorValueMap[ck];
       layers.push({ name: ck, index: '', h: v.h, s: v.s, b: v.b, label: colorLabelMap[ck] || '' });
+      layerBaseKeys[baseKey(ck)] = true;
+    }
+  });
+  // Restore keymap-synced layers that aren't already covered by parsed data
+  savedLayers.forEach(function(sl) {
+    if (!layerBaseKeys[baseKey(sl.name)]) {
+      layers.push(sl);
+      layerBaseKeys[baseKey(sl.name)] = true;
     }
   });
 
@@ -1772,19 +1839,33 @@ function updateRgbOutput() {
   var out = '';
   var includeHelpers = document.getElementById('includeHelpers').checked;
   var merged = {};
+  // Also build an index-based lookup so layers with the same index but different names merge
+  var mergedByIndex = {};
   layers.forEach(function(l) {
     var bk = baseKey(l.name);
-    if (!merged[bk]) {
+    var idx = (l.index !== '' && l.index !== undefined) ? String(l.index) : '';
+    // Try index-based merge first (if this layer has an index matching an existing entry)
+    var target = merged[bk] || (idx && mergedByIndex[idx]) || null;
+    if (!target) {
       merged[bk] = { name: l.name, index: l.index, h: l.h, s: l.s, b: l.b, label: l.label, bk: bk };
+      if (idx) mergedByIndex[idx] = merged[bk];
     } else {
-      if (merged[bk].h === '' && l.h !== '') merged[bk].h = l.h;
-      if (merged[bk].s === '' && l.s !== '') merged[bk].s = l.s;
-      if (merged[bk].b === '' && l.b !== '') merged[bk].b = l.b;
-      if (!merged[bk].label && l.label) merged[bk].label = l.label;
-      if (merged[bk].index === '' && l.index !== '') merged[bk].index = l.index;
+      if (target.h === '' && l.h !== '') target.h = l.h;
+      if (target.s === '' && l.s !== '') target.s = l.s;
+      if (target.b === '' && l.b !== '') target.b = l.b;
+      if (!target.label && l.label) target.label = l.label;
+      if (target.index === '' && l.index !== '') target.index = l.index;
+      // If merging by index into a different baseKey, also register this bk
+      if (!merged[bk]) merged[bk] = target;
     }
   });
-  var mergedArr = Object.values(merged);
+  // Deduplicate: merged may have multiple keys pointing to the same object
+  var seen = new Set();
+  var mergedArr = [];
+  Object.keys(merged).forEach(function(k) {
+    var obj = merged[k];
+    if (!seen.has(obj)) { seen.add(obj); mergedArr.push(obj); }
+  });
 
   out += '/* ---- STEP 1: DEFINE LAYERS ---- */\n';
   mergedArr.forEach(function(l) {
@@ -1923,18 +2004,33 @@ function renderKeyboardSvg(targetId, options) {
   var isComboMode = options.comboMode || false;
   var comboPositions = options.comboPositions || [];
 
-  // Calculate bounding box
+  // Calculate bounding box (accounts for key rotation)
   var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
   keyboardLayout.forEach(function(k) {
     var x = k.x * scale, y = k.y * scale;
-    if (x < minX) minX = x; if (y < minY) minY = y;
-    if (x + keySize > maxX) maxX = x + keySize;
-    if (y + keySize > maxY) maxY = y + keySize;
+    var r = k.r || 0;
+    if (r !== 0) {
+      var rpx = (k.rx || 0) * scale, rpy = (k.ry || 0) * scale;
+      var rad = r * Math.PI / 180;
+      var cr = Math.cos(rad), sr = Math.sin(rad);
+      [[x,y],[x+keySize,y],[x,y+keySize],[x+keySize,y+keySize]].forEach(function(c) {
+        var dx = c[0] - rpx, dy = c[1] - rpy;
+        var nx = rpx + dx * cr - dy * sr;
+        var ny = rpy + dx * sr + dy * cr;
+        if (nx < minX) minX = nx; if (ny < minY) minY = ny;
+        if (nx > maxX) maxX = nx; if (ny > maxY) maxY = ny;
+      });
+    } else {
+      if (x < minX) minX = x; if (y < minY) minY = y;
+      if (x + keySize > maxX) maxX = x + keySize;
+      if (y + keySize > maxY) maxY = y + keySize;
+    }
   });
   var pad = 10;
   var w = maxX - minX + pad * 2;
   var h = maxY - minY + pad * 2;
   svg.setAttribute('viewBox', (minX - pad) + ' ' + (minY - pad) + ' ' + w + ' ' + h);
+  svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
   var html = '';
   keyboardLayout.forEach(function(k, i) {
@@ -2099,12 +2195,18 @@ function getLayerLabel(idx) {
 // KEYMAP PARSER (.keymap file)
 // ================================================
 function parseKeymap(text) {
+  // Preserve cross-tab data (items synced from RGB tab)
+  var savedMacros = keymapMacros.filter(function(m) { return m._fromRgb; });
+  var savedBehaviors = keymapBehaviors.filter(function(b) { return b._fromRgb || b._fromDtsi; });
   keymapLayers = [];
   keymapCombos = [];
   keymapMacros = [];
   keymapBehaviors = [];
   keymapConditionalLayers = [];
   keymapSensorBindings = [];
+  // Restore cross-tab data
+  savedMacros.forEach(function(m) { keymapMacros.push(m); });
+  savedBehaviors.forEach(function(b) { keymapBehaviors.push(b); });
 
   // Parse #include lines and header comment from user's pasted text
   keymapParsedIncludes = [];
@@ -2350,11 +2452,18 @@ function renderLayerTabs() {
   keymapLayers.forEach(function(l, i) {
     if (l.status === 'reserved') return;
     var cls = i === activeLayerIndex ? 'layer-tab active' : 'layer-tab';
-    // Look up matching RGB layer color
+    // Look up matching RGB layer color — match by index first, then by name
     var colorDot = '';
+    var idxStr = String(i);
     var lName = l.name.toUpperCase();
+    var dispUpper = l.displayName ? l.displayName.toUpperCase().replace(/[^A-Z0-9]/g, '_') : '';
     var rgbMatch = layers.find(function(rl) {
-      return rl.name === l.name || rl.name === 'LAYER_' + lName;
+      // Index match (most reliable across name differences)
+      if (rl.index !== '' && rl.index !== undefined && String(rl.index) === idxStr) return true;
+      // Name match fallbacks
+      if (rl.name === l.name || rl.name === 'LAYER_' + lName) return true;
+      if (dispUpper && baseKey(rl.name) === dispUpper) return true;
+      return false;
     });
     if (rgbMatch && rgbMatch.h !== '' && rgbMatch.s !== '' && rgbMatch.b !== '') {
       var dotColor = 'hsl(' + rgbMatch.h + ',' + rgbMatch.s + '%,' + Math.max(Number(rgbMatch.b), 30) + '%)';
@@ -3317,34 +3426,81 @@ function populateCondLayerSelects() {
 }
 
 function populateSensorLayerSelect() {
-  var sel = document.getElementById('kmSensorLayer');
-  var html = '';
-  keymapLayers.forEach(function(l, i) {
-    if (l.status === 'reserved') return;
-    html += '<option value="' + i + '">' + i + ' - ' + esc(l.displayName || l.name) + '</option>';
-  });
-  sel.innerHTML = html;
+  // No longer needed — sensor editor is per active layer
 }
 
 // ================================================
-// SENSOR BINDINGS
+// SENSOR BINDINGS (visual encoder cards)
 // ================================================
-var editingSensorIndex = -1;
+var editingSensorIndex = -1;   // index within keymapSensorBindings
+var editingSensorSubIdx = -1;  // which encoder token within that entry (-1 = adding new)
+
+function parseSensorToken(token) {
+  // Parse "&inc_dec_kp C_VOL_DN C_VOL_UP" or "&custom_behavior"
+  token = (token || '').trim();
+  if (token.indexOf('&inc_dec_kp') === 0) {
+    var parts = token.split(/\s+/);
+    return { behavior: '&inc_dec_kp', increment: parts[1] || '', decrement: parts[2] || '' };
+  }
+  return { behavior: 'custom', raw: token };
+}
+
+function sensorTokenDisplay(token) {
+  var p = parseSensorToken(token);
+  if (p.behavior === '&inc_dec_kp') {
+    return { behavior: '&inc_dec_kp', cw: p.increment, ccw: p.decrement };
+  }
+  return { behavior: p.raw || '?', cw: '', ccw: '' };
+}
 
 function renderKeymapSensorList() {
-  var list = document.getElementById('kmSensorList');
-  list.innerHTML = '';
-  keymapSensorBindings.forEach(function(s, i) {
-    var layerName = keymapLayers[s.layerIndex] ? (keymapLayers[s.layerIndex].displayName || keymapLayers[s.layerIndex].name) : s.layerIndex;
-    var div = document.createElement('div');
-    div.className = 'item';
-    div.innerHTML =
-      '<b>Layer ' + esc(layerName) + '</b>' +
-      '<span style="color:var(--muted);">' + esc(s.bindings.join(', ')) + '</span>' +
-      '<button class="btn-sm" data-edit-sensor="' + i + '">Edit</button>' +
-      '<button class="btn-danger btn-sm" data-remove-sensor="' + i + '">&#10005;</button>';
-    list.appendChild(div);
-  });
+  var area = document.getElementById('sensorBindingsArea');
+  var container = document.getElementById('sensorCards');
+  if (!area || !container) return;
+
+  // Find sensor binding entry for active layer
+  var layerSensor = null;
+  var layerSensorIdx = -1;
+  for (var si = 0; si < keymapSensorBindings.length; si++) {
+    if (keymapSensorBindings[si].layerIndex === activeLayerIndex) {
+      layerSensor = keymapSensorBindings[si];
+      layerSensorIdx = si;
+      break;
+    }
+  }
+
+  var html = '';
+  var encoderNames = ['encoder_left', 'encoder_right'];
+
+  if (layerSensor && layerSensor.bindings.length > 0) {
+    area.style.display = '';
+    layerSensor.bindings.forEach(function(token, ti) {
+      var d = sensorTokenDisplay(token);
+      var name = encoderNames[ti] || ('encoder_' + ti);
+      html += '<div class="sensor-card" data-sensor-idx="' + layerSensorIdx + '" data-sensor-sub="' + ti + '">';
+      html += '<span class="sensor-label">' + esc(name) + '</span>';
+      html += '<div class="sensor-icon">';
+      html += '<span class="sensor-behavior">' + esc(d.behavior) + '</span>';
+      if (d.cw) html += '<span class="sensor-cw">' + esc(d.cw) + '</span>';
+      if (d.ccw) html += '<span class="sensor-ccw">' + esc(d.ccw) + '</span>';
+      html += '</div>';
+      html += '<button class="sensor-delete" data-del-sensor-idx="' + layerSensorIdx + '" data-del-sensor-sub="' + ti + '" title="Remove">&#10005;</button>';
+      html += '</div>';
+    });
+    // Add button
+    html += '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.3em;">';
+    html += '<button class="sensor-add-btn" id="sensorAddBtn" title="Add encoder binding">+</button>';
+    html += '</div>';
+  } else {
+    // No sensor bindings for this layer — show option to add
+    area.style.display = '';
+    html += '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.3em;">';
+    html += '<button class="sensor-add-btn" id="sensorAddBtn" title="Add sensor binding for this layer">+</button>';
+    html += '<span style="font-size:0.7em;color:var(--muted);">Add encoder</span>';
+    html += '</div>';
+  }
+
+  container.innerHTML = html;
 }
 
 // ================================================
@@ -3427,65 +3583,7 @@ function updateKeymapOutput() {
     out += '    };\n};\n\n';
   }
 
-  // Blink macros — output expanded ZMK macro definitions (no helper dependency)
-  if (blinkMacros.length) {
-    var blinkEntries = [];
-    var seenBlink = {};
-    blinkMacros.forEach(function(bm) {
-      if (!bm.color || !bm.returnColor) return;
-      if (seenBlink[bm.name]) return;
-      seenBlink[bm.name] = true;
-      blinkEntries.push(bm);
-    });
-    if (blinkEntries.length) {
-      // Output color defines needed by blink macros
-      var blinkColors = {};
-      blinkEntries.forEach(function(bm) {
-        blinkColors[bm.color] = true;
-        blinkColors[bm.returnColor] = true;
-      });
-      var colorDefines = [];
-      Object.keys(blinkColors).forEach(function(cname) {
-        // Look up HSB values from RGB tab's colorValueMap
-        var hsb = colorValueMap[cname];
-        if (hsb) {
-          colorDefines.push('#define ' + cname + ' RGB_COLOR_HSB(' + hsb.h + ',' + hsb.s + ',' + hsb.b + ')');
-        }
-      });
-      if (colorDefines.length) {
-        out += '/* Blink Color Defines */\n';
-        colorDefines.forEach(function(d) { out += d + '\n'; });
-        out += '\n';
-      }
-      // BLINK_SEQ helper macro
-      out += '#define BLINK_SEQ(ON, OFF, WAIT) \\\n';
-      out += '    &macro_tap &rgb_ug ON \\\n';
-      out += '    &macro_wait_time WAIT \\\n';
-      out += '    &macro_tap &rgb_ug RGB_TOG \\\n';
-      out += '    &macro_wait_time WAIT \\\n';
-      out += '    &macro_tap &rgb_ug RGB_TOG \\\n';
-      out += '    &macro_wait_time WAIT \\\n';
-      out += '    &macro_tap &rgb_ug RGB_TOG \\\n';
-      out += '    &macro_wait_time WAIT \\\n';
-      out += '    &macro_tap &rgb_ug RGB_TOG \\\n';
-      out += '    &macro_wait_time WAIT \\\n';
-      out += '    &macro_tap &rgb_ug OFF\n\n';
-      out += '/* Blink/Status Macros */\n';
-      blinkEntries.forEach(function(bm) {
-        out += 'ZMK_MACRO(' + bm.name + ',\n';
-        if (bm.label) out += '    label = "' + bm.label + '";\n';
-        if (bm.key.indexOf('&mo') === 0) {
-          out += '    bindings = <&macro_press ' + bm.key + ' BLINK_SEQ(' + bm.color + ', ' + bm.returnColor + ', ' + (bm.wait || '80') + ')>,\n';
-          out += '               <&macro_pause_for_release>,\n';
-          out += '               <&macro_release ' + bm.key + '>;\n';
-        } else {
-          out += '    bindings = <&macro_tap &kp ' + bm.key + ' BLINK_SEQ(' + bm.color + ', ' + bm.returnColor + ', ' + (bm.wait || '80') + ')>;\n';
-        }
-        out += ')\n';
-      });
-      out += '\n';
-    }
-  }
+  // Note: Blink macros are RGB-tab items — output only in RGB generator, not in keymap output
 
   // Keymap — track layer positions for highlighting
   var layerMarkers = []; // { start, end, layerIndex }
@@ -3520,24 +3618,36 @@ function updateKeymapOutput() {
       keyboardLayout.forEach(function(k) { colSet[k.col] = true; });
       var allCols = Object.keys(colSet).map(Number).sort(function(a, b) { return a - b; });
 
-      // Find split: detect left/right halves via largest x-position gap on the fullest row
-      var splitAfterColIdx = -1;
-      var refRowForSplit = rowKeys[0];
-      rowKeys.forEach(function(rk) { if (layoutRows[rk].length > layoutRows[refRowForSplit].length) refRowForSplit = rk; });
-      var refSplitEntries = layoutRows[refRowForSplit];
+      // Find split: detect left/right halves via largest x-position gap across ALL rows
       var xLookup = {};
       keyboardLayout.forEach(function(k) { xLookup[k.row + ',' + k.col] = k.x; });
+      var splitX = -1;
       var maxXGap = 2;
-      for (var gi = 1; gi < refSplitEntries.length; gi++) {
-        var xPrev = xLookup[refRowForSplit + ',' + refSplitEntries[gi - 1].col] || 0;
-        var xCurr = xLookup[refRowForSplit + ',' + refSplitEntries[gi].col] || 0;
-        if (xCurr - xPrev > maxXGap) {
-          maxXGap = xCurr - xPrev;
-          splitAfterColIdx = allCols.indexOf(refSplitEntries[gi - 1].col);
+      rowKeys.forEach(function(rk) {
+        var entries = layoutRows[rk];
+        for (var gi = 1; gi < entries.length; gi++) {
+          var xPrev = xLookup[rk + ',' + entries[gi - 1].col] || 0;
+          var xCurr = xLookup[rk + ',' + entries[gi].col] || 0;
+          if (xCurr - xPrev > maxXGap) {
+            maxXGap = xCurr - xPrev;
+            splitX = (xPrev + xCurr) / 2;
+          }
         }
+      });
+      // Classify columns as left/right by their max x-position vs the split midpoint
+      var leftCols = [], rightCols = [];
+      if (splitX >= 0) {
+        var colMaxX = {};
+        keyboardLayout.forEach(function(k) {
+          if (colMaxX[k.col] === undefined || k.x > colMaxX[k.col]) colMaxX[k.col] = k.x;
+        });
+        allCols.forEach(function(c) {
+          if (colMaxX[c] !== undefined && colMaxX[c] < splitX) leftCols.push(c);
+          else rightCols.push(c);
+        });
+      } else {
+        leftCols = allCols;
       }
-      var leftCols = splitAfterColIdx >= 0 ? allCols.slice(0, splitAfterColIdx + 1) : allCols;
-      var rightCols = splitAfterColIdx >= 0 ? allCols.slice(splitAfterColIdx + 1) : [];
 
       // Compute per-column binding widths across ALL layers
       var colWidths = {};
@@ -3683,6 +3793,23 @@ function updateKeymapOutput() {
   hlOut += esc(out.substring(lastPos));
   document.getElementById('kmOutput').innerHTML = hlOut;
   document.getElementById('kmOutput').dataset.rawText = out;
+  // Scroll to highlighted layer
+  var hlEl = document.querySelector('#kmOutput .hl-layer');
+  if (hlEl) {
+    var pre = document.getElementById('kmOutput');
+    var preRect = pre.getBoundingClientRect();
+    var hlRect = hlEl.getBoundingClientRect();
+    var scrollTarget = pre.scrollTop + (hlRect.top - preRect.top) - preRect.height / 3;
+    pre.scrollTop = Math.max(0, scrollTarget);
+  }
+  // Reset edit mode when output is regenerated
+  var editTa = document.getElementById('kmOutputEdit');
+  var editBtn = document.getElementById('kmEditToggle');
+  if (editTa && editTa.style.display !== 'none') {
+    editTa.style.display = 'none';
+    document.getElementById('kmOutput').style.display = '';
+    if (editBtn) { editBtn.innerHTML = '&#9998; Edit'; editBtn.style.background = 'var(--item-bg)'; editBtn.style.color = 'var(--text)'; editBtn.style.borderColor = 'var(--border)'; }
+  }
   var activeCount = keymapLayers.filter(function(l) { return l.status !== 'reserved'; }).length;
   document.getElementById('kmOutputStats').textContent = activeCount + ' layers \u00B7 ' + keymapCombos.length + ' combos \u00B7 ' + keymapMacros.length + ' macros \u00B7 ' + keymapConditionalLayers.length + ' cond. layers';
 }
@@ -3742,27 +3869,40 @@ function generateBehaviorCode(b) {
 // CROSS-TAB DATA REFLECTION
 // ================================================
 function syncCrossTabData() {
-  // Reflect keymap editor layers into RGB generator layer dropdown
-  // Build lookup of existing RGB layer base keys to avoid duplicates
+  // Reflect keymap editor layers into RGB generator layer list
+  // Build lookup of existing RGB layer base keys AND indexes to avoid duplicates
   var existingBaseKeys = {};
-  layers.forEach(function(l) { existingBaseKeys[baseKey(l.name)] = true; });
+  var existingIndexes = {};
+  layers.forEach(function(l) {
+    existingBaseKeys[baseKey(l.name)] = true;
+    if (l.index !== '' && l.index !== undefined) existingIndexes[String(l.index)] = true;
+  });
   Object.keys(colorValueMap).forEach(function(ck) { existingBaseKeys[baseKey(ck)] = true; });
 
   keymapLayers.forEach(function(kl, i) {
     if (kl.status === 'reserved') return;
+    var idxStr = String(i);
+    // Match by index first — if an RGB layer already covers this index, skip
+    if (existingIndexes[idxStr]) return;
     var klBase = baseKey(kl.name);
     // Also try stripping trailing _N (e.g. abc_0 → ABC, nmrw_1 → NMRW)
     var klBaseStripped = klBase.replace(/_\d+$/, '');
     // Also try matching by displayName (e.g. "ABC", "KPAD")
     var dispBase = kl.displayName ? kl.displayName.toUpperCase().replace(/[^A-Z0-9]/g, '_') : '';
     if (existingBaseKeys[klBase] || existingBaseKeys[klBaseStripped] || (dispBase && existingBaseKeys[dispBase])) return;
-    var key = 'LAYER_' + klBase;
-    if (!colorValueMap[key]) {
-      var hue = (i * 60) % 360;
-      colorValueMap[key] = { h: hue, s: 100, b: 50, _autoSync: true };
-      colorLabelMap[key] = kl.displayName || kl.name;
-    }
+    // Push as a real layer entry so user can assign RGB color
+    var layerName = 'LAYER_' + (dispBase || klBaseStripped || klBase);
+    layers.push({
+      name: layerName,
+      index: idxStr,
+      h: '', s: '', b: '',
+      label: kl.displayName || kl.name,
+      _fromKeymap: true
+    });
     existingBaseKeys[klBase] = true;
+    existingIndexes[idxStr] = true;
+    if (klBaseStripped !== klBase) existingBaseKeys[klBaseStripped] = true;
+    if (dispBase) existingBaseKeys[dispBase] = true;
   });
 
   // Reflect keymap behaviors into RGB behavior macro selection
@@ -4154,6 +4294,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // --- RGB Generator wiring (Tab 1) ---
   document.getElementById('parseBtn').onclick = parseUserCode;
+  document.getElementById('rgbClearSyncBtn').onclick = function() {
+    // Remove items synced from Keymap tab
+    layers = layers.filter(function(l) { return !l._fromKeymap; });
+    behaviors = behaviors.filter(function(b) { return !b._fromKeymap; });
+    Object.keys(colorValueMap).forEach(function(k) { if (colorValueMap[k]._autoSync) { delete colorValueMap[k]; delete colorLabelMap[k]; } });
+    rgbRenderAll();
+    showStatus('userCodeStatus', 'Cleared synced keymap data');
+  };
   document.getElementById('addLayerBtn').onclick = addLayer;
   document.getElementById('addMacroBtn').onclick = addMacro;
   document.getElementById('addBehaviorBtn').onclick = addBehavior;
@@ -4223,6 +4371,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Load default layout
   loadLayout(DEFAULT_CORNE_LAYOUT);
   renderKeyboardSvg('keyboardSvg');
+  renderKeymapSensorList();
   populateKeycodeGrids();
 
   // Layout import
@@ -4238,6 +4387,7 @@ document.addEventListener('DOMContentLoaded', function() {
       var json = JSON.parse(document.getElementById('layoutJsonInput').value);
       loadLayout(json);
       renderKeyboardSvg('keyboardSvg');
+      renderKeymapSensorList();
       document.getElementById('layoutJsonOverlay').style.display = 'none';
       showStatus('kmLayoutStatus', 'Layout loaded: ' + keyboardLayout.length + ' keys');
     } catch(e) {
@@ -4247,11 +4397,13 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('kmUseDefaultLayoutBtn').onclick = function() {
     loadLayout(DEFAULT_CORNE_LAYOUT);
     renderKeyboardSvg('keyboardSvg');
+    renderKeymapSensorList();
     showStatus('kmLayoutStatus', 'Default Corne layout loaded (42 keys)');
   };
   document.getElementById('kmUseLotus58Btn').onclick = function() {
     loadLayout(DEFAULT_LOTUS58_LAYOUT);
     renderKeyboardSvg('keyboardSvg');
+    renderKeymapSensorList();
     showStatus('kmLayoutStatus', 'Lotus58 layout loaded (60 keys)');
   };
 
@@ -4275,6 +4427,17 @@ document.addEventListener('DOMContentLoaded', function() {
     showStatus('kmParseStatus', 'Parsed: ' + keymapLayers.length + ' layers, ' + keymapCombos.length + ' combos, ' + keymapMacros.length + ' macros, ' + keymapBehaviors.length + ' behaviors, ' + keymapConditionalLayers.length + ' cond. layers');
   };
 
+  document.getElementById('kmClearSyncBtn').onclick = function() {
+    // Remove items synced from RGB tab
+    keymapMacros = keymapMacros.filter(function(m) { return !m._fromRgb; });
+    keymapBehaviors = keymapBehaviors.filter(function(b) { return !b._fromRgb && !b._fromDtsi; });
+    populateBehaviorDropdown();
+    renderKeymapMacroList();
+    renderKeymapBehaviorList();
+    updateKeymapOutput();
+    showStatus('kmParseStatus', 'Cleared synced RGB data');
+  };
+
   // Layer tabs event delegation (now sidebar)
   var layerTabsEl = document.getElementById('layerSidebar');
   layerTabsEl.addEventListener('click', function(e) {
@@ -4290,6 +4453,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (activeLayerIndex < 0) activeLayerIndex = 0;
       renderLayerTabs();
       renderKeyboardSvg('keyboardSvg');
+      renderKeymapSensorList();
       updateKeymapOutput();
       return;
     }
@@ -4342,6 +4506,7 @@ document.addEventListener('DOMContentLoaded', function() {
       activeLayerIndex = keymapLayers.length - 1;
       renderLayerTabs();
       renderKeyboardSvg('keyboardSvg');
+      renderKeymapSensorList();
       updateKeymapOutput();
       return;
     }
@@ -4351,6 +4516,7 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('bindingEditor').classList.remove('visible');
       renderLayerTabs();
       renderKeyboardSvg('keyboardSvg');
+      renderKeymapSensorList();
       updateKeymapOutput();
     }
   });
@@ -4405,6 +4571,7 @@ document.addEventListener('DOMContentLoaded', function() {
     dragSrcIndex = null;
     renderLayerTabs();
     renderKeyboardSvg('keyboardSvg');
+    renderKeymapSensorList();
     updateKeymapOutput();
   });
 
@@ -4732,13 +4899,42 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Keymap output copy
   document.getElementById('kmCopyBtn').onclick = function() {
-    var el = document.getElementById('kmOutput');
-    var raw = el.dataset.rawText || el.textContent;
+    var editTa = document.getElementById('kmOutputEdit');
+    var raw;
+    if (editTa.style.display !== 'none') {
+      raw = editTa.value;
+    } else {
+      var el = document.getElementById('kmOutput');
+      raw = el.dataset.rawText || el.textContent;
+    }
     navigator.clipboard.writeText(raw).catch(function() {
-      // Fallback: create temporary textarea
       var ta = document.createElement('textarea');
       ta.value = raw; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
     });
+  };
+
+  // Keymap output edit toggle
+  document.getElementById('kmEditToggle').onclick = function() {
+    var pre = document.getElementById('kmOutput');
+    var ta = document.getElementById('kmOutputEdit');
+    var btn = document.getElementById('kmEditToggle');
+    var enteringEdit = (ta.style.display === 'none');
+    if (enteringEdit) {
+      ta.value = pre.dataset.rawText || pre.textContent;
+      pre.style.display = 'none';
+      ta.style.display = '';
+      btn.innerHTML = '&#10003; Done';
+      btn.style.background = 'var(--success)';
+      btn.style.color = '#fff';
+      btn.style.borderColor = 'var(--success)';
+    } else {
+      pre.style.display = '';
+      ta.style.display = 'none';
+      btn.innerHTML = '&#9998; Edit';
+      btn.style.background = 'var(--item-bg)';
+      btn.style.color = 'var(--text)';
+      btn.style.borderColor = 'var(--border)';
+    }
   };
 
   // --- Layer Customize dialog ---
@@ -5170,75 +5366,154 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // --- Sensor bindings editor ---
-  document.getElementById('kmAddSensorBtn').onclick = function() {
+  // --- Sensor bindings modal editor ---
+  function openSensorModal(sensorIdx, subIdx, isNew) {
+    editingSensorIndex = sensorIdx;
+    editingSensorSubIdx = subIdx;
+    var overlay = document.getElementById('sensorModalOverlay');
+    var encoderNames = ['encoder_left', 'encoder_right'];
+
+    if (isNew) {
+      // Adding new encoder
+      var name = encoderNames[subIdx >= 0 ? subIdx : 0] || 'encoder';
+      document.getElementById('smEncoderName').textContent = name;
+      document.getElementById('smBehavior').value = '&inc_dec_kp';
+      document.getElementById('smIncrement').value = 'C_VOL_UP';
+      document.getElementById('smDecrement').value = 'C_VOL_DN';
+      document.getElementById('smCustomBinding').value = '';
+      document.getElementById('smCustomRow').style.display = 'none';
+      document.getElementById('smIncDecParams').style.display = '';
+    } else {
+      // Editing existing
+      var s = keymapSensorBindings[sensorIdx];
+      var token = s.bindings[subIdx] || '';
+      var name = encoderNames[subIdx] || ('encoder_' + subIdx);
+      document.getElementById('smEncoderName').textContent = name;
+      var p = parseSensorToken(token);
+      if (p.behavior === '&inc_dec_kp') {
+        document.getElementById('smBehavior').value = '&inc_dec_kp';
+        document.getElementById('smIncrement').value = p.increment || '';
+        document.getElementById('smDecrement').value = p.decrement || '';
+        document.getElementById('smCustomBinding').value = '';
+        document.getElementById('smCustomRow').style.display = 'none';
+        document.getElementById('smIncDecParams').style.display = '';
+      } else {
+        document.getElementById('smBehavior').value = 'custom';
+        document.getElementById('smCustomBinding').value = p.raw || '';
+        document.getElementById('smCustomRow').style.display = '';
+        document.getElementById('smIncDecParams').style.display = 'none';
+      }
+    }
+    // Update icon preview
+    updateSensorIconPreview();
+    overlay.style.display = 'flex';
+  }
+
+  function updateSensorIconPreview() {
+    var icon = document.getElementById('smIconPreview');
+    var beh = document.getElementById('smBehavior').value;
+    if (beh === '&inc_dec_kp') {
+      var inc = document.getElementById('smIncrement').value || '?';
+      var dec = document.getElementById('smDecrement').value || '?';
+      icon.innerHTML = '<span style="font-size:0.5em;color:var(--accent2);position:absolute;top:-1px;">&inc_dec_kp</span>' +
+        '<span style="font-size:0.55em;display:flex;align-items:center;gap:1px;">&#x21BB;' + esc(inc) + '</span>' +
+        '<span style="font-size:0.55em;display:flex;align-items:center;gap:1px;">&#x21BA;' + esc(dec) + '</span>';
+    } else {
+      var raw = document.getElementById('smCustomBinding').value || '?';
+      icon.innerHTML = '<span style="font-size:0.55em;">' + esc(raw) + '</span>';
+    }
+  }
+
+  function closeSensorModal() {
+    document.getElementById('sensorModalOverlay').style.display = 'none';
     editingSensorIndex = -1;
-    populateSensorLayerSelect();
-    document.getElementById('kmSensorName').value = '';
-    document.getElementById('kmSensorCW').value = 'C_VOL_UP';
-    document.getElementById('kmSensorCCW').value = 'C_VOL_DN';
-    document.getElementById('kmSensorBehavior').value = '&inc_dec_kp';
-    document.getElementById('kmSensorEditor').style.display = '';
-  };
-  document.getElementById('kmSensorCancelBtn').onclick = function() {
-    document.getElementById('kmSensorEditor').style.display = 'none';
-    editingSensorIndex = -1;
-  };
-  document.getElementById('kmSensorBehavior').addEventListener('change', function() {
+    editingSensorSubIdx = -1;
+  }
+
+  document.getElementById('smBehavior').addEventListener('change', function() {
     var custom = this.value === 'custom';
-    document.getElementById('kmSensorParams').style.display = custom ? 'none' : '';
+    document.getElementById('smCustomRow').style.display = custom ? '' : 'none';
+    document.getElementById('smIncDecParams').style.display = custom ? 'none' : '';
+    updateSensorIconPreview();
   });
-  document.getElementById('kmSensorSaveBtn').onclick = function() {
+  document.getElementById('smIncrement').addEventListener('input', updateSensorIconPreview);
+  document.getElementById('smDecrement').addEventListener('input', updateSensorIconPreview);
+  document.getElementById('smCustomBinding').addEventListener('input', updateSensorIconPreview);
+
+  document.getElementById('smCancelBtn').onclick = closeSensorModal;
+  document.getElementById('sensorModalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeSensorModal();
+  });
+
+  document.getElementById('smApplyBtn').onclick = function() {
     pushUndo();
-    var layerIdx = parseInt(document.getElementById('kmSensorLayer').value);
-    var behavior = document.getElementById('kmSensorBehavior').value;
+    var beh = document.getElementById('smBehavior').value;
     var bindingStr;
-    if (behavior === 'custom') {
-      var customName = document.getElementById('kmSensorName').value || 'custom_sensor';
-      bindingStr = '&' + customName;
+    if (beh === 'custom') {
+      bindingStr = document.getElementById('smCustomBinding').value.trim() || '&none';
     } else {
-      var cw = document.getElementById('kmSensorCW').value || 'C_VOL_UP';
-      var ccw = document.getElementById('kmSensorCCW').value || 'C_VOL_DN';
-      bindingStr = '&inc_dec_kp ' + cw + ' ' + ccw;
+      var inc = document.getElementById('smIncrement').value.trim() || 'C_VOL_UP';
+      var dec = document.getElementById('smDecrement').value.trim() || 'C_VOL_DN';
+      bindingStr = '&inc_dec_kp ' + inc + ' ' + dec;
     }
-    var sensor = { layerIndex: layerIdx, bindings: [bindingStr] };
-    if (editingSensorIndex >= 0) {
-      keymapSensorBindings[editingSensorIndex] = sensor;
+
+    if (editingSensorIndex >= 0 && editingSensorSubIdx >= 0) {
+      // Editing existing token
+      keymapSensorBindings[editingSensorIndex].bindings[editingSensorSubIdx] = bindingStr;
+    } else if (editingSensorIndex >= 0 && editingSensorSubIdx === -1) {
+      // Adding new encoder to existing layer entry
+      keymapSensorBindings[editingSensorIndex].bindings.push(bindingStr);
     } else {
-      keymapSensorBindings.push(sensor);
+      // Creating new sensor entry for this layer
+      keymapSensorBindings.push({ layerIndex: activeLayerIndex, bindings: [bindingStr] });
     }
-    document.getElementById('kmSensorEditor').style.display = 'none';
-    editingSensorIndex = -1;
+    closeSensorModal();
     renderKeymapSensorList();
     updateKeymapOutput();
   };
-  document.getElementById('kmSensorList').addEventListener('click', function(e) {
-    if (e.target.dataset.removeSensor !== undefined) {
+
+  // Event delegation for sensor cards
+  document.getElementById('sensorCards').addEventListener('click', function(e) {
+    // Delete button
+    var delBtn = e.target.closest('.sensor-delete');
+    if (delBtn) {
+      e.stopPropagation();
       pushUndo();
-      keymapSensorBindings.splice(parseInt(e.target.dataset.removeSensor), 1);
+      var idx = parseInt(delBtn.dataset.delSensorIdx);
+      var sub = parseInt(delBtn.dataset.delSensorSub);
+      keymapSensorBindings[idx].bindings.splice(sub, 1);
+      if (keymapSensorBindings[idx].bindings.length === 0) {
+        keymapSensorBindings.splice(idx, 1);
+      }
       renderKeymapSensorList();
       updateKeymapOutput();
+      return;
     }
-    if (e.target.dataset.editSensor !== undefined) {
-      var si = parseInt(e.target.dataset.editSensor);
-      editingSensorIndex = si;
-      var s = keymapSensorBindings[si];
-      populateSensorLayerSelect();
-      document.getElementById('kmSensorLayer').value = s.layerIndex;
-      // Try to parse the binding
-      var bindStr = s.bindings[0] || '';
-      if (bindStr.indexOf('&inc_dec_kp') === 0) {
-        document.getElementById('kmSensorBehavior').value = '&inc_dec_kp';
-        var parts = bindStr.split(/\s+/);
-        document.getElementById('kmSensorCW').value = parts[1] || '';
-        document.getElementById('kmSensorCCW').value = parts[2] || '';
-        document.getElementById('kmSensorParams').style.display = '';
-      } else {
-        document.getElementById('kmSensorBehavior').value = 'custom';
-        document.getElementById('kmSensorName').value = bindStr.replace('&', '');
-        document.getElementById('kmSensorParams').style.display = 'none';
+    // Add button
+    if (e.target.id === 'sensorAddBtn' || e.target.closest('#sensorAddBtn')) {
+      // Find if there's already an entry for active layer
+      var existingIdx = -1;
+      for (var si = 0; si < keymapSensorBindings.length; si++) {
+        if (keymapSensorBindings[si].layerIndex === activeLayerIndex) { existingIdx = si; break; }
       }
-      document.getElementById('kmSensorEditor').style.display = '';
+      if (existingIdx >= 0) {
+        var newSubIdx = keymapSensorBindings[existingIdx].bindings.length;
+        openSensorModal(existingIdx, -1, true);
+        // Set encoder name based on position
+        var encoderNames2 = ['encoder_left', 'encoder_right'];
+        document.getElementById('smEncoderName').textContent = encoderNames2[newSubIdx] || ('encoder_' + newSubIdx);
+        editingSensorSubIdx = -1;
+      } else {
+        openSensorModal(-1, -1, true);
+      }
+      return;
+    }
+    // Click on card to edit
+    var card = e.target.closest('.sensor-card');
+    if (card) {
+      var sIdx = parseInt(card.dataset.sensorIdx);
+      var sSub = parseInt(card.dataset.sensorSub);
+      openSensorModal(sIdx, sSub, false);
     }
   });
 
