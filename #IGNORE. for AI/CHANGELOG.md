@@ -143,7 +143,7 @@ Coverage note: this reflects everything I can reliably reconstruct from availabl
 - Result: dark mode, tab switching, and button wiring resumed execution after script parse recovery.
 
 ### Minor/maintenance changes
-- Multiple corruption-recovery utility scripts created during emergency repair work (stored under RGB Layer Tool folder).
+- Multiple corruption-recovery utility scripts created during emergency repair work (stored under `#IGNORE. for AI` Folder).
 - Additional validation helpers added (_check.js, _validate.js, _code.txt snapshots) to support troubleshooting.
 
 ## Ongoing Notes
