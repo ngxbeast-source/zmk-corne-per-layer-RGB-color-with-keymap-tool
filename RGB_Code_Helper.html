@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZMK RGB &amp; Keymap Editor v8</title>
+  <title>ZMK RGB &amp; Keymap Editor v9</title>
   <style>
     /* ====== THEME VARIABLES ====== */
     :root {
@@ -25,6 +25,7 @@
       --svg-bg: #1e242e;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
     body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); transition: background 0.2s, color 0.2s; }
 
     /* ====== TOPBAR ====== */
@@ -1032,15 +1033,15 @@ function snapshotState() {
       return { name: l.name, displayName: l.displayName, bindings: l.bindings.slice(), status: l.status };
     }),
     combos: keymapCombos.map(function(c) {
-      return { name: c.name, binding: c.binding, positions: c.positions.slice(), layers: c.layers, timeout: c.timeout };
+      return { name: c.name, binding: c.binding, positions: c.positions.slice(), layers: c.layers, timeout: c.timeout, _fromRgb: c._fromRgb };
     }),
     macros: keymapMacros.map(function(m) {
-      return { name: m.name, label: m.label, steps: m.steps.slice(), paramType: m.paramType, waitMs: m.waitMs, tapMs: m.tapMs };
+      return { name: m.name, label: m.label, steps: m.steps.slice(), paramType: m.paramType, waitMs: m.waitMs, tapMs: m.tapMs, _fromRgb: m._fromRgb };
     }),
     behaviors: keymapBehaviors.map(function(b) {
       var cfg = {};
       for (var k in b.config) cfg[k] = b.config[k];
-      return { name: b.name, type: b.type, label: b.label, config: cfg, _fromDtsi: b._fromDtsi };
+      return { name: b.name, type: b.type, label: b.label, config: cfg, _fromRgb: b._fromRgb, _fromDtsi: b._fromDtsi };
     }),
     condLayers: keymapConditionalLayers.map(function(c) {
       return { name: c.name, ifLayers: c.ifLayers.slice(), thenLayer: c.thenLayer };
@@ -1058,15 +1059,15 @@ function restoreState(snap) {
     return { name: l.name, displayName: l.displayName, bindings: l.bindings.slice(), status: l.status };
   });
   keymapCombos = snap.combos.map(function(c) {
-    return { name: c.name, binding: c.binding, positions: c.positions.slice(), layers: c.layers, timeout: c.timeout };
+    return { name: c.name, binding: c.binding, positions: c.positions.slice(), layers: c.layers, timeout: c.timeout, _fromRgb: c._fromRgb };
   });
   keymapMacros = snap.macros.map(function(m) {
-    return { name: m.name, label: m.label, steps: m.steps.slice(), paramType: m.paramType, waitMs: m.waitMs, tapMs: m.tapMs };
+    return { name: m.name, label: m.label, steps: m.steps.slice(), paramType: m.paramType, waitMs: m.waitMs, tapMs: m.tapMs, _fromRgb: m._fromRgb };
   });
   keymapBehaviors = snap.behaviors.map(function(b) {
     var cfg = {};
     for (var k in b.config) cfg[k] = b.config[k];
-    return { name: b.name, type: b.type, label: b.label, config: cfg, _fromDtsi: b._fromDtsi };
+    return { name: b.name, type: b.type, label: b.label, config: cfg, _fromRgb: b._fromRgb, _fromDtsi: b._fromDtsi };
   });
   keymapConditionalLayers = snap.condLayers.map(function(c) {
     return { name: c.name, ifLayers: c.ifLayers.slice(), thenLayer: c.thenLayer };
@@ -1662,12 +1663,12 @@ function parseUserCode() {
   savedBehaviors.forEach(function(b) { behaviors.push(b); });
   var m;
 
-  var colorRe = /^#define\s+([A-Za-z0-9_]+)\s+RGB_COLOR_HSB\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)\s*(?:\/\*([^*]*)\*\/)?(?:\s*\/\/(.*))?/gm;
+  var colorRe = /^#define\s+([A-Za-z0-9_]+)\s+RGB_COLOR_HSB\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)[^\S\n]*(?:\/\*([^*]*)\*\/)?(?:[^\S\n]*\/\/(.*))?/gm;
   while ((m = colorRe.exec(code))) {
     var h = parseInt(m[2]), s = parseInt(m[3]), b = parseInt(m[4]);
     if (h === 0 && s === 0 && b === 0) continue;
     colorValueMap[m[1]] = { h: h, s: s, b: b };
-    colorLabelMap[m[1]] = '';
+    colorLabelMap[m[1]] = (m[5] || m[6] || '').trim();
   }
 
   var layerRe = /^#define\s+(LAYER_[A-Za-z0-9_]+)\s+(\d+)\s*$/gm;
@@ -1713,24 +1714,49 @@ function parseUserCode() {
     }
   });
 
+  // Strip multi-line #define helper templates (lines ending with \) so that
+  // macro/behavior/combo regexes don't falsely match the template parameter lists.
+  // Single-line #defines (layers, colors) are unaffected.
+  var codeNoHelpers = code.replace(/^#define\s+[A-Za-z0-9_]+\([^)]*\)\s*\\[\s\S]*?(?:\n(?!.*\\)\s*[^\n]*)/gm, '');
+
+  // Parse macro section comments (// and /* */ lines preceding each macro call)
+  var macroSectionComments = {};
+  var macroSectionMatch = codeNoHelpers.match(/macros\s*\{([\s\S]*?)\};/);
+  if (macroSectionMatch) {
+    var mLines = macroSectionMatch[1].split('\n');
+    var pendingComments = [];
+    for (var mi = 0; mi < mLines.length; mi++) {
+      var mline = mLines[mi].trim();
+      if (!mline) continue;
+      if (mline.startsWith('//') || mline.startsWith('/*')) {
+        pendingComments.push(mline);
+      } else if (pendingComments.length > 0) {
+        var mcName = mline.match(/(?:MOMENTARY_RGB_MACRO|TO_RGB_MACRO|TO_RGB_PRESS_MACRO)\(\s*([^,\s]+)/);
+        if (mcName) macroSectionComments[mcName[1]] = pendingComments.join('\n');
+        pendingComments = [];
+      }
+    }
+  }
+
   var macroRe = /(TO_RGB_MACRO|MOMENTARY_RGB_MACRO|TO_RGB_PRESS_MACRO)\(([^)]+)\)/g;
-  while ((m = macroRe.exec(code))) {
+  while ((m = macroRe.exec(codeNoHelpers))) {
     var args = m[2].split(',').map(function(x) { return x.trim(); });
+    var macroLabel = (args[1] || '').replace(/^"|"$/g, '').trim();
     if (m[1] === 'MOMENTARY_RGB_MACRO') {
-      macros.push({ name: args[0], type: m[1], layer: args[2] || '', color: args[3] || '', releaseColor: args[4] || '' });
+      macros.push({ name: args[0], type: m[1], layer: args[2] || '', color: args[3] || '', releaseColor: args[4] || '', label: macroLabel, comment: macroSectionComments[args[0]] || '' });
     } else {
-      macros.push({ name: args[0], type: m[1], layer: args[2] || '', color: args[3] || '', releaseColor: '' });
+      macros.push({ name: args[0], type: m[1], layer: args[2] || '', color: args[3] || '', releaseColor: '', label: macroLabel, comment: macroSectionComments[args[0]] || '' });
     }
   }
 
   var behRe = /RGB_HOLD_TAP\(([^)]+)\)/g;
-  while ((m = behRe.exec(code))) {
+  while ((m = behRe.exec(codeNoHelpers))) {
     var bargs = m[1].split(',').map(function(x) { return x.trim(); });
     behaviors.push({ name: bargs[0], label: (bargs[1] || '').replace(/"/g, ''), macro: bargs[2] || '' });
   }
 
   var comboRe = /COMBO\(([^)]+)\)/g;
-  while ((m = comboRe.exec(code))) {
+  while ((m = comboRe.exec(codeNoHelpers))) {
     var cargs = m[1].split(',').map(function(x) { return x.trim(); });
     var pos, layersStr;
     if (cargs.length > 3 && /^\d+$/.test(cargs[3])) {
@@ -1746,7 +1772,7 @@ function parseUserCode() {
   var blinkBlockRe = /ZMK_MACRO\(\s*([A-Za-z0-9_]+)\s*,([\s\S]*?)\n\s*\)/g;
   var seenBlinkNames = {};
   var bb;
-  while ((bb = blinkBlockRe.exec(code))) {
+  while ((bb = blinkBlockRe.exec(codeNoHelpers))) {
     var bname = bb[1].trim();
     var body = bb[2];
     if (!body.includes('BLINK_SEQ')) continue;
@@ -1771,7 +1797,7 @@ function parseUserCode() {
   var dbm;
   var rgbBehNames = {};
   behaviors.forEach(function(b) { rgbBehNames[b.name] = true; });
-  while ((dbm = dtsiBehRe.exec(code))) {
+  while ((dbm = dtsiBehRe.exec(codeNoHelpers))) {
     var dbname = dbm[1];
     if (rgbBehNames[dbname]) continue; // skip RGB_HOLD_TAP behaviors already parsed
     var dbbody = dbm[2];
@@ -2219,7 +2245,8 @@ function updateRgbOutput() {
   mergedArr.forEach(function(l) {
     if (hasHsbVal(l.h) && hasHsbVal(l.s) && hasHsbVal(l.b)) {
       var name = l.name.startsWith('RGB_') ? l.name : 'RGB_' + l.bk;
-      out += '#define ' + name.replace(/\s/g, '_') + ' RGB_COLOR_HSB(' + l.h + ',' + l.s + ',' + l.b + ')\n';
+      var cmt = l.label ? '      /* ' + l.label + ' */' : '';
+      out += '#define ' + name.replace(/\s/g, '_') + ' RGB_COLOR_HSB(' + l.h + ',' + l.s + ',' + l.b + ')' + cmt + '\n';
     }
   });
 
@@ -2242,7 +2269,9 @@ function updateRgbOutput() {
       out += '\n/* ---- (OPTIONAL) BLINK HELPERS ---- */\n';
       enabledOrphans.forEach(function(ck) {
         var v = colorValueMap[ck];
-        out += '#define ' + ck + ' RGB_COLOR_HSB(' + v.h + ',' + v.s + ',' + v.b + ')\n';
+        var olbl = colorLabelMap[ck] || '';
+        var ocmt = olbl ? '      /* ' + olbl + ' */' : '';
+        out += '#define ' + ck + ' RGB_COLOR_HSB(' + v.h + ',' + v.s + ',' + v.b + ')' + ocmt + '\n';
       });
     }
   }
@@ -2260,12 +2289,14 @@ function updateRgbOutput() {
   if (macros.length) {
     out += '\n/* ---- STEP 2+3: MACROS ---- */\n';
     macros.forEach(function(m) {
+      if (m.comment) out += m.comment + '\n';
+      var lbl = m.label || m.name;
       if (m.type === 'MOMENTARY_RGB_MACRO') {
-        out += 'MOMENTARY_RGB_MACRO(' + m.name + ', "' + m.name + '", ' + m.layer + ', ' + m.color + ', ' + m.releaseColor + ')\n';
+        out += 'MOMENTARY_RGB_MACRO(' + m.name + ', "' + lbl + '", ' + m.layer + ', ' + m.color + ', ' + m.releaseColor + ')\n';
       } else if (m.type === 'TO_RGB_PRESS_MACRO') {
-        out += 'TO_RGB_PRESS_MACRO(' + m.name + ', "' + m.name + '", ' + m.layer + ', ' + m.color + ')\n';
+        out += 'TO_RGB_PRESS_MACRO(' + m.name + ', "' + lbl + '", ' + m.layer + ', ' + m.color + ')\n';
       } else {
-        out += 'TO_RGB_MACRO(' + m.name + ', "' + m.name + '", ' + m.layer + ', ' + m.color + ')\n';
+        out += 'TO_RGB_MACRO(' + m.name + ', "' + lbl + '", ' + m.layer + ', ' + m.color + ')\n';
       }
     });
   }
@@ -2560,16 +2591,20 @@ function getLayerLabel(idx) {
 // sensor bindings. This is the biggest function in the file. It works by
 // using regex patterns to find each section of the devicetree format.
 function parseKeymap(text) {
-  // Preserve dtsi-native behaviors across re-parse (they come from .dtsi, not .keymap)
-  var savedBehaviors = keymapBehaviors.filter(function(b) { return b._fromDtsi; });
+  // Preserve cross-tab synced data across re-parse (RGB macros/behaviors and dtsi behaviors)
+  var savedMacros = keymapMacros.filter(function(m) { return m._fromRgb; });
+  var savedBehaviors = keymapBehaviors.filter(function(b) { return b._fromRgb || b._fromDtsi; });
+  var savedCombos = keymapCombos.filter(function(c) { return c._fromRgb; });
   keymapLayers = [];
   keymapCombos = [];
   keymapMacros = [];
   keymapBehaviors = [];
   keymapConditionalLayers = [];
   keymapSensorBindings = [];
-  // Restore dtsi-native behaviors
+  // Restore cross-tab data
+  savedMacros.forEach(function(m) { keymapMacros.push(m); });
   savedBehaviors.forEach(function(b) { keymapBehaviors.push(b); });
+  savedCombos.forEach(function(c) { keymapCombos.push(c); });
 
   // Parse #include lines and header comment from user's pasted text
   keymapParsedIncludes = [];
@@ -2959,6 +2994,9 @@ function showLayerContextMenu(anchorEl) {
     { label: 'Duplicate Layer', action: 'duplicate' },
     { label: 'Delete Layer', action: 'delete', danger: true },
     { sep: true },
+    { label: 'Clear Layer \u2192 &trans', action: 'clear-trans' },
+    { label: 'Clear Layer \u2192 &none', action: 'clear-none' },
+    { sep: true },
     { label: 'Quick &kp Assignment...', action: 'quick-kp' },
     { sep: true },
     { label: 'Convert &trans \u2192 &kp', action: 'trans-to-kp' },
@@ -3023,6 +3061,16 @@ function handleCtxAction(action) {
   } else if (action === 'quick-kp') {
     openQuickAssign();
     return; // Don't re-render below, Quick Assign handles it
+  } else if (action === 'clear-trans') {
+    if (!confirm('Clear all bindings in this layer to &trans?')) return;
+    for (var i = 0; i < layer.bindings.length; i++) {
+      layer.bindings[i] = '&trans';
+    }
+  } else if (action === 'clear-none') {
+    if (!confirm('Clear all bindings in this layer to &none?')) return;
+    for (var i = 0; i < layer.bindings.length; i++) {
+      layer.bindings[i] = '&none';
+    }
   } else if (action === 'trans-to-kp') {
     var kc2 = prompt('Replace &trans with &kp [keycode]:');
     if (kc2 && kc2.trim()) {
@@ -4402,7 +4450,7 @@ function updateKeymapOutput() {
   // No raw blocks — generate from parsed data (default behavior)
 
   // Custom behaviors
-  var nativeKeymapBehaviors = keymapBehaviors.filter(function(b) { return !b._fromDtsi; });
+  var nativeKeymapBehaviors = keymapBehaviors.filter(function(b) { return !b._fromRgb && !b._fromDtsi; });
   if (nativeKeymapBehaviors.length) {
     out += '/ {\n    behaviors {\n';
     nativeKeymapBehaviors.forEach(function(b) {
@@ -4412,7 +4460,7 @@ function updateKeymapOutput() {
   }
 
   // Combos — only output native (non-RGB) combos; RGB combos stay in the .dtsi
-  var nativeCombos = keymapCombos.filter(function(c) { return !c._fromDtsi; });
+  var nativeCombos = keymapCombos.filter(function(c) { return !c._fromRgb && !c._fromDtsi; });
 
   if (nativeCombos.length) {
     out += '/ {\n    combos {\n        compatible = "zmk,combos";\n';
@@ -4430,7 +4478,7 @@ function updateKeymapOutput() {
   }
 
   // Macros
-  var nativeKeymapMacros = keymapMacros.filter(function(m) { return !m._fromDtsi; });
+  var nativeKeymapMacros = keymapMacros.filter(function(m) { return !m._fromRgb && !m._fromDtsi; });
   if (nativeKeymapMacros.length) {
     out += '/ {\n    macros {\n';
     nativeKeymapMacros.forEach(function(m) {
@@ -4826,14 +4874,67 @@ function syncCrossTabData() {
 // syncRgbToKeymap() — Copies RGB tab data (behaviors, macros) back into
 // the keymap tab's arrays. Called when switching to the Keymap tab.
 function syncRgbToKeymap() {
-  // RGB macros and behaviors stay exclusive to the RGB tool — do NOT sync them into keymap.
-  // Only sync dtsi native behaviors (hm, ltq, td_numcaps, etc.) since those are
-  // actual keymap behaviors defined in the .dtsi that the keymap references.
+  // Sync RGB macros, behaviors, and combos INTO the keymap editor so they
+  // appear as selectable bindings. They get _fromRgb flag so they are
+  // excluded from the .keymap output (they live in the .dtsi file).
+
+  // First remove any stale _fromRgb items from previous syncs
+  keymapMacros = keymapMacros.filter(function(m) { return !m._fromRgb; });
+  keymapBehaviors = keymapBehaviors.filter(function(b) { return !b._fromRgb; });
+  keymapCombos = keymapCombos.filter(function(c) { return !c._fromRgb; });
+
+  var existingMacNames = {};
+  keymapMacros.forEach(function(m) { existingMacNames[m.name] = true; });
 
   var existingBehNames = {};
   keymapBehaviors.forEach(function(b) { existingBehNames[b.name] = true; });
 
-  // Sync dtsi native behaviors (hm, ltq, td_numcaps, etc.) into keymap behaviors
+  var existingComboNames = {};
+  keymapCombos.forEach(function(c) { existingComboNames[c.name] = true; });
+
+  // Sync RGB macros (TO_RGB_MACRO, MOMENTARY_RGB_MACRO, TO_RGB_PRESS_MACRO)
+  macros.forEach(function(rm) {
+    if (!existingMacNames[rm.name]) {
+      existingMacNames[rm.name] = true;
+      keymapMacros.push({
+        name: rm.name,
+        paramType: 0,
+        steps: [],
+        label: rm.label || rm.name,
+        _fromRgb: true
+      });
+    }
+  });
+
+  // Sync blink macros (caps_blink, num_blink, f_blink, etc.)
+  blinkMacros.forEach(function(bm) {
+    if (!existingMacNames[bm.name]) {
+      existingMacNames[bm.name] = true;
+      keymapMacros.push({
+        name: bm.name,
+        paramType: 0,
+        steps: [],
+        label: bm.label || bm.name,
+        _fromRgb: true
+      });
+    }
+  });
+
+  // Sync RGB behaviors (RGB_HOLD_TAP instances)
+  behaviors.forEach(function(rb) {
+    if (!existingBehNames[rb.name]) {
+      existingBehNames[rb.name] = true;
+      keymapBehaviors.push({
+        name: rb.name,
+        type: 'hold-tap',
+        label: rb.label || rb.name,
+        config: { tappingTerm: '200', flavor: 'tap-preferred' },
+        _fromRgb: true
+      });
+    }
+  });
+
+  // Sync dtsi native behaviors (hm, ltq, td_numcaps, etc.)
   dtsiNativeBehaviors.forEach(function(db) {
     if (!existingBehNames[db.name]) {
       existingBehNames[db.name] = true;
@@ -4847,7 +4948,20 @@ function syncRgbToKeymap() {
     }
   });
 
-  // Note: RGB tab combos are NOT synced to keymap — they stay in the .dtsi output
+  // Sync RGB combos
+  combos.forEach(function(rc) {
+    if (!existingComboNames[rc.name]) {
+      existingComboNames[rc.name] = true;
+      keymapCombos.push({
+        name: rc.name,
+        binding: rc.bind,
+        positions: rc.pos.split(/[\s,]+/).filter(Boolean),
+        layers: rc.layers,
+        timeout: 50,
+        _fromRgb: true
+      });
+    }
+  });
 }
 
 // ================================================================
@@ -5300,12 +5414,15 @@ document.addEventListener('DOMContentLoaded', function() {
   };
 
   document.getElementById('kmClearSyncBtn').onclick = function() {
-    // Remove dtsi-native behaviors synced from RGB tab
-    keymapBehaviors = keymapBehaviors.filter(function(b) { return !b._fromDtsi; });
+    // Remove items synced from RGB tab
+    keymapMacros = keymapMacros.filter(function(m) { return !m._fromRgb; });
+    keymapBehaviors = keymapBehaviors.filter(function(b) { return !b._fromRgb && !b._fromDtsi; });
+    keymapCombos = keymapCombos.filter(function(c) { return !c._fromRgb; });
     populateBehaviorDropdown();
+    renderKeymapMacroList();
     renderKeymapBehaviorList();
     updateKeymapOutput();
-    showStatus('kmParseStatus', 'Cleared synced dtsi behaviors');
+    showStatus('kmParseStatus', 'Cleared synced RGB data');
   };
 
   // Layer tabs event delegation (now sidebar)

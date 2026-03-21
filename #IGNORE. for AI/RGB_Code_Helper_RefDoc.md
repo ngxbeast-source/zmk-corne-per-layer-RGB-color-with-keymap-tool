@@ -45,6 +45,9 @@
 # Line 690 — Section 24: Tab Switching & Dark Mode
 # Line 710 — Section 25: DOMContentLoaded (wiring everything up)
 # Line 750 — Section 26: Layer Ordering (how layers stay in sequence)
+# Line 790 — Section 27: Macro Param Controls (context-aware editing)
+# Line 830 — Section 28: Comment Preservation (.dtsi round-trip)
+# Line 865 — Section 29: Clear Layer Feature
 
 # ============================================================
 # SECTION 1: WHAT THIS TOOL DOES (Overview)
@@ -82,6 +85,9 @@
 #      These control how everything looks: colors, spacing, fonts,
 #      button styles, dark mode, etc. The tool uses CSS custom
 #      properties (variables like --bg, --fg) for dark/light theme.
+#      The html and body elements have height:100% and overflow:hidden
+#      to prevent document-level scrolling from bleeding between tabs;
+#      each tab panel scrolls independently within its own container.
 #
 #   2. HTML Body (lines 342-971):
 #      The page layout. All the buttons, text fields, dropdowns,
@@ -336,6 +342,17 @@
 #   and \d+ means "one or more digits". The parentheses capture the matched
 #   parts so you can use them (layer name and index number).
 #   More on regex: see any JavaScript regex tutorial.
+#
+# HELPER TEMPLATE STRIPPING:
+#   Before running the macro/behavior/combo regexes, the parser creates
+#   a `codeNoHelpers` copy of the code with all multi-line #define
+#   blocks removed. Multi-line #defines are helper templates like
+#   `#define MOMENTARY_RGB_MACRO(params...) \` that span multiple lines
+#   using `\` continuation characters. Without stripping, the regex
+#   would match the template's parameter names (node_name, node_label,
+#   etc.) as if they were actual macro/behavior/combo instantiations.
+#   Single-line #defines (layers, colors) are NOT stripped — those are
+#   parsed from the original `code` variable before stripping happens.
 
 # ============================================================
 # SECTION 11: RGB TAB RENDERING (Lists, Dropdowns, UI)
@@ -639,21 +656,35 @@
 # ============================================================
 # SECTION 22: CROSS-TAB SYNC (how RGB & Keymap tabs talk)
 # ============================================================
-# Ref. Lines 4497-4646 in code
+# Ref. Lines ~4780-4930 in code
 #
 # The two tabs have separate data, but they need to stay in agreement.
 #
-#   syncCrossTabData() (line 4509):
+#   syncCrossTabData() (line ~4780):
 #     Called when switching TO the RGB tab.
 #     Goes through every keymapLayer and adds matching entries to
 #     the RGB layers[] array (if they don't already exist).
 #     Matching is done by: index first, then by name.
 #     After syncing, sorts layers by index so they appear in order.
 #
-#   syncRgbToKeymap() (line 4570):
+#   syncRgbToKeymap() (line ~4853):
 #     Called when switching TO the Keymap tab.
-#     Copies RGB macros into the keymap macro list so they appear
-#     in the behavior dropdown.
+#     Syncs ALL RGB data into keymap arrays with _fromRgb flag:
+#       - macros[] → keymapMacros (as paramType 0 with empty steps)
+#       - blinkMacros[] → keymapMacros (as paramType 0 with empty steps)
+#       - behaviors[] → keymapBehaviors (as hold-tap type)
+#       - combos[] → keymapCombos (positions converted from string to array)
+#       - dtsiNativeBehaviors[] → keymapBehaviors (with _fromDtsi flag)
+#     Before syncing, removes any stale _fromRgb items from previous syncs.
+#     Purpose: RGB macros/behaviors appear as selectable bindings in the
+#     keymap editor's dropdowns and value picker, but are EXCLUDED from
+#     the .keymap output (filtered by _fromRgb flag in updateKeymapOutput).
+#
+# Flags used:
+#   _fromRgb  — Marks items synced from RGB tab. Included in UI, excluded from output.
+#   _fromDtsi — Marks native dtsi behaviors (hm, ltq, td_numcaps). Excluded from output.
+#   _fromKeymap — Marks RGB layers synced from keymap tab.
+#   _fromEditor — Marks items added via the keymap editor UI (for raw-blocks path).
 #
 # Layer Index Matching:
 #   The keymap parser assigns indices 0, 1, 2, 3... to layers in
@@ -784,3 +815,96 @@
 #   })
 # This puts layer index 0 first, index 1 second, etc.
 # Layers with no index get 9999 so they sort to the end.
+
+# ============================================================
+# SECTION 27: MACRO PARAM CONTROLS (context-aware editing)
+# ============================================================
+# Ref. Lines ~3550-3760 in code
+#
+# When editing macro steps, each step has a behavior (like &kp, &mo,
+# &lt) and parameters. The editor provides context-aware controls
+# based on which behavior is selected.
+#
+#   renderParamControl(stepIdx, paramNum, paramType, value, behavior):
+#     Generates the right HTML input for a macro step parameter.
+#     Returns different controls depending on the behavior:
+#       - &to, &mo, &tog, &sl → layer dropdown from keymapLayers
+#       - &lt → layer dropdown (param1) + keycode input with search (param2)
+#       - &kp, &sk, &kt → keycode input with search button
+#       - &bt → BT_ACTIONS dropdown (BT_CLR, BT_SEL, etc.)
+#       - &out → OUT_ACTIONS dropdown (OUT_TOG, OUT_USB, OUT_BLE)
+#       - &mmv, &msc → direction dropdown (MOVE_UP, SCROLL_DOWN, etc.)
+#       - &mkp → mouse button dropdown (LCLK, RCLK, MCLK)
+#       - Unknown behaviors → generic text input with search fallback
+#
+#   updateMacroBindingStep(stepIdx):
+#     Reads param1 and param2 values from the DOM inputs and saves
+#     them back into the macro step. Uses data attributes:
+#       data-step-param1, data-step-param2 (text inputs)
+#       data-step-pick1, data-step-pick2 (search buttons)
+#
+#   openMacroKcSearch(stepIdx, anchorEl, targetAttr):
+#     Opens the value picker for keycode searching. The targetAttr
+#     parameter specifies which input to write the result into
+#     (data-step-param1 or data-step-param2).
+#
+# When the behavior dropdown changes, the step is re-rendered with
+# smart defaults appropriate for the new behavior.
+
+# ============================================================
+# SECTION 28: COMMENT PRESERVATION (.dtsi round-trip)
+# ============================================================
+# Ref. Lines ~1665-1740 (parser) and ~2218-2300 (output) in code
+#
+# When you paste a .dtsi file and the tool regenerates it, comments
+# from the original code are now preserved:
+#
+# COLOR INLINE COMMENTS:
+#   Lines like: #define RGB_ABC RGB_COLOR_HSB(19,100,17) /* BASE - Dim Yellow */
+#   The regex captures two comment groups:
+#     m[5] = /* block comment */ content
+#     m[6] = // line comment content
+#   These are stored in colorLabelMap[colorName] and displayed in the
+#   "Lbl" field in the layer list. In the output, they appear as
+#   inline /* comments */ after each color #define line.
+#
+#   IMPORTANT: The colorRe regex uses [^\S\n]* (horizontal whitespace
+#   only) after the closing paren, NOT \s*. Using \s* would match
+#   newlines and cause the regex to "hop" to the next line, capturing
+#   section header comments (like /* ---- HELPER DEFINITIONS ---- */)
+#   as color labels. This was a bug that was fixed.
+#
+# MACRO SECTION COMMENTS:
+#   Comments like "// Momentary Layers" or "/* Toggled macros */" that
+#   appear before macro calls in the macros{} block are parsed, stored
+#   on each macro object as a .comment property, and emitted before the
+#   macro in the generated output.
+#   Parsing: scans the macros{} block line by line, accumulating comment
+#   lines and associating them with the next macro call found.
+#
+# MACRO LABELS:
+#   The second argument of macro calls (e.g., "GameLayer LED Macro" in
+#   TO_RGB_MACRO(game_led, "GameLayer LED Macro", ...)) is now stored
+#   as macro.label and used in the output instead of defaulting to the
+#   node name. This preserves the user's descriptive labels.
+
+# ============================================================
+# SECTION 29: CLEAR LAYER FEATURE
+# ============================================================
+# Ref. Lines ~2960-2990 (context menu) and ~3020-3040 (handler) in code
+#
+# The layer context menu (right-click a layer tab) now includes two
+# "Clear Layer" options:
+#
+#   "Clear Layer → &trans":
+#     Sets ALL key bindings in the active layer to &trans.
+#     &trans means "transparent" — the keypress passes through to
+#     the layer below. Useful when creating overlay layers.
+#
+#   "Clear Layer → &none":
+#     Sets ALL key bindings in the active layer to &none.
+#     &none means "do nothing" — the key is completely disabled.
+#     Useful for blocking keys on specific layers.
+#
+# Both options show a confirmation dialog before executing.
+# The action calls pushUndo() first so it can be undone with Ctrl+Z.
