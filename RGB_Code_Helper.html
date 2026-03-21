@@ -1663,9 +1663,8 @@ function parseUserCode() {
   while ((m = colorRe.exec(code))) {
     var h = parseInt(m[2]), s = parseInt(m[3]), b = parseInt(m[4]);
     if (h === 0 && s === 0 && b === 0) continue;
-    var label = (m[5] ? m[5].trim() : '') || (m[6] ? m[6].trim() : '');
     colorValueMap[m[1]] = { h: h, s: s, b: b };
-    colorLabelMap[m[1]] = label;
+    colorLabelMap[m[1]] = '';
   }
 
   var layerRe = /^#define\s+(LAYER_[A-Za-z0-9_]+)\s+(\d+)\s*$/gm;
@@ -2201,9 +2200,7 @@ function updateRgbOutput() {
   mergedArr.forEach(function(l) {
     if (hasHsbVal(l.h) && hasHsbVal(l.s) && hasHsbVal(l.b)) {
       var name = l.name.startsWith('RGB_') ? l.name : 'RGB_' + l.bk;
-      out += '#define ' + name.replace(/\s/g, '_') + ' RGB_COLOR_HSB(' + l.h + ',' + l.s + ',' + l.b + ')';
-      if (l.label) out += '      /* ' + l.label + ' */';
-      out += '\n';
+      out += '#define ' + name.replace(/\s/g, '_') + ' RGB_COLOR_HSB(' + l.h + ',' + l.s + ',' + l.b + ')\n';
     }
   });
 
@@ -2226,9 +2223,7 @@ function updateRgbOutput() {
       out += '\n/* ---- (OPTIONAL) BLINK HELPERS ---- */\n';
       enabledOrphans.forEach(function(ck) {
         var v = colorValueMap[ck];
-        out += '#define ' + ck + ' RGB_COLOR_HSB(' + v.h + ',' + v.s + ',' + v.b + ')';
-        if (colorLabelMap[ck]) out += '    /* ' + colorLabelMap[ck] + ' */';
-        out += '\n';
+        out += '#define ' + ck + ' RGB_COLOR_HSB(' + v.h + ',' + v.s + ',' + v.b + ')\n';
       });
     }
   }
@@ -4534,7 +4529,7 @@ function syncCrossTabData() {
       name: layerName,
       index: idxStr,
       h: '', s: '', b: '',
-      label: kl.displayName || kl.name,
+      label: '',
       _fromKeymap: true
     });
     existingBaseKeys[klBase] = true;
@@ -4551,18 +4546,6 @@ function syncCrossTabData() {
     return ai - bi;
   });
 
-  // Reflect keymap behaviors into RGB behavior macro selection
-  keymapBehaviors.forEach(function(kb) {
-    var exists = behaviors.some(function(b) { return b.name === kb.name; });
-    if (!exists) {
-      behaviors.push({
-        name: kb.name,
-        label: kb.label || kb.name,
-        macro: '',
-        _fromKeymap: true
-      });
-    }
-  });
 }
 
 // syncRgbToKeymap() — Copies RGB tab data (behaviors, macros) back into
