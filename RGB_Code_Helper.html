@@ -256,6 +256,7 @@
     .macro-step .step-fields { display: flex; align-items: center; gap: 0.3em; flex-wrap: wrap; }
     .macro-step-move { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.9em; padding: 0 0.15em; }
     .macro-step-move:hover { color: var(--accent); }
+    .macro-kc-item:hover { background: var(--accent, #89b4fa); color: #000; }
     .macro-props { display: flex; flex-wrap: wrap; gap: 0.5em; margin: 0.3em 0; padding: 0.4em; background: var(--item-bg); border: 1px solid var(--border); border-radius: 4px; }
     .macro-props label { font-size: 0.82em; display: flex; align-items: center; gap: 0.3em; }
     .macro-props input, .macro-props select { font-size: 0.82em; padding: 0.2em 0.3em; border: 1px solid var(--border); border-radius: 3px; background: var(--card); color: var(--text); width: 70px; }
@@ -875,6 +876,7 @@
           <h2>Generated .keymap</h2>
           <button id="kmCopyBtn">Copy</button>
           <button id="kmEditToggle" style="background:var(--item-bg);color:var(--text);border:1px solid var(--border);font-size:0.82em;padding:0.3em 0.8em;border-radius:4px;cursor:pointer;">&#9998; Edit</button>
+          <label><input type="checkbox" id="kmIncludeRgbDtsi" checked> RGB .dtsi</label>
         </div>
         <pre class="output-pre" id="kmOutput"></pre>
         <textarea id="kmOutputEdit" class="output-textarea" style="display:none;flex:1;width:100%;border:none;background:transparent;color:var(--output-text);font-family:'Fira Code','Fira Mono','Consolas','Menlo',monospace;font-size:0.88em;padding:0.8em 1em;resize:none;line-height:1.55;outline:none;tab-size:4;white-space:pre;overflow:auto;"></textarea>
@@ -998,6 +1000,7 @@ var keymapBehaviors = []; // { name, type, label, config }
 var keymapConditionalLayers = []; // { name, ifLayers: number[], thenLayer: number }
 var keymapSensorBindings = [];    // Encoder rotation bindings: { layerIndex, bindings[] } per layer
 var keyboardLayout = null; // Physical key positions from layout JSON (used by SVG renderer, line 2329)
+var currentLayoutId = 'corne'; // Tracks which layout is loaded: 'corne' or 'lotus58'
 
 // --- UI State: tracks what the user is currently doing ---
 var activeLayerIndex = 0;     // Which layer tab is selected (0 = first layer)
@@ -1032,12 +1035,12 @@ function snapshotState() {
       return { name: c.name, binding: c.binding, positions: c.positions.slice(), layers: c.layers, timeout: c.timeout };
     }),
     macros: keymapMacros.map(function(m) {
-      return { name: m.name, label: m.label, steps: m.steps.slice(), paramType: m.paramType, waitMs: m.waitMs, tapMs: m.tapMs, _fromRgb: m._fromRgb };
+      return { name: m.name, label: m.label, steps: m.steps.slice(), paramType: m.paramType, waitMs: m.waitMs, tapMs: m.tapMs };
     }),
     behaviors: keymapBehaviors.map(function(b) {
       var cfg = {};
       for (var k in b.config) cfg[k] = b.config[k];
-      return { name: b.name, type: b.type, label: b.label, config: cfg, _fromRgb: b._fromRgb, _fromDtsi: b._fromDtsi };
+      return { name: b.name, type: b.type, label: b.label, config: cfg, _fromDtsi: b._fromDtsi };
     }),
     condLayers: keymapConditionalLayers.map(function(c) {
       return { name: c.name, ifLayers: c.ifLayers.slice(), thenLayer: c.thenLayer };
@@ -1058,12 +1061,12 @@ function restoreState(snap) {
     return { name: c.name, binding: c.binding, positions: c.positions.slice(), layers: c.layers, timeout: c.timeout };
   });
   keymapMacros = snap.macros.map(function(m) {
-    return { name: m.name, label: m.label, steps: m.steps.slice(), paramType: m.paramType, waitMs: m.waitMs, tapMs: m.tapMs, _fromRgb: m._fromRgb };
+    return { name: m.name, label: m.label, steps: m.steps.slice(), paramType: m.paramType, waitMs: m.waitMs, tapMs: m.tapMs };
   });
   keymapBehaviors = snap.behaviors.map(function(b) {
     var cfg = {};
     for (var k in b.config) cfg[k] = b.config[k];
-    return { name: b.name, type: b.type, label: b.label, config: cfg, _fromRgb: b._fromRgb, _fromDtsi: b._fromDtsi };
+    return { name: b.name, type: b.type, label: b.label, config: cfg, _fromDtsi: b._fromDtsi };
   });
   keymapConditionalLayers = snap.condLayers.map(function(c) {
     return { name: c.name, ifLayers: c.ifLayers.slice(), thenLayer: c.thenLayer };
@@ -1695,10 +1698,18 @@ function parseUserCode() {
     }
   });
   // Restore keymap-synced layers that aren't already covered by parsed data
+  // Check both name AND index to prevent duplicates (same index = same layer)
+  var parsedIndexes = {};
+  layers.forEach(function(l) {
+    if (l.index !== '' && l.index !== undefined) parsedIndexes[String(l.index)] = true;
+  });
   savedLayers.forEach(function(sl) {
-    if (!layerBaseKeys[baseKey(sl.name)]) {
+    var nameExists = layerBaseKeys[baseKey(sl.name)];
+    var indexExists = sl.index !== '' && sl.index !== undefined && parsedIndexes[String(sl.index)];
+    if (!nameExists && !indexExists) {
       layers.push(sl);
       layerBaseKeys[baseKey(sl.name)] = true;
+      if (sl.index !== '' && sl.index !== undefined) parsedIndexes[String(sl.index)] = true;
     }
   });
 
@@ -1802,6 +1813,14 @@ function parseUserCode() {
     }
     dtsiNativeBehaviors.push({ name: dbname, type: dbtype, label: dblabel ? dblabel[1] : '', config: dbconfig, _fromDtsi: true });
   }
+
+  // Sort layers by index so they display in sequential order (0, 1, 2...)
+  // Layers without an index (orphans) go to the end of the list
+  layers.sort(function(a, b) {
+    var ai = (a.index !== '' && a.index !== undefined) ? parseInt(a.index) : 9999;
+    var bi = (b.index !== '' && b.index !== undefined) ? parseInt(b.index) : 9999;
+    return ai - bi;
+  });
 
   var status = document.getElementById('userCodeStatus');
   status.textContent = 'Parsed: ' + layers.length + ' layers, ' + macros.length + ' macros, ' + behaviors.length + ' behaviors, ' + dtsiNativeBehaviors.length + ' native behaviors, ' + combos.length + ' combos, ' + blinkMacros.length + ' blink macros.';
@@ -2311,6 +2330,7 @@ var KEY_RADIUS = 5;
 function loadLayout(layoutObj) {
   if (layoutObj && layoutObj.layouts && layoutObj.layouts.default_layout) {
     keyboardLayout = layoutObj.layouts.default_layout.layout;
+    if (layoutObj.id) currentLayoutId = layoutObj.id;
   } else if (Array.isArray(layoutObj)) {
     keyboardLayout = layoutObj;
   } else {
@@ -2540,17 +2560,15 @@ function getLayerLabel(idx) {
 // sensor bindings. This is the biggest function in the file. It works by
 // using regex patterns to find each section of the devicetree format.
 function parseKeymap(text) {
-  // Preserve cross-tab data (items synced from RGB tab)
-  var savedMacros = keymapMacros.filter(function(m) { return m._fromRgb; });
-  var savedBehaviors = keymapBehaviors.filter(function(b) { return b._fromRgb || b._fromDtsi; });
+  // Preserve dtsi-native behaviors across re-parse (they come from .dtsi, not .keymap)
+  var savedBehaviors = keymapBehaviors.filter(function(b) { return b._fromDtsi; });
   keymapLayers = [];
   keymapCombos = [];
   keymapMacros = [];
   keymapBehaviors = [];
   keymapConditionalLayers = [];
   keymapSensorBindings = [];
-  // Restore cross-tab data
-  savedMacros.forEach(function(m) { keymapMacros.push(m); });
+  // Restore dtsi-native behaviors
   savedBehaviors.forEach(function(b) { keymapBehaviors.push(b); });
 
   // Parse #include lines and header comment from user's pasted text
@@ -3491,7 +3509,7 @@ function renderKeymapMacroList() {
 
 // Macro step type definitions for the dropdown sub-menu system
 var MACRO_STEP_TYPES = [
-  { value: 'kp_tap', label: 'Key Binding (&kp)', desc: 'Key press binding (mode-dependent)', prefix: '&kp', hasKeycode: true },
+  { value: 'binding', label: 'Binding', desc: 'Any ZMK binding (&kp, &mo, &to, macros, etc.)', hasBinding: true },
   { value: 'macro_tap', label: 'Set Tap Mode', desc: 'Subsequent bindings will tap (press+release)', ctrl: '&macro_tap' },
   { value: 'macro_press', label: 'Set Press Mode', desc: 'Subsequent bindings will only press (hold)', ctrl: '&macro_press' },
   { value: 'macro_release', label: 'Set Release Mode', desc: 'Subsequent bindings will only release', ctrl: '&macro_release' },
@@ -3502,33 +3520,53 @@ var MACRO_STEP_TYPES = [
   { value: 'param_1to2', label: 'Param 1\u21922', desc: "Forward macro's 1st param to next binding 2nd param", ctrl: '&macro_param_1to2', isParam: true },
   { value: 'param_2to1', label: 'Param 2\u21921', desc: "Forward macro's 2nd param to next binding 1st param", ctrl: '&macro_param_2to1', isParam: true },
   { value: 'param_2to2', label: 'Param 2\u21922', desc: "Forward macro's 2nd param to next binding 2nd param", ctrl: '&macro_param_2to2', isParam: true },
-  { value: 'custom', label: 'Custom Binding', desc: 'Enter a raw binding string', hasRaw: true }
+  { value: 'custom', label: 'Custom / Raw', desc: 'Enter a raw binding string', hasRaw: true }
 ];
 
 function classifyMacroStep(stepStr) {
   stepStr = stepStr.trim();
-  if (stepStr === '&macro_tap') return { type: 'macro_tap', keycode: '' };
-  if (stepStr === '&macro_press') return { type: 'macro_press', keycode: '' };
-  if (stepStr === '&macro_release') return { type: 'macro_release', keycode: '' };
-  if (stepStr === '&macro_pause_for_release') return { type: 'macro_pause', keycode: '' };
+  if (stepStr === '&macro_tap') return { type: 'macro_tap' };
+  if (stepStr === '&macro_press') return { type: 'macro_press' };
+  if (stepStr === '&macro_release') return { type: 'macro_release' };
+  if (stepStr === '&macro_pause_for_release') return { type: 'macro_pause' };
   if (stepStr.startsWith('&macro_wait_time')) return { type: 'wait_time', time: stepStr.replace('&macro_wait_time', '').trim() || '100' };
   if (stepStr.startsWith('&macro_tap_time')) return { type: 'tap_time', time: stepStr.replace('&macro_tap_time', '').trim() || '100' };
-  if (stepStr === '&macro_param_1to1') return { type: 'param_1to1', keycode: '' };
-  if (stepStr === '&macro_param_1to2') return { type: 'param_1to2', keycode: '' };
-  if (stepStr === '&macro_param_2to1') return { type: 'param_2to1', keycode: '' };
-  if (stepStr === '&macro_param_2to2') return { type: 'param_2to2', keycode: '' };
-  if (stepStr.startsWith('&kp ')) return { type: 'kp_tap', keycode: stepStr.replace('&kp ', '') };
+  if (stepStr === '&macro_param_1to1') return { type: 'param_1to1' };
+  if (stepStr === '&macro_param_1to2') return { type: 'param_1to2' };
+  if (stepStr === '&macro_param_2to1') return { type: 'param_2to1' };
+  if (stepStr === '&macro_param_2to2') return { type: 'param_2to2' };
+  // Any &behavior binding (including &kp, &mo, &to, &lt, custom macros, etc.)
+  if (stepStr.startsWith('&')) {
+    var parts = stepStr.split(/\s+/);
+    return { type: 'binding', behavior: parts[0], params: parts.slice(1).join(' ') };
+  }
   return { type: 'custom', raw: stepStr };
 }
 
-function macroStepToString(type, keycode, time, raw) {
+function macroStepToString(type, opts) {
+  opts = opts || {};
   var def = MACRO_STEP_TYPES.find(function(s) { return s.value === type; });
-  if (!def) return raw || '';
-  if (def.ctrl && def.hasTime) return def.ctrl + ' ' + (time || '100');
+  if (!def) return opts.raw || '';
+  if (def.ctrl && def.hasTime) return def.ctrl + ' ' + (opts.time || '100');
   if (def.ctrl) return def.ctrl;
-  if (def.hasKeycode) return '&kp ' + (keycode || 'A');
-  if (def.hasRaw) return raw || '';
+  if (def.hasBinding) return (opts.behavior || '&kp') + (opts.params ? ' ' + opts.params : '');
+  if (def.hasRaw) return opts.raw || '';
   return '';
+}
+
+// Helper: read param controls for a binding step and save to the macro
+function updateMacroBindingStep(stepIdx) {
+  if (editingMacroIndex < 0) return;
+  var behSel = document.querySelector('[data-step-behavior="' + stepIdx + '"]');
+  var beh = behSel ? behSel.value : '&kp';
+  var p1 = document.querySelector('[data-step-param1="' + stepIdx + '"]');
+  var p2 = document.querySelector('[data-step-param2="' + stepIdx + '"]');
+  var pGeneric = document.querySelector('[data-step-params="' + stepIdx + '"]');
+  var params = '';
+  if (p1 && p2) params = (p1.value || '') + (p2.value ? ' ' + p2.value : '');
+  else if (p1) params = p1.value || '';
+  else if (pGeneric) params = pGeneric.value || '';
+  keymapMacros[editingMacroIndex].steps[stepIdx] = macroStepToString('binding', { behavior: beh, params: params });
 }
 
 function renderMacroSteps() {
@@ -3536,6 +3574,31 @@ function renderMacroSteps() {
   var macro = editingMacroIndex >= 0 ? keymapMacros[editingMacroIndex] : null;
   if (!macro) { container.innerHTML = ''; return; }
   container.innerHTML = '';
+
+  // Build behavior options list (ZMK built-in + custom + macros)
+  // IMPORTANT: use esc() on the full '&name' reference so HTML entity escaping is consistent
+  var behaviorOptions = '';
+  ZMK_BEHAVIORS.forEach(function(b) {
+    behaviorOptions += '<option value="' + esc(b.name) + '">' + esc(b.name) + ' | ' + esc(b.label) + '</option>';
+  });
+  keymapBehaviors.forEach(function(cb) {
+    var ref = '&' + cb.name;
+    behaviorOptions += '<option value="' + esc(ref) + '">' + esc(ref) + ' (custom ' + esc(cb.type || '') + ')</option>';
+  });
+  keymapMacros.forEach(function(m, mi) {
+    if (editingMacroIndex >= 0 && mi === editingMacroIndex) return; // skip self to prevent circular
+    var ref = '&' + m.name;
+    var paramLabel = m.paramType === 1 ? ' (1-param)' : m.paramType === 2 ? ' (2-param)' : '';
+    behaviorOptions += '<option value="' + esc(ref) + '">' + esc(ref) + ' (macro' + paramLabel + ')</option>';
+  });
+  blinkMacros.forEach(function(bm) {
+    var ref = '&' + bm.name;
+    behaviorOptions += '<option value="' + esc(ref) + '">' + esc(ref) + ' (blink)</option>';
+  });
+  macros.forEach(function(m) {
+    var ref = '&' + m.name;
+    behaviorOptions += '<option value="' + esc(ref) + '">' + esc(ref) + ' (RGB macro)</option>';
+  });
 
   // Group steps: detect mode context (tap/press/release) for display hints
   var currentMode = 'tap';
@@ -3554,15 +3617,54 @@ function renderMacroSteps() {
     html += '<select data-step-type="' + i + '" style="min-width:160px;">';
     MACRO_STEP_TYPES.forEach(function(st) {
       var sel = st.value === classified.type ? ' selected' : '';
-      html += '<option value="' + st.value + '"' + sel + '>' + esc(st.label) + ' — ' + esc(st.desc) + '</option>';
+      html += '<option value="' + st.value + '"' + sel + '>' + esc(st.label) + ' \u2014 ' + esc(st.desc) + '</option>';
     });
     html += '</select>';
 
     // Sub-fields based on type
     html += '<span class="step-fields">';
     var def = MACRO_STEP_TYPES.find(function(s) { return s.value === classified.type; });
-    if (def && def.hasKeycode) {
-      html += '<input type="text" data-step-keycode="' + i + '" value="' + esc(classified.keycode || '') + '" placeholder="Keycode" style="width:100px;" list="macroKcList">';
+
+    if (def && def.hasBinding) {
+      var beh = classified.behavior || '&kp';
+      var par = classified.params || '';
+
+      // Behavior picker dropdown
+      html += '<select data-step-behavior="' + i + '" style="min-width:130px;">';
+      var foundBeh = false;
+      ZMK_BEHAVIORS.forEach(function(b) { if (b.name === beh) foundBeh = true; });
+      keymapBehaviors.forEach(function(cb) { if ('&' + cb.name === beh) foundBeh = true; });
+      keymapMacros.forEach(function(m, mi) { if ('&' + m.name === beh && mi !== editingMacroIndex) foundBeh = true; });
+      blinkMacros.forEach(function(bm) { if ('&' + bm.name === beh) foundBeh = true; });
+      macros.forEach(function(rm) { if ('&' + rm.name === beh) foundBeh = true; });
+      if (!foundBeh) {
+        html += '<option value="' + esc(beh) + '" selected>' + esc(beh) + ' (from keymap)</option>';
+      }
+      var tmpOpts = behaviorOptions.replace('value="' + esc(beh) + '"', 'value="' + esc(beh) + '" selected');
+      html += tmpOpts;
+      html += '</select>';
+
+      // Context-aware parameter controls based on behavior
+      var behDef = ZMK_BEHAVIORS.find(function(b) { return b.name === beh; });
+      var paramTypes = behDef ? behDef.params : null;
+
+      if (paramTypes && paramTypes.length === 0) {
+        // No params needed (e.g. &none, &trans, &gresc)
+      } else if (paramTypes && paramTypes.length === 1) {
+        // Single parameter
+        html += renderParamControl(i, 1, paramTypes[0], par, beh);
+      } else if (paramTypes && paramTypes.length === 2) {
+        // Two parameters — split by first space
+        var spIdx = par.indexOf(' ');
+        var p1val = spIdx >= 0 ? par.substring(0, spIdx) : par;
+        var p2val = spIdx >= 0 ? par.substring(spIdx + 1) : '';
+        html += renderParamControl(i, 1, paramTypes[0], p1val, beh);
+        html += renderParamControl(i, 2, paramTypes[1], p2val, beh);
+      } else {
+        // Unknown behavior (custom behaviors, macros) — generic text + search
+        html += '<input type="text" data-step-params="' + i + '" value="' + esc(par) + '" placeholder="params" style="width:120px;">';
+        html += '<button class="btn-sm" data-step-pick="' + i + '" title="Search keycodes" style="padding:2px 6px;font-size:0.85em;">&#x1F50D;</button>';
+      }
     }
     if (def && def.hasTime) {
       html += '<input type="number" data-step-time="' + i + '" value="' + esc(classified.time || '100') + '" min="0" style="width:70px;"> <span class="step-desc">ms</span>';
@@ -3577,7 +3679,7 @@ function renderMacroSteps() {
     else if (classified.type === 'macro_press') currentMode = 'press';
     else if (classified.type === 'macro_release') currentMode = 'release';
 
-    if (def && def.hasKeycode && currentMode !== 'tap') {
+    if (def && def.hasBinding && currentMode !== 'tap') {
       html += '<span class="step-desc">(mode: ' + currentMode + ')</span>';
     }
 
@@ -3586,16 +3688,178 @@ function renderMacroSteps() {
     div.innerHTML = html;
     container.appendChild(div);
   });
+}
 
-  // Add a datalist for keycode auto-complete in macro steps
-  if (!document.getElementById('macroKcList')) {
-    var dl = document.createElement('datalist');
-    dl.id = 'macroKcList';
-    var allKc = [];
-    Object.keys(ZMK_KEYCODES).forEach(function(cat) { allKc = allKc.concat(ZMK_KEYCODES[cat]); });
-    dl.innerHTML = allKc.map(function(kc) { return '<option value="' + kc + '">'; }).join('');
-    document.body.appendChild(dl);
+// Render a single parameter control based on its type
+function renderParamControl(stepIdx, paramNum, paramType, value, behavior) {
+  var attr = 'data-step-param' + paramNum;
+  var pickAttr = 'data-step-pick' + paramNum;
+
+  // Keycode or modifier: text input + search button
+  if (paramType === 'keycode' || paramType === 'modifier') {
+    return '<input type="text" ' + attr + '="' + stepIdx + '" value="' + esc(value) + '" placeholder="' + paramType + '" style="width:100px;">' +
+           '<button class="btn-sm" ' + pickAttr + '="' + stepIdx + '" title="Search keycodes" style="padding:2px 6px;font-size:0.85em;">&#x1F50D;</button>';
   }
+
+  // Layer: dropdown of parsed layers
+  if (paramType === 'layer') {
+    var h = '<select ' + attr + '="' + stepIdx + '" style="min-width:80px;">';
+    var foundLayer = false;
+    keymapLayers.forEach(function(l, li) {
+      var sel = String(li) === String(value) ? ' selected' : '';
+      if (sel) foundLayer = true;
+      h += '<option value="' + li + '"' + sel + '>' + li + ': ' + esc(l.displayName || l.name) + '</option>';
+    });
+    if (!foundLayer && value !== '') h += '<option value="' + esc(value) + '" selected>' + esc(value) + '</option>';
+    h += '</select>';
+    return h;
+  }
+
+  // Direction: depends on behavior (&mmv = moves, &msc = scrolls)
+  if (paramType === 'direction') {
+    var dirs = (behavior === '&msc') ? MOUSE_SCROLLS : MOUSE_MOVES;
+    var h = '<select ' + attr + '="' + stepIdx + '" style="min-width:100px;">';
+    var foundDir = false;
+    dirs.forEach(function(d) {
+      var sel = d === value ? ' selected' : '';
+      if (sel) foundDir = true;
+      h += '<option value="' + esc(d) + '"' + sel + '>' + esc(d) + '</option>';
+    });
+    if (!foundDir && value) h += '<option value="' + esc(value) + '" selected>' + esc(value) + '</option>';
+    h += '</select>';
+    return h;
+  }
+
+  // Enum params: bt_action, out_action, rgb_action, bl_action, ep_action, button
+  var enumMap = {
+    bt_action: BT_ACTIONS, out_action: OUT_ACTIONS, rgb_action: RGB_ACTIONS,
+    bl_action: BL_ACTIONS, ep_action: EP_ACTIONS, button: MOUSE_BUTTONS
+  };
+  if (enumMap[paramType]) {
+    var vals = enumMap[paramType];
+    var h = '<select ' + attr + '="' + stepIdx + '" style="min-width:100px;">';
+    var foundVal = false;
+    vals.forEach(function(v) {
+      var sel = v === value ? ' selected' : '';
+      if (sel) foundVal = true;
+      h += '<option value="' + esc(v) + '"' + sel + '>' + esc(v) + '</option>';
+    });
+    if (!foundVal && value) h += '<option value="' + esc(value) + '" selected>' + esc(value) + '</option>';
+    h += '</select>';
+    return h;
+  }
+
+  // Fallback: generic text input
+  return '<input type="text" ' + attr + '="' + stepIdx + '" value="' + esc(value) + '" placeholder="' + paramType + '" style="width:100px;">';
+}
+
+// Macro step keycode search popup
+var macroKcPopupStepIdx = -1;
+var macroKcPopupTargetAttr = 'data-step-params';
+function openMacroKcSearch(stepIdx, anchorEl, targetAttr) {
+  macroKcPopupStepIdx = stepIdx;
+  macroKcPopupTargetAttr = targetAttr || 'data-step-params';
+  var existing = document.getElementById('macroKcPopup');
+  if (existing) existing.remove();
+
+  var popup = document.createElement('div');
+  popup.id = 'macroKcPopup';
+  popup.style.cssText = 'position:fixed;z-index:10000;background:var(--panel-bg,#1e1e2e);border:1px solid var(--border,#555);border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,0.5);padding:10px;width:320px;max-height:400px;display:flex;flex-direction:column;';
+
+  // Position near anchor
+  var rect = anchorEl.getBoundingClientRect();
+  popup.style.left = Math.min(rect.left, window.innerWidth - 340) + 'px';
+  popup.style.top = Math.min(rect.bottom + 4, window.innerHeight - 420) + 'px';
+
+  // Search input
+  var searchRow = document.createElement('div');
+  searchRow.style.cssText = 'display:flex;gap:6px;margin-bottom:8px;align-items:center;';
+  searchRow.innerHTML = '<span style="font-size:1.1em;">&#x1F50D;</span><input type="text" id="macroKcSearchInput" placeholder="Search keycodes..." style="flex:1;padding:4px 8px;background:var(--input-bg,#2a2a3e);color:var(--text,#e0e0e0);border:1px solid var(--border,#555);border-radius:4px;">' +
+    '<button id="macroKcCloseBtn" style="background:none;border:none;color:var(--muted,#888);cursor:pointer;font-size:1.2em;">&times;</button>';
+  popup.appendChild(searchRow);
+
+  // Modifier checkboxes
+  var modRow = document.createElement('div');
+  modRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;font-size:0.8em;';
+  var mods = ['LSHFT','LALT','LCTRL','LGUI','RSHFT','RALT','RCTRL','RGUI'];
+  mods.forEach(function(mod) {
+    modRow.innerHTML += '<label style="display:flex;align-items:center;gap:2px;cursor:pointer;"><input type="checkbox" data-macro-mod="' + mod + '"> ' + mod + '</label>';
+  });
+  popup.appendChild(modRow);
+
+  // Results list
+  var list = document.createElement('div');
+  list.id = 'macroKcResults';
+  list.style.cssText = 'overflow-y:auto;flex:1;min-height:100px;';
+  popup.appendChild(list);
+
+  document.body.appendChild(popup);
+
+  // Build all keycodes
+  var allKc = [];
+  Object.keys(ZMK_KEYCODES).forEach(function(cat) {
+    ZMK_KEYCODES[cat].forEach(function(kc) {
+      allKc.push({ code: kc, cat: cat });
+    });
+  });
+
+  function renderResults(filter) {
+    var f = (filter || '').toUpperCase();
+    var html = '';
+    var count = 0;
+    allKc.forEach(function(item) {
+      if (f && item.code.indexOf(f) < 0 && item.cat.toUpperCase().indexOf(f) < 0) return;
+      if (count >= 200) return;
+      count++;
+      html += '<div class="macro-kc-item" data-kc="' + item.code + '" style="padding:3px 8px;cursor:pointer;border-bottom:1px solid var(--border,#333);display:flex;justify-content:space-between;">';
+      html += '<b>' + item.code + '</b><span style="color:var(--muted,#888);font-size:0.85em;">' + item.cat + '</span></div>';
+    });
+    if (!count) html = '<div style="padding:8px;color:var(--muted);">No matches</div>';
+    list.innerHTML = html;
+  }
+
+  renderResults('');
+
+  var searchInput = document.getElementById('macroKcSearchInput');
+  searchInput.focus();
+  searchInput.oninput = function() { renderResults(searchInput.value); };
+
+  // Click on keycode to apply
+  list.onclick = function(e) {
+    var item = e.target.closest('[data-kc]');
+    if (!item || editingMacroIndex < 0 || macroKcPopupStepIdx < 0) return;
+    var kc = item.dataset.kc;
+    // Wrap with selected modifiers
+    var selectedMods = [];
+    popup.querySelectorAll('[data-macro-mod]').forEach(function(cb) {
+      if (cb.checked) selectedMods.push(cb.dataset.macroMod);
+    });
+    var paramStr = kc;
+    // Nest modifiers: LS(LA(key)) etc.
+    selectedMods.reverse().forEach(function(mod) {
+      var modMap = { LSHFT: 'LS', LALT: 'LA', LCTRL: 'LC', LGUI: 'LG', RSHFT: 'RS', RALT: 'RA', RCTRL: 'RC', RGUI: 'RG' };
+      paramStr = (modMap[mod] || mod) + '(' + paramStr + ')';
+    });
+
+    // Update the param input for this step
+    var paramInput = document.querySelector('[' + macroKcPopupTargetAttr + '="' + macroKcPopupStepIdx + '"]');
+    if (paramInput) {
+      paramInput.value = paramStr;
+      paramInput.dispatchEvent(new Event('input', { bubbles: true }));
+      paramInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    popup.remove();
+  };
+
+  // Close button
+  document.getElementById('macroKcCloseBtn').onclick = function() { popup.remove(); };
+
+  // Close on outside click
+  setTimeout(function() {
+    document.addEventListener('mousedown', function closeMacroKc(e) {
+      if (!popup.contains(e.target)) { popup.remove(); document.removeEventListener('mousedown', closeMacroKc); }
+    });
+  }, 10);
 }
 
 // ================================================================
@@ -4050,8 +4314,16 @@ function updateKeymapOutput() {
   var out = '';
 
   // Use parsed includes from user's file if available, otherwise generate defaults
+  var includeRgbDtsi = document.getElementById('kmIncludeRgbDtsi') && document.getElementById('kmIncludeRgbDtsi').checked;
   if (keymapParsedIncludes && keymapParsedIncludes.length > 0) {
+    // Check if existing includes already have the rgb dtsi include
+    var hasRgbInclude = keymapParsedIncludes.some(function(inc) { return inc.indexOf('-rgb.dtsi') >= 0; });
     keymapParsedIncludes.forEach(function(inc) { out += inc + '\n'; });
+    // Add rgb dtsi include if toggle is on and not already present
+    if (includeRgbDtsi && !hasRgbInclude) {
+      var dtsiName = currentLayoutId === 'lotus58' ? 'lotus58-rgb.dtsi' : 'corne-rgb.dtsi';
+      out += '#include "' + dtsiName + '"\n';
+    }
   } else {
     out += '/*\n * Generated by ZMK Keymap Editor v4\n */\n\n';
     out += '#include <behaviors.dtsi>\n';
@@ -4059,7 +4331,10 @@ function updateKeymapOutput() {
     out += '#include <dt-bindings/zmk/keys.h>\n';
     out += '#include <dt-bindings/zmk/outputs.h>\n';
     out += '#include <dt-bindings/zmk/rgb.h>\n';
-    out += '//#include "corne-rgb.dtsi" //CHANGE IF USING DIFFERENT FILE NAME; MAKE SURE TO UNCOMMENT\n';
+    if (includeRgbDtsi) {
+      var dtsiName2 = currentLayoutId === 'lotus58' ? 'lotus58-rgb.dtsi' : 'corne-rgb.dtsi';
+      out += '#include "' + dtsiName2 + '"\n';
+    }
     // Auto-detect additional includes
     var usesMouse = false, usesBacklight = false, usesExtPower = false;
     keymapLayers.forEach(function(l) {
@@ -4127,7 +4402,7 @@ function updateKeymapOutput() {
   // No raw blocks — generate from parsed data (default behavior)
 
   // Custom behaviors
-  var nativeKeymapBehaviors = keymapBehaviors.filter(function(b) { return !b._fromRgb && !b._fromDtsi; });
+  var nativeKeymapBehaviors = keymapBehaviors.filter(function(b) { return !b._fromDtsi; });
   if (nativeKeymapBehaviors.length) {
     out += '/ {\n    behaviors {\n';
     nativeKeymapBehaviors.forEach(function(b) {
@@ -4137,7 +4412,7 @@ function updateKeymapOutput() {
   }
 
   // Combos — only output native (non-RGB) combos; RGB combos stay in the .dtsi
-  var nativeCombos = keymapCombos.filter(function(c) { return !c._fromRgb; });
+  var nativeCombos = keymapCombos.filter(function(c) { return !c._fromDtsi; });
 
   if (nativeCombos.length) {
     out += '/ {\n    combos {\n        compatible = "zmk,combos";\n';
@@ -4155,7 +4430,7 @@ function updateKeymapOutput() {
   }
 
   // Macros
-  var nativeKeymapMacros = keymapMacros.filter(function(m) { return !m._fromRgb; });
+  var nativeKeymapMacros = keymapMacros.filter(function(m) { return !m._fromDtsi; });
   if (nativeKeymapMacros.length) {
     out += '/ {\n    macros {\n';
     nativeKeymapMacros.forEach(function(m) {
@@ -4551,64 +4826,12 @@ function syncCrossTabData() {
 // syncRgbToKeymap() — Copies RGB tab data (behaviors, macros) back into
 // the keymap tab's arrays. Called when switching to the Keymap tab.
 function syncRgbToKeymap() {
-  // Upstream RGB macros into keymap macros list (so they appear in behavior dropdown)
-  var existingMacroNames = {};
-  keymapMacros.forEach(function(m) { existingMacroNames[m.name] = true; });
+  // RGB macros and behaviors stay exclusive to the RGB tool — do NOT sync them into keymap.
+  // Only sync dtsi native behaviors (hm, ltq, td_numcaps, etc.) since those are
+  // actual keymap behaviors defined in the .dtsi that the keymap references.
 
-  // RGB tab macros (TO_RGB_MACRO, MOMENTARY_RGB_MACRO, etc.)
-  macros.forEach(function(m) {
-    if (!existingMacroNames[m.name]) {
-      existingMacroNames[m.name] = true;
-      keymapMacros.push({
-        name: m.name,
-        label: m.name,
-        steps: [],  // RGB macros are helper-based, steps aren't standard
-        paramType: 0,
-        waitMs: '',
-        tapMs: '',
-        _fromRgb: true
-      });
-    }
-  });
-
-  // RGB tab blink macros
-  blinkMacros.forEach(function(bm) {
-    if (!existingMacroNames[bm.name]) {
-      existingMacroNames[bm.name] = true;
-      keymapMacros.push({
-        name: bm.name,
-        label: bm.label || bm.name,
-        steps: ['&macro_tap', '&kp ' + bm.key],
-        paramType: 0,
-        waitMs: '',
-        tapMs: '',
-        _fromRgb: true
-      });
-    }
-  });
-
-  // RGB tab behaviors (RGB_HOLD_TAP) into keymap behaviors
   var existingBehNames = {};
   keymapBehaviors.forEach(function(b) { existingBehNames[b.name] = true; });
-
-  behaviors.forEach(function(b) {
-    if (b._fromKeymap) return; // don't loop back
-    if (!existingBehNames[b.name]) {
-      existingBehNames[b.name] = true;
-      keymapBehaviors.push({
-        name: b.name,
-        type: 'hold-tap',
-        label: b.label || b.name,
-        config: {
-          tappingTerm: 200,
-          flavor: 'tap-preferred',
-          holdBinding: '&mo 0',
-          tapBinding: '&kp'
-        },
-        _fromRgb: true
-      });
-    }
-  });
 
   // Sync dtsi native behaviors (hm, ltq, td_numcaps, etc.) into keymap behaviors
   dtsiNativeBehaviors.forEach(function(db) {
@@ -4683,7 +4906,7 @@ function vpBuildChoices(param, currentBindBehavior) {
     });
     // Macros as behaviors
     keymapMacros.forEach(function(m) {
-      if (!m._fromRgb && !choices.some(function(c) { return c.code === '&' + m.name; })) {
+      if (!choices.some(function(c) { return c.code === '&' + m.name; })) {
         choices.push({ code: '&' + m.name, description: 'Macro' + (m.paramType > 0 ? ' (' + m.paramType + ' param)' : '') });
       }
     });
@@ -5077,14 +5300,12 @@ document.addEventListener('DOMContentLoaded', function() {
   };
 
   document.getElementById('kmClearSyncBtn').onclick = function() {
-    // Remove items synced from RGB tab
-    keymapMacros = keymapMacros.filter(function(m) { return !m._fromRgb; });
-    keymapBehaviors = keymapBehaviors.filter(function(b) { return !b._fromRgb && !b._fromDtsi; });
+    // Remove dtsi-native behaviors synced from RGB tab
+    keymapBehaviors = keymapBehaviors.filter(function(b) { return !b._fromDtsi; });
     populateBehaviorDropdown();
-    renderKeymapMacroList();
     renderKeymapBehaviorList();
     updateKeymapOutput();
-    showStatus('kmParseStatus', 'Cleared synced RGB data');
+    showStatus('kmParseStatus', 'Cleared synced dtsi behaviors');
   };
 
   // Layer tabs event delegation (now sidebar)
@@ -5563,6 +5784,7 @@ document.addEventListener('DOMContentLoaded', function() {
   };
 
   // Keymap output edit toggle
+  document.getElementById('kmIncludeRgbDtsi').onchange = function() { updateKeymapOutput(); };
   document.getElementById('kmEditToggle').onclick = function() {
     var pre = document.getElementById('kmOutput');
     var ta = document.getElementById('kmOutputEdit');
@@ -5791,6 +6013,15 @@ document.addEventListener('DOMContentLoaded', function() {
         renderMacroSteps();
       }
     }
+    if (e.target.dataset.stepPick !== undefined && editingMacroIndex >= 0) {
+      openMacroKcSearch(parseInt(e.target.dataset.stepPick), e.target, 'data-step-params');
+    }
+    if (e.target.dataset.stepPick1 !== undefined && editingMacroIndex >= 0) {
+      openMacroKcSearch(parseInt(e.target.dataset.stepPick1), e.target, 'data-step-param1');
+    }
+    if (e.target.dataset.stepPick2 !== undefined && editingMacroIndex >= 0) {
+      openMacroKcSearch(parseInt(e.target.dataset.stepPick2), e.target, 'data-step-param2');
+    }
   });
 
   // Handle macro step type dropdown changes
@@ -5799,25 +6030,60 @@ document.addEventListener('DOMContentLoaded', function() {
       var stepIdx = parseInt(e.target.dataset.stepType);
       var newType = e.target.value;
       // Convert type to default step string
-      var newStep = macroStepToString(newType, 'A', '100', keymapMacros[editingMacroIndex].steps[stepIdx]);
+      var newStep = macroStepToString(newType, { behavior: '&kp', params: 'A', time: '100', raw: keymapMacros[editingMacroIndex].steps[stepIdx] });
       keymapMacros[editingMacroIndex].steps[stepIdx] = newStep;
       renderMacroSteps();
     }
+    // Handle behavior dropdown change — re-render with smart defaults for new param context
+    if (e.target.dataset.stepBehavior !== undefined && editingMacroIndex >= 0) {
+      var si = parseInt(e.target.dataset.stepBehavior);
+      var newBeh = e.target.value;
+      var behDef = ZMK_BEHAVIORS.find(function(b) { return b.name === newBeh; });
+      var defaultParams = '';
+      if (behDef && behDef.params.length > 0) {
+        var defs = behDef.params.map(function(pt) {
+          if (pt === 'keycode' || pt === 'modifier') return 'A';
+          if (pt === 'layer') return '0';
+          if (pt === 'bt_action') return BT_ACTIONS[0];
+          if (pt === 'out_action') return OUT_ACTIONS[0];
+          if (pt === 'rgb_action') return RGB_ACTIONS[0];
+          if (pt === 'bl_action') return BL_ACTIONS[0];
+          if (pt === 'ep_action') return EP_ACTIONS[0];
+          if (pt === 'button') return MOUSE_BUTTONS[0];
+          if (pt === 'direction') return newBeh === '&msc' ? MOUSE_SCROLLS[0] : MOUSE_MOVES[0];
+          return '';
+        });
+        defaultParams = defs.join(' ');
+      }
+      keymapMacros[editingMacroIndex].steps[si] = macroStepToString('binding', { behavior: newBeh, params: defaultParams });
+      renderMacroSteps();
+    }
+    // Handle structured param dropdown changes (param1/param2)
+    if (e.target.dataset.stepParam1 !== undefined && editingMacroIndex >= 0) {
+      updateMacroBindingStep(parseInt(e.target.dataset.stepParam1));
+    }
+    if (e.target.dataset.stepParam2 !== undefined && editingMacroIndex >= 0) {
+      updateMacroBindingStep(parseInt(e.target.dataset.stepParam2));
+    }
   });
 
-  // Handle macro step parameter changes (keycode, time, raw)
+  // Handle macro step parameter changes (params, param1, param2, time, raw)
   document.getElementById('kmMacroSteps').addEventListener('input', function(e) {
     if (editingMacroIndex < 0) return;
     var stepIdx;
-    if (e.target.dataset.stepKeycode !== undefined) {
-      stepIdx = parseInt(e.target.dataset.stepKeycode);
-      var classified = classifyMacroStep(keymapMacros[editingMacroIndex].steps[stepIdx]);
-      keymapMacros[editingMacroIndex].steps[stepIdx] = macroStepToString(classified.type, e.target.value, classified.time, '');
+    if (e.target.dataset.stepParams !== undefined) {
+      updateMacroBindingStep(parseInt(e.target.dataset.stepParams));
+    }
+    if (e.target.dataset.stepParam1 !== undefined) {
+      updateMacroBindingStep(parseInt(e.target.dataset.stepParam1));
+    }
+    if (e.target.dataset.stepParam2 !== undefined) {
+      updateMacroBindingStep(parseInt(e.target.dataset.stepParam2));
     }
     if (e.target.dataset.stepTime !== undefined) {
       stepIdx = parseInt(e.target.dataset.stepTime);
       var classified2 = classifyMacroStep(keymapMacros[editingMacroIndex].steps[stepIdx]);
-      keymapMacros[editingMacroIndex].steps[stepIdx] = macroStepToString(classified2.type, '', e.target.value, '');
+      keymapMacros[editingMacroIndex].steps[stepIdx] = macroStepToString(classified2.type, { time: e.target.value });
     }
     if (e.target.dataset.stepRaw !== undefined) {
       stepIdx = parseInt(e.target.dataset.stepRaw);
