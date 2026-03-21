@@ -100,6 +100,7 @@ I used Copilot to help modularize and refine the macros and combos. The modular 
 - I got lazy updating my colors and just had AI construct a tool to help streamline the process since we were mostly working with 3 macros, it just got redundant coding them.
   - There is an integrated keymap editor I pulled mostly from (https://nickcoutsos.github.io/keymap-editor/) for an idea. I havent really tried it out but it seems mostly functional.
   - There are certainly bugs(its ALL AI written), I havent really used this much yet; I can say that the RGB builder does work well enough so feel free to use it you want, there are included "helpers" in the generator.
+<br>**___Should NOTE that this has only been cofigured for Lotus58 and Corne Keymaps, it says you can add a .json but I never tried.___**
 ![editor](ZMKPer-LayerColor_RGB_Tool_with_keymap_editor1.png)
 
 ![editor2](ZMKPer-LayerColor_RGB_Tool_with_keymap_editor2.png)
