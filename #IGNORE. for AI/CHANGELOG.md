@@ -69,9 +69,31 @@ Coverage note: this reflects everything I can reliably reconstruct from availabl
 - Streamlining passes and small index/syntax corrections.
 - Cleanup/removal of obsolete files.
 
-## 2026-03-22 (Session 3) - Devicetree Merge, Combo Layers Picker, Snapshot Fixes
+## 2026-03-22 (Session 3) - Devicetree Merge, Combo Layers Picker, Snapshot Fixes, Built-in Behaviors
 
-### Major additions
+### Major additions — Built-in Behaviors (Toggleable Presets)
+- **New "Built-in Behaviors" section** in the Keymap Editor tab with checkbox toggles for 7 preset ZMK behaviors:
+  - `&hm` — Homerow Mod (tap-preferred hold-tap with global-quick-tap, 200ms tapping term, 180ms quick-tap)
+  - `&hml` — Timeless Homerow Mod Left (balanced, 280ms, require-prior-idle 150ms, positional hold-trigger-on-release)
+  - `&hmr` — Timeless Homerow Mod Right (mirror of hml)
+  - `&as` — Autoshift (tap-preferred, 135ms, quick-tap 0). Emits `#define AS(keycode) &as LS(keycode) keycode`
+  - `&mo_tog` — Momentary-hold / Toggle-tap (hold-preferred, 200ms). Emits `#define MO_TOG(layer) &mo_tog layer layer`
+  - `&td0` — Tap-Dance Example (200ms, `<&kp LSFT>, <&kp CAPS>`)
+- **Toggle on/off**: When enabled, the behavior is added to `keymapBehaviors` with `_builtin` and `_fromEditor` flags. When disabled, it's removed. Dedup logic prevents clashes with parsed behaviors of the same name.
+- **#define macros**: Autoshift and mo_tog presets output their `#define` helper macros after the `#include` block in the generated .keymap.
+- **Binding dropdown**: Built-in behaviors appear with `(built-in)` tag instead of `(custom)`.
+- **Behavior list**: Built-in behaviors are shown only in their own toggle section; hidden from the main behavior editor list.
+- **`BUILTIN_BEHAVIORS` constant** (line 1317): Array of preset templates with id, name, type, label, config, desc, and optional `define` strings.
+- **New functions**: `renderBuiltinBehaviorToggles()` (line 4075), `toggleBuiltinBehavior()` (line 4092).
+- **Toggle sync**: Checkboxes sync after `parseKeymap()`, undo/redo (`fullRender()`), and initial page load.
+
+### Major additions — globalQuickTap Support
+- **Parser**: `parseKeymap()` now detects `global-quick-tap;` in hold-tap behavior blocks and stores it in `config.globalQuickTap`.
+- **Editor**: Added "Global Quick Tap (deprecated)" checkbox to the hold-tap config panel in `showBehaviorConfig()`.
+- **Output**: `generateBehaviorCode()` emits `global-quick-tap;` when enabled.
+- **Save/Edit/Snapshot**: `globalQuickTap` preserved through save handler, edit handler, and undo/redo snapshots.
+
+### Major additions (earlier in session)
 - **Devicetree merge for editor-only items**: When a parsed .keymap has raw pre-keymap blocks (combos, behaviors, macros), new items created in the editor are now **merged INTO the existing devicetree sections** instead of being appended as separate `/ { ... };` blocks. If no existing section is found, a new block is created as before.
 - **RGB combo layers picker**: The "Layers" input in the RGB combo section (both the header form and each inline combo row) now has a `+` dropdown that lists all available layers. Selecting a layer appends it to the text field (deduped).
 

@@ -114,6 +114,12 @@
     .layer-tag { display: inline-flex; align-items: center; background: var(--accent); color: #fff; border-radius: 3px; padding: 1px 5px; font-size: 0.8em; white-space: nowrap; }
     .layer-tag .tag-x { margin-left: 4px; cursor: pointer; font-weight: bold; opacity: 0.7; }
     .layer-tag .tag-x:hover { opacity: 1; }
+    .builtin-beh { display: flex; align-items: center; gap: 0.5em; padding: 0.3em 0.5em; margin-bottom: 0.25em; border-radius: 4px; border: 1px solid var(--border); background: var(--item-bg); font-size: 0.88em; }
+    .builtin-beh label { cursor: pointer; display: flex; align-items: center; gap: 0.4em; flex: 1; min-width: 0; }
+    .builtin-beh .bb-name { font-weight: 700; color: var(--accent2); min-width: 55px; }
+    .builtin-beh .bb-type { color: var(--muted); font-size: 0.85em; }
+    .builtin-beh .bb-desc { color: var(--muted); font-size: 0.82em; margin-left: auto; }
+    .builtin-beh.bb-on { border-color: var(--accent); }
     .color-preview { display: inline-block; width: 18px; height: 18px; border-radius: 4px; border: 1px solid var(--border); vertical-align: middle; flex-shrink: 0; }
     .status-msg { color: var(--success); font-size: 0.85em; margin-left: 0.5em; }
     .release-color-group { transition: opacity 0.2s; }
@@ -760,6 +766,18 @@
         </div>
       </div>
 
+      <!-- BUILT-IN BEHAVIORS -->
+      <div class="section">
+        <div class="section-head" data-toggle="kmBuiltinBehBody">
+          <h2>&#9889; Built-in Behaviors</h2>
+          <span class="toggle-icon">&#9662;</span>
+        </div>
+        <div class="section-body" id="kmBuiltinBehBody">
+          <p style="font-size:0.82em;color:var(--muted);margin:0 0 0.4em;">Toggle preset ZMK behaviors on/off. Enabled behaviors appear in the binding dropdown and are included in the output.</p>
+          <div id="builtinBehaviorToggles"></div>
+        </div>
+      </div>
+
       <!-- BEHAVIORS -->
       <div class="section">
         <div class="section-head" data-toggle="kmBehaviorBody">
@@ -1045,7 +1063,7 @@ function snapshotState() {
     behaviors: keymapBehaviors.map(function(b) {
       var cfg = {};
       for (var k in b.config) cfg[k] = b.config[k];
-      return { name: b.name, type: b.type, label: b.label, config: cfg, _fromRgb: b._fromRgb, _fromDtsi: b._fromDtsi, _fromEditor: b._fromEditor };
+      return { name: b.name, type: b.type, label: b.label, config: cfg, _fromRgb: b._fromRgb, _fromDtsi: b._fromDtsi, _fromEditor: b._fromEditor, _builtin: b._builtin };
     }),
     condLayers: keymapConditionalLayers.map(function(c) {
       return { name: c.name, ifLayers: c.ifLayers.slice(), thenLayer: c.thenLayer };
@@ -1071,7 +1089,7 @@ function restoreState(snap) {
   keymapBehaviors = snap.behaviors.map(function(b) {
     var cfg = {};
     for (var k in b.config) cfg[k] = b.config[k];
-    return { name: b.name, type: b.type, label: b.label, config: cfg, _fromRgb: b._fromRgb, _fromDtsi: b._fromDtsi, _fromEditor: b._fromEditor };
+    return { name: b.name, type: b.type, label: b.label, config: cfg, _fromRgb: b._fromRgb, _fromDtsi: b._fromDtsi, _fromEditor: b._fromEditor, _builtin: b._builtin };
   });
   keymapConditionalLayers = snap.condLayers.map(function(c) {
     return { name: c.name, ifLayers: c.ifLayers.slice(), thenLayer: c.thenLayer };
@@ -1111,6 +1129,7 @@ function fullRender() {
   renderKeyboardSvg('keyboardSvg');
   renderKeymapComboList();
   renderKeymapMacroList();
+  renderBuiltinBehaviorToggles();
   renderKeymapBehaviorList();
   renderKeymapCondLayerList();
   renderKeymapSensorList();
@@ -1288,6 +1307,62 @@ var EP_ACTIONS = ['EP_TOG','EP_ON','EP_OFF'];
 var MOUSE_BUTTONS = ['LCLK','RCLK','MCLK','MB4','MB5'];
 var MOUSE_MOVES = ['MOVE_UP','MOVE_DOWN','MOVE_LEFT','MOVE_RIGHT'];
 var MOUSE_SCROLLS = ['SCRL_UP','SCRL_DOWN','SCRL_LEFT','SCRL_RIGHT'];
+
+// ================================================================
+// BUILT-IN BEHAVIOR PRESETS
+// Toggleable standard ZMK behavior templates from the ZMK docs.
+// When enabled, these are added to keymapBehaviors and appear in
+// the binding dropdown. Users can bind keys to them like any behavior.
+// ================================================================
+var BUILTIN_BEHAVIORS = [
+  {
+    id: 'hm', name: 'hm', label: 'Homerow Mods', type: 'hold-tap',
+    desc: 'Tap-preferred hold-tap with quick-tap &amp; global-quick-tap. Binds &amp;kp on hold &amp; tap.',
+    config: { tappingTerm: '200', flavor: 'tap-preferred', holdBinding: '&kp', tapBinding: '&kp',
+              quickTap: '180', requirePriorIdle: '', holdTriggerPositions: '',
+              retroTap: false, holdWhileUndecided: false, holdWhileUndecidedLinger: false,
+              holdTriggerOnRelease: false, globalQuickTap: true }
+  },
+  {
+    id: 'hml', name: 'hml', label: 'Timeless HRM Left', type: 'hold-tap',
+    desc: 'Balanced homerow mod (left hand). Positional hold-tap targets right-side keys.',
+    config: { tappingTerm: '280', flavor: 'balanced', holdBinding: '&kp', tapBinding: '&kp',
+              quickTap: '175', requirePriorIdle: '150', holdTriggerPositions: '',
+              retroTap: false, holdWhileUndecided: false, holdWhileUndecidedLinger: false,
+              holdTriggerOnRelease: true, globalQuickTap: false }
+  },
+  {
+    id: 'hmr', name: 'hmr', label: 'Timeless HRM Right', type: 'hold-tap',
+    desc: 'Balanced homerow mod (right hand). Positional hold-tap targets left-side keys.',
+    config: { tappingTerm: '280', flavor: 'balanced', holdBinding: '&kp', tapBinding: '&kp',
+              quickTap: '175', requirePriorIdle: '150', holdTriggerPositions: '',
+              retroTap: false, holdWhileUndecided: false, holdWhileUndecidedLinger: false,
+              holdTriggerOnRelease: true, globalQuickTap: false }
+  },
+  {
+    id: 'as', name: 'as', label: 'Autoshift', type: 'hold-tap',
+    desc: 'Hold = Shifted key, Tap = Normal key. Use with AS(keycode) macro.',
+    config: { tappingTerm: '135', flavor: 'tap-preferred', holdBinding: '&kp', tapBinding: '&kp',
+              quickTap: '0', requirePriorIdle: '', holdTriggerPositions: '',
+              retroTap: false, holdWhileUndecided: false, holdWhileUndecidedLinger: false,
+              holdTriggerOnRelease: false, globalQuickTap: false },
+    define: '#define AS(keycode) &as LS(keycode) keycode'
+  },
+  {
+    id: 'mo_tog', name: 'mo_tog', label: 'Mo-Hold / Tog-Tap', type: 'hold-tap',
+    desc: 'Hold = Momentary layer, Tap = Toggle layer. Use with MO_TOG(layer) macro.',
+    config: { tappingTerm: '200', flavor: 'hold-preferred', holdBinding: '&mo', tapBinding: '&tog',
+              quickTap: '', requirePriorIdle: '', holdTriggerPositions: '',
+              retroTap: false, holdWhileUndecided: false, holdWhileUndecidedLinger: false,
+              holdTriggerOnRelease: false, globalQuickTap: false },
+    define: '#define MO_TOG(layer) &mo_tog layer layer'
+  },
+  {
+    id: 'td_example', name: 'td0', label: 'Tap-Dance Example', type: 'tap-dance',
+    desc: 'Tap 1&times;/2&times;/3&times; for different keycodes. Edit bindings after enabling.',
+    config: { tappingTerm: '200', bindings: '<&kp LSFT>, <&kp CAPS>' }
+  }
+];
 
 // ================================================================
 // SECTION: COLOR UTILITY FUNCTIONS
@@ -2883,6 +2958,7 @@ function parseKeymap(text) {
         var hwu = /hold-while-undecided\s*;/.test(bbody) && !/hold-while-undecided-linger/.test(bbody);
         var hwul = /hold-while-undecided-linger\s*;/.test(bbody);
         var htor = /hold-trigger-on-release\s*;/.test(bbody);
+        var gqt = /global-quick-tap\s*;/.test(bbody);
         config = {
           tappingTerm: tt ? tt[1] : '200',
           flavor: fl ? fl[1] : 'tap-preferred',
@@ -2894,7 +2970,8 @@ function parseKeymap(text) {
           retroTap: rt,
           holdWhileUndecided: hwu,
           holdWhileUndecidedLinger: hwul,
-          holdTriggerOnRelease: htor
+          holdTriggerOnRelease: htor,
+          globalQuickTap: gqt
         };
       } else if (bcompat[1] === 'zmk,behavior-tap-dance') {
         btype = 'tap-dance';
@@ -3271,7 +3348,8 @@ function populateBehaviorDropdown() {
   });
   // Add custom behaviors from keymap
   keymapBehaviors.forEach(function(cb) {
-    html += '<option value="&' + esc(cb.name) + '">&' + esc(cb.name) + ' (custom)</option>';
+    var tag = cb._builtin ? '(built-in)' : '(custom)';
+    html += '<option value="&' + esc(cb.name) + '">&' + esc(cb.name) + ' ' + tag + '</option>';
   });
   // Add macros from keymap editor as behaviors (0-param macros can be used as bindings)
   var addedMacros = {};
@@ -3978,6 +4056,7 @@ function renderKeymapBehaviorList() {
   var list = document.getElementById('kmBehaviorList');
   list.innerHTML = '';
   keymapBehaviors.forEach(function(b, i) {
+    if (b._builtin) return; // built-ins shown in their own section
     var div = document.createElement('div');
     div.className = 'item';
     div.innerHTML =
@@ -3988,6 +4067,53 @@ function renderKeymapBehaviorList() {
       '<button class="btn-danger btn-sm" data-remove-behavior="' + i + '">&#10005;</button>';
     list.appendChild(div);
   });
+}
+
+// renderBuiltinBehaviorToggles() — Renders the checkbox toggles for
+// preset ZMK behaviors. When toggled ON, the behavior is added to
+// keymapBehaviors with _builtin flag. When OFF, it's removed.
+function renderBuiltinBehaviorToggles() {
+  var container = document.getElementById('builtinBehaviorToggles');
+  if (!container) return;
+  container.innerHTML = '';
+  BUILTIN_BEHAVIORS.forEach(function(preset) {
+    var isOn = keymapBehaviors.some(function(b) { return b._builtin === preset.id; });
+    var div = document.createElement('div');
+    div.className = 'builtin-beh' + (isOn ? ' bb-on' : '');
+    div.innerHTML =
+      '<label><input type="checkbox" data-builtin-id="' + preset.id + '"' + (isOn ? ' checked' : '') + '>' +
+      '<span class="bb-name">&' + esc(preset.name) + '</span>' +
+      '<span class="bb-type">' + esc(preset.type) + '</span></label>' +
+      '<span class="bb-desc">' + preset.desc + '</span>';
+    container.appendChild(div);
+  });
+}
+
+function toggleBuiltinBehavior(presetId, enable) {
+  var preset = null;
+  BUILTIN_BEHAVIORS.forEach(function(p) { if (p.id === presetId) preset = p; });
+  if (!preset) return;
+  pushUndo();
+  if (enable) {
+    // Check if already exists as builtin
+    var exists = keymapBehaviors.some(function(b) { return b._builtin === preset.id; });
+    if (!exists) {
+      // Remove any parsed behavior with same name first (avoid duplicates)
+      keymapBehaviors = keymapBehaviors.filter(function(b) { return b.name !== preset.name; });
+      var cfg = {};
+      for (var k in preset.config) cfg[k] = preset.config[k];
+      keymapBehaviors.push({
+        name: preset.name, type: preset.type, label: preset.label,
+        config: cfg, _builtin: preset.id, _fromEditor: true
+      });
+    }
+  } else {
+    keymapBehaviors = keymapBehaviors.filter(function(b) { return b._builtin !== preset.id; });
+  }
+  renderBuiltinBehaviorToggles();
+  renderKeymapBehaviorList();
+  populateBehaviorDropdown();
+  updateKeymapOutput();
 }
 
 // showBehaviorConfig(type) — Opens the behavior editor with fields for
@@ -4009,11 +4135,12 @@ function showBehaviorConfig(type) {
       '<label style="display:flex;align-items:center;gap:0.3em;cursor:pointer;"><input type="checkbox" id="kmBehHoldWhileUndecided"> Hold While Undecided</label>' +
       '<label style="display:flex;align-items:center;gap:0.3em;cursor:pointer;"><input type="checkbox" id="kmBehHoldWhileUndecidedLinger"> HWU Linger</label>' +
       '<label style="display:flex;align-items:center;gap:0.3em;cursor:pointer;"><input type="checkbox" id="kmBehHoldTriggerOnRelease"> Hold Trigger on Release</label>' +
+      '<label style="display:flex;align-items:center;gap:0.3em;cursor:pointer;"><input type="checkbox" id="kmBehGlobalQuickTap"> Global Quick Tap (legacy)</label>' +
       '</div>';
   } else if (type === 'tap-dance') {
     container.innerHTML =
       '<div class="input-row"><div class="input-group"><label>Tapping Term</label><input type="number" id="kmBehTappingTerm" value="200" min="0" style="width:70px;"> ms</div></div>' +
-      '<div class="input-row"><div class="input-group"><label>Bindings (comma-sep)</label><input type="text" id="kmBehTdBindings" placeholder="&kp A, &kp B" style="width:250px;"></div></div>';
+      '<div class="input-row"><div class="input-group"><label>Bindings</label><input type="text" id="kmBehTdBindings" placeholder="<&kp A>, <&kp B>, <&kp C>" style="width:300px;"></div></div>';
   } else if (type === 'mod-morph') {
     container.innerHTML =
       '<div class="input-row"><div class="input-group"><label>Normal</label><input type="text" id="kmBehMmNormal" placeholder="&kp A" style="width:160px;"></div></div>' +
@@ -4452,6 +4579,17 @@ function updateKeymapOutput() {
   }
   out += '\n';
 
+  // Emit #define macros for enabled built-in behaviors that have them
+  var hasDefines = false;
+  keymapBehaviors.forEach(function(b) {
+    if (b._builtin) {
+      var preset = null;
+      BUILTIN_BEHAVIORS.forEach(function(p) { if (p.id === b._builtin) preset = p; });
+      if (preset && preset.define) { out += preset.define + '\n'; hasDefines = true; }
+    }
+  });
+  if (hasDefines) out += '\n';
+
   // If we have preserved raw pre-keymap blocks from the parsed source, output them
   // with any NEW editor-only items merged into the existing devicetree sections.
   if (keymapParsedRawBlocks) {
@@ -4848,6 +4986,7 @@ function generateBehaviorCode(b) {
     if (b.config.holdWhileUndecided) out += '            hold-while-undecided;\n';
     if (b.config.holdWhileUndecidedLinger) out += '            hold-while-undecided-linger;\n';
     if (b.config.holdTriggerOnRelease) out += '            hold-trigger-on-release;\n';
+    if (b.config.globalQuickTap) out += '            global-quick-tap;\n';
   } else if (b.type === 'tap-dance') {
     out += '            compatible = "zmk,behavior-tap-dance";\n';
     if (b.label) out += '            label = "' + b.label + '";\n';
@@ -5519,6 +5658,7 @@ document.addEventListener('DOMContentLoaded', function() {
     renderKeyboardSvg('keyboardSvg');
     renderKeymapComboList();
     renderKeymapMacroList();
+    renderBuiltinBehaviorToggles();
     renderKeymapBehaviorList();
     renderKeymapCondLayerList();
     renderKeymapSensorList();
@@ -6041,6 +6181,7 @@ document.addEventListener('DOMContentLoaded', function() {
         renderKeyboardSvg('keyboardSvg');
         renderKeymapComboList();
         renderKeymapMacroList();
+        renderBuiltinBehaviorToggles();
         renderKeymapBehaviorList();
         renderKeymapCondLayerList();
         renderKeymapSensorList();
@@ -6343,6 +6484,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
+  // --- Built-in behavior toggles ---
+  document.getElementById('builtinBehaviorToggles').addEventListener('change', function(e) {
+    var cb = e.target;
+    if (cb.type !== 'checkbox' || !cb.dataset.builtinId) return;
+    toggleBuiltinBehavior(cb.dataset.builtinId, cb.checked);
+  });
+
   // --- Behavior editor ---
   document.getElementById('kmAddBehaviorBtn').onclick = function() {
     editingBehaviorIndex = -1;
@@ -6375,7 +6523,8 @@ document.addEventListener('DOMContentLoaded', function() {
         retroTap: document.getElementById('kmBehRetroTap').checked,
         holdWhileUndecided: document.getElementById('kmBehHoldWhileUndecided').checked,
         holdWhileUndecidedLinger: document.getElementById('kmBehHoldWhileUndecidedLinger').checked,
-        holdTriggerOnRelease: document.getElementById('kmBehHoldTriggerOnRelease').checked
+        holdTriggerOnRelease: document.getElementById('kmBehHoldTriggerOnRelease').checked,
+        globalQuickTap: document.getElementById('kmBehGlobalQuickTap').checked
       };
     } else if (type === 'tap-dance') {
       config = {
@@ -6469,6 +6618,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('kmBehHoldWhileUndecided').checked = !!b.config.holdWhileUndecided;
         document.getElementById('kmBehHoldWhileUndecidedLinger').checked = !!b.config.holdWhileUndecidedLinger;
         document.getElementById('kmBehHoldTriggerOnRelease').checked = !!b.config.holdTriggerOnRelease;
+        document.getElementById('kmBehGlobalQuickTap').checked = !!b.config.globalQuickTap;
       } else if (b.type === 'tap-dance') {
         document.getElementById('kmBehTappingTerm').value = b.config.tappingTerm || '200';
         document.getElementById('kmBehTdBindings').value = b.config.bindings || '';
@@ -6809,6 +6959,7 @@ document.addEventListener('DOMContentLoaded', function() {
   renderLayerTabs();
   renderKeymapComboList();
   renderKeymapMacroList();
+  renderBuiltinBehaviorToggles();
   renderKeymapBehaviorList();
   renderKeymapCondLayerList();
   renderKeymapSensorList();

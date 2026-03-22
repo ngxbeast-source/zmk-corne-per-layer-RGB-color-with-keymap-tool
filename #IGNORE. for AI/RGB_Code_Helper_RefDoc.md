@@ -36,7 +36,7 @@
 # Line 457 — Section 15: .keymap File Parser (parseKeymap)
 # Line 488 — Section 16: Layer Tabs & Management
 # Line 510 — Section 17: Binding Editor (how you change a key)
-# Line 541 — Section 18: Combo, Macro, & Behavior Editors
+# Line 541 — Section 18: Combo, Macro, Behavior & Built-in Behavior Editors
 # Line 577 — Section 19: Quick-Assign System
 # Line 595 — Section 20: Keymap Output Generation (updateKeymapOutput)
 # Line 623 — Section 21: Behavior Code Generation
@@ -574,7 +574,7 @@
 #     Closes the editor without saving.
 
 # ============================================================
-# SECTION 18: COMBO, MACRO, & BEHAVIOR EDITORS
+# SECTION 18: COMBO, MACRO, BEHAVIOR & BUILT-IN BEHAVIOR EDITORS
 # ============================================================
 # Ref. Lines 3414-3702 in code
 #
@@ -593,14 +593,32 @@
 #   renderKeymapMacroList() (line 3478):
 #     Displays the list of macros with names and step previews.
 #
-#   renderKeymapBehaviorList() (line 3616):
+#   renderKeymapBehaviorList() (line 4055):
 #     Displays custom behaviors with type, name, and config summary.
+#     Built-in behaviors (those with `_builtin` flag) are skipped here —
+#     they are shown in the Built-in Behaviors toggle section instead.
 #
-#   showBehaviorConfig(type) (line 3635):
+#   renderBuiltinBehaviorToggles() (line 4075):
+#     Renders the Built-in Behaviors section — a list of checkbox toggles
+#     for preset ZMK behaviors defined in BUILTIN_BEHAVIORS (line 1317).
+#     Each toggle shows the behavior name, type, and description.
+#     Checkbox state syncs with keymapBehaviors (checked = behavior exists
+#     in the array with matching `_builtin` id).
+#
+#   toggleBuiltinBehavior(presetId, enable) (line 4092):
+#     Called when a built-in behavior checkbox changes. When enabled:
+#     removes any parsed behavior with the same name (dedup), then adds
+#     a deep copy of the preset config to keymapBehaviors with _builtin
+#     and _fromEditor flags. When disabled: filters out by _builtin id.
+#     Then re-renders toggles, behavior list, dropdown, and output.
+#
+#   showBehaviorConfig(type) (line 4122):
 #     When you select a behavior type (hold-tap, tap-dance, etc),
 #     this shows the appropriate configuration fields.
 #     Different types need different settings:
-#       - hold-tap: tapping-term, flavor, hold/tap bindings, etc.
+#       - hold-tap: tapping-term, flavor, hold/tap bindings, quick-tap,
+#         require-prior-idle, hold-trigger-key-positions, retro-tap,
+#         hold-while-undecided, hold-trigger-on-release, global-quick-tap
 #       - tap-dance: tapping-term, binding list
 #       - mod-morph: normal/morphed bindings, modifier mask
 #       - sticky-key: release time, binding, quick-release, lazy
@@ -630,20 +648,24 @@
 # ============================================================
 # SECTION 20: KEYMAP OUTPUT GENERATION (updateKeymapOutput)
 # ============================================================
-# Ref. Lines 4042-4416 in code
+# Ref. Lines 4542-4930 in code
 #
 # This is the biggest output function. It generates the complete
 # .keymap file text from all the parsed/edited data.
 #
 # Output order:
 #   1. #include lines (preserved from original file)
-#   2. Pre-keymap raw blocks (if the file had custom combos/behaviors
+#   2. #define macros for enabled built-in behaviors (e.g.,
+#      `#define AS(keycode) &as LS(keycode) keycode` for autoshift,
+#      `#define MO_TOG(layer) &mo_tog layer layer` for mo_tog).
+#      Only emitted when the corresponding built-in behavior is toggled on.
+#   3. Pre-keymap raw blocks (if the file had custom combos/behaviors
 #      outside the keymap block, they're preserved verbatim)
-#   3. Custom behavior definitions (generated from keymapBehaviors)
-#   4. Combo definitions
-#   5. Macro definitions
-#   6. The "keymap { compatible = ... }" block with all layers
-#   7. Conditional layers
+#   4. Custom behavior definitions (generated from keymapBehaviors)
+#   5. Combo definitions
+#   6. Macro definitions
+#   7. The "keymap { compatible = ... }" block with all layers
+#   8. Conditional layers
 #
 # Column alignment:
 #   The binding output uses column-aligned formatting so the .keymap
@@ -658,18 +680,20 @@
 # ============================================================
 # SECTION 21: BEHAVIOR CODE GENERATION
 # ============================================================
-# Ref. Lines 4417-4496 in code
+# Ref. Lines 4960-5050 in code
 #
-#   generateBehaviorCode(b) (line 4425):
+#   generateBehaviorCode(b) (line 4972):
 #     Takes a behavior object ({name, type, label, config}) and
 #     generates the devicetree code for it.
 #     Each behavior type has a different "compatible" string and
 #     different properties. For example:
 #       - hold-tap: compatible = "zmk,behavior-hold-tap"
-#         properties: tapping-term-ms, flavor, bindings, quick-tap-ms, etc.
+#         properties: tapping-term-ms, flavor, bindings, quick-tap-ms,
+#         require-prior-idle-ms, hold-trigger-key-positions, retro-tap,
+#         hold-while-undecided, hold-trigger-on-release, global-quick-tap
 #       - tap-dance: compatible = "zmk,behavior-tap-dance"
 #         properties: tapping-term-ms, bindings
-#     This function is called by updateKeymapOutput() (line 4054)
+#     This function is called by updateKeymapOutput() (line 4542)
 #     when generating the behavior section of the .keymap file.
 
 # ============================================================
@@ -704,6 +728,10 @@
 #   _fromDtsi — Marks native dtsi behaviors (hm, ltq, td_numcaps). Excluded from output.
 #   _fromKeymap — Marks RGB layers synced from keymap tab.
 #   _fromEditor — Marks items added via the keymap editor UI (for raw-blocks path).
+#   _builtin  — Marks behaviors added via the Built-in Behaviors toggles. Stores the
+#               preset id (e.g., 'hm', 'as', 'td_example'). Used to sync checkboxes,
+#               show the '(built-in)' tag in dropdowns, skip in the main behavior list,
+#               and emit #define macros in the output.
 #
 # DEVICETREE MERGE BEHAVIOR (raw-blocks output path):
 #   When keymapParsedRawBlocks is set (user parsed a .keymap), the output
@@ -719,8 +747,8 @@
 #
 # SNAPSHOT PRESERVATION:
 #   snapshotState() and restoreState() preserve _fromEditor, slowRelease,
-#   and requirePriorIdle on combos, and _fromEditor on macros and behaviors,
-#   so undo/redo operations don't lose the editor-origin flag.
+#   and requirePriorIdle on combos, and _fromEditor and _builtin on
+#   macros and behaviors, so undo/redo operations don't lose flags.
 #
 # Layer Index Matching:
 #   The keymap parser assigns indices 0, 1, 2, 3... to layers in
