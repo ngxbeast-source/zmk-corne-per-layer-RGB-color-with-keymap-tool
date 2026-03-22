@@ -110,6 +110,10 @@
     .item b { color: var(--accent2); min-width: 80px; font-size: 0.92em; }
     .item input[type="text"], .item input[type="number"] { width: 75px; }
     .item select { max-width: 160px; }
+    .layer-tags { display: inline-flex; flex-wrap: wrap; gap: 3px; margin-left: 4px; vertical-align: middle; }
+    .layer-tag { display: inline-flex; align-items: center; background: var(--accent); color: #fff; border-radius: 3px; padding: 1px 5px; font-size: 0.8em; white-space: nowrap; }
+    .layer-tag .tag-x { margin-left: 4px; cursor: pointer; font-weight: bold; opacity: 0.7; }
+    .layer-tag .tag-x:hover { opacity: 1; }
     .color-preview { display: inline-block; width: 18px; height: 18px; border-radius: 4px; border: 1px solid var(--border); vertical-align: middle; flex-shrink: 0; }
     .status-msg { color: var(--success); font-size: 0.85em; margin-left: 0.5em; }
     .release-color-group { transition: opacity 0.2s; }
@@ -452,7 +456,7 @@
             <div class="input-group"><label>Name</label><input type="text" id="comboName" placeholder="combo_name" style="width:110px;"></div>
             <div class="input-group"><label>Bind</label><input type="text" id="comboBind" placeholder="&amp;kp ESC" style="width:120px;"></div>
             <div class="input-group"><label>Pos</label><input type="text" id="comboPos" placeholder="0 1" style="width:60px;" readonly title="Click to select on keyboard"></div>
-            <div class="input-group"><label>Layers</label><input type="text" id="comboLayersInput" placeholder="LAYER_ABC LAYER_GAME" style="width:180px;"></div>
+            <div class="input-group"><label>Layers</label><select id="comboLayerPicker" style="width:120px;cursor:pointer;" title="Pick a layer to add"><option value="">+ Add layer</option></select><span id="comboLayerTags" class="layer-tags"></span><input type="hidden" id="comboLayersInput"></div>
             <button id="addComboBtn">+ Add</button>
           </div>
           <div id="rgbComboMiniKbWrap" style="display:none;">
@@ -1033,15 +1037,15 @@ function snapshotState() {
       return { name: l.name, displayName: l.displayName, bindings: l.bindings.slice(), status: l.status };
     }),
     combos: keymapCombos.map(function(c) {
-      return { name: c.name, binding: c.binding, positions: c.positions.slice(), layers: c.layers, timeout: c.timeout, _fromRgb: c._fromRgb };
+      return { name: c.name, binding: c.binding, positions: c.positions.slice(), layers: c.layers, timeout: c.timeout, _fromRgb: c._fromRgb, _fromEditor: c._fromEditor, slowRelease: c.slowRelease, requirePriorIdle: c.requirePriorIdle };
     }),
     macros: keymapMacros.map(function(m) {
-      return { name: m.name, label: m.label, steps: m.steps.slice(), paramType: m.paramType, waitMs: m.waitMs, tapMs: m.tapMs, _fromRgb: m._fromRgb };
+      return { name: m.name, label: m.label, steps: m.steps.slice(), paramType: m.paramType, waitMs: m.waitMs, tapMs: m.tapMs, _fromRgb: m._fromRgb, _fromEditor: m._fromEditor };
     }),
     behaviors: keymapBehaviors.map(function(b) {
       var cfg = {};
       for (var k in b.config) cfg[k] = b.config[k];
-      return { name: b.name, type: b.type, label: b.label, config: cfg, _fromRgb: b._fromRgb, _fromDtsi: b._fromDtsi };
+      return { name: b.name, type: b.type, label: b.label, config: cfg, _fromRgb: b._fromRgb, _fromDtsi: b._fromDtsi, _fromEditor: b._fromEditor };
     }),
     condLayers: keymapConditionalLayers.map(function(c) {
       return { name: c.name, ifLayers: c.ifLayers.slice(), thenLayer: c.thenLayer };
@@ -1059,15 +1063,15 @@ function restoreState(snap) {
     return { name: l.name, displayName: l.displayName, bindings: l.bindings.slice(), status: l.status };
   });
   keymapCombos = snap.combos.map(function(c) {
-    return { name: c.name, binding: c.binding, positions: c.positions.slice(), layers: c.layers, timeout: c.timeout, _fromRgb: c._fromRgb };
+    return { name: c.name, binding: c.binding, positions: c.positions.slice(), layers: c.layers, timeout: c.timeout, _fromRgb: c._fromRgb, _fromEditor: c._fromEditor, slowRelease: c.slowRelease, requirePriorIdle: c.requirePriorIdle };
   });
   keymapMacros = snap.macros.map(function(m) {
-    return { name: m.name, label: m.label, steps: m.steps.slice(), paramType: m.paramType, waitMs: m.waitMs, tapMs: m.tapMs, _fromRgb: m._fromRgb };
+    return { name: m.name, label: m.label, steps: m.steps.slice(), paramType: m.paramType, waitMs: m.waitMs, tapMs: m.tapMs, _fromRgb: m._fromRgb, _fromEditor: m._fromEditor };
   });
   keymapBehaviors = snap.behaviors.map(function(b) {
     var cfg = {};
     for (var k in b.config) cfg[k] = b.config[k];
-    return { name: b.name, type: b.type, label: b.label, config: cfg, _fromRgb: b._fromRgb, _fromDtsi: b._fromDtsi };
+    return { name: b.name, type: b.type, label: b.label, config: cfg, _fromRgb: b._fromRgb, _fromDtsi: b._fromDtsi, _fromEditor: b._fromEditor };
   });
   keymapConditionalLayers = snap.condLayers.map(function(c) {
     return { name: c.name, ifLayers: c.ifLayers.slice(), thenLayer: c.thenLayer };
@@ -2003,11 +2007,15 @@ function renderComboList() {
   combos.forEach(function(c, i) {
     var div = document.createElement('div');
     div.className = 'item';
+    var layerParts = (c.layers || '').trim() ? c.layers.trim().split(/\s+/) : [];
+    var tagsHtml = layerParts.map(function(p) {
+      return '<span class="layer-tag">' + esc(p) + '<span class="tag-x" data-layer="' + esc(p) + '" data-i="' + i + '">&times;</span></span>';
+    }).join('');
     div.innerHTML =
       '<b>' + esc(c.name) + '</b>' +
       '<div class="input-group"><label>Bind</label><input type="text" value="' + esc(c.bind) + '" data-field="bind" data-i="' + i + '" style="width:120px"></div>' +
       '<div class="input-group"><label>Pos</label><input type="text" value="' + esc(c.pos) + '" data-field="pos" data-i="' + i + '" style="width:55px;cursor:pointer;" readonly title="Click to edit on keyboard"></div>' +
-      '<div class="input-group"><label>Layers</label><input type="text" value="' + esc(c.layers) + '" data-field="layers" data-i="' + i + '" style="width:180px"></div>' +
+      '<div class="input-group"><label>Layers</label><select data-field="layerpick" data-i="' + i + '" style="width:120px;cursor:pointer;" title="Pick a layer to add"><option value="">+ Add layer</option>' + layerOptionsHTML('') + '</select><span class="layer-tags" data-tags="' + i + '">' + tagsHtml + '</span></div>' +
       '<button class="btn-danger btn-sm" data-remove="combo" data-i="' + i + '">&#10005;</button>';
     list.appendChild(div);
   });
@@ -2022,10 +2030,35 @@ function renderComboList() {
       document.getElementById('rgbComboMiniKbWrap').style.display = '';
       renderRgbComboMiniKb();
     }
+    // Remove layer tag from inline combo row
+    if (e.target.classList.contains('tag-x') && e.target.dataset.i !== undefined) {
+      var idx = parseInt(e.target.dataset.i);
+      var layer = e.target.dataset.layer;
+      if (combos[idx]) {
+        var parts = (combos[idx].layers || '').trim().split(/\s+/).filter(function(p) { return p !== layer; });
+        combos[idx].layers = parts.join(' ');
+        rgbRenderAll();
+      }
+    }
   };
   list.oninput = function(e) {
     var idx = parseInt(e.target.dataset.i), field = e.target.dataset.field;
     if (field !== undefined && !isNaN(idx)) { combos[idx][field] = e.target.value; updateRgbOutput(); }
+  };
+  list.onchange = function(e) {
+    if (e.target.dataset.field === 'layerpick') {
+      var sel = e.target;
+      if (!sel.value) return;
+      var idx = parseInt(sel.dataset.i);
+      var cur = (combos[idx].layers || '').trim();
+      var parts = cur ? cur.split(/\s+/) : [];
+      if (parts.indexOf(sel.value) < 0) {
+        parts.push(sel.value);
+        combos[idx].layers = parts.join(' ');
+        rgbRenderAll();
+      }
+      sel.value = '';
+    }
   };
 }
 
@@ -2069,10 +2102,24 @@ function updateHeaderDropdowns() {
   document.getElementById('blinkColor').innerHTML = colorOpts;
   document.getElementById('blinkReturnColor').innerHTML = colorOpts;
   document.getElementById('behaviorMacro').innerHTML = macroRefOptionsHTML('');
+  // Populate combo layer picker dropdown
+  var clp = document.getElementById('comboLayerPicker');
+  if (clp) clp.innerHTML = '<option value="">+ Add layer</option>' + layerOptionsHTML('');
+  renderComboLayerTags();
   var macroTypeEl = document.getElementById('macroType');
   var releaseGroup = document.getElementById('releaseColorGroup');
   if (macroTypeEl.value === 'MOMENTARY_RGB_MACRO') releaseGroup.classList.remove('hidden');
   else releaseGroup.classList.add('hidden');
+}
+
+function renderComboLayerTags() {
+  var tags = document.getElementById('comboLayerTags');
+  if (!tags) return;
+  var val = (document.getElementById('comboLayersInput').value || '').trim();
+  var parts = val ? val.split(/\s+/) : [];
+  tags.innerHTML = parts.map(function(p) {
+    return '<span class="layer-tag">' + esc(p) + '<span class="tag-x" data-layer="' + esc(p) + '">&times;</span></span>';
+  }).join('');
 }
 
 function addLayer() {
@@ -2100,6 +2147,7 @@ function addCombo() {
   rgbEditingComboIndex = -1;
   document.getElementById('rgbComboMiniKbWrap').style.display = 'none';
   document.getElementById('comboPos').value = '';
+  document.getElementById('comboLayersInput').value = '';
   rgbRenderAll();
 }
 function addBlinkMacro() {
@@ -2332,7 +2380,7 @@ function updateRgbOutput() {
   if (combos.length) {
     out += '\n/* ---- STEP 5: COMBOS ---- */\n';
     combos.forEach(function(c) {
-      out += 'COMBO(' + c.name + ', ' + c.bind + ', ' + c.pos + ', ' + c.layers + ')\n';
+      out += 'COMBO(' + c.name + ', ' + c.bind + ', ' + c.pos.replace(/\s+/g, ', ') + ', ' + c.layers + ')\n';
     });
   }
 
@@ -2743,15 +2791,18 @@ function parseKeymap(text) {
       var ctimeMatch = cbody.match(/timeout-ms\s*=\s*<(\d+)>/);
       var cslow = /slow-release\s*;/.test(cbody);
       var crpi = cbody.match(/require-prior-idle-ms\s*=\s*<(\d+)>/);
-      keymapCombos.push({
-        name: cname,
-        binding: cbindMatch ? cbindMatch[1].trim() : '',
-        positions: cposMatch ? cposMatch[1].trim().split(/\s+/).map(Number) : [],
-        layers: clayerMatch ? clayerMatch[1].trim() : '',
-        timeout: ctimeMatch ? parseInt(ctimeMatch[1]) : 50,
-        slowRelease: cslow,
-        requirePriorIdle: crpi ? crpi[1] : ''
-      });
+      var comboExists = keymapCombos.some(function(ec) { return ec.name === cname; });
+      if (!comboExists) {
+        keymapCombos.push({
+          name: cname,
+          binding: cbindMatch ? cbindMatch[1].trim() : '',
+          positions: cposMatch ? cposMatch[1].trim().split(/\s+/).map(Number) : [],
+          layers: clayerMatch ? clayerMatch[1].trim() : '',
+          timeout: ctimeMatch ? parseInt(ctimeMatch[1]) : 50,
+          slowRelease: cslow,
+          requirePriorIdle: crpi ? crpi[1] : ''
+        });
+      }
     }
   }
 
@@ -2881,7 +2932,10 @@ function parseKeymap(text) {
       } else {
         continue; // Skip unknown behavior types
       }
-      keymapBehaviors.push({ name: bname, type: btype, label: blabel ? blabel[1] : '', config: config });
+      var behExists = keymapBehaviors.some(function(eb) { return eb.name === bname; });
+      if (!behExists) {
+        keymapBehaviors.push({ name: bname, type: btype, label: blabel ? blabel[1] : '', config: config });
+      }
     }
   }
 }
@@ -4398,54 +4452,91 @@ function updateKeymapOutput() {
   }
   out += '\n';
 
-  // If we have preserved raw pre-keymap blocks from the parsed source, output them verbatim
-  // This preserves original combos, behaviors, macros formatting from the user's source file
+  // If we have preserved raw pre-keymap blocks from the parsed source, output them
+  // with any NEW editor-only items merged into the existing devicetree sections.
   if (keymapParsedRawBlocks) {
-    out += keymapParsedRawBlocks + '\n\n';
-    // Also output any NEW combos/behaviors/macros added via the editor (not from the parsed source)
+    var rawOut = keymapParsedRawBlocks;
+
+    // Build text snippets for editor-only items to merge
     var editorOnlyCombos = keymapCombos.filter(function(c) { return c._fromEditor; });
-    if (editorOnlyCombos.length) {
-      out += '/ {\n    combos {\n        compatible = "zmk,combos";\n';
-      editorOnlyCombos.forEach(function(c) {
-        out += '        ' + c.name + ' {\n';
-        out += '            bindings = <' + c.binding + '>;\n';
-        out += '            key-positions = <' + c.positions.join(' ') + '>;\n';
-        if (c.layers) out += '            layers = <' + c.layers + '>;\n';
-        out += '            timeout-ms = <' + c.timeout + '>;\n';
-        if (c.requirePriorIdle) out += '            require-prior-idle-ms = <' + c.requirePriorIdle + '>;\n';
-        if (c.slowRelease) out += '            slow-release;\n';
-        out += '        };\n';
-      });
-      out += '    };\n};\n\n';
-    }
     var editorOnlyBehaviors = keymapBehaviors.filter(function(b) { return b._fromEditor; });
-    if (editorOnlyBehaviors.length) {
-      out += '/ {\n    behaviors {\n';
-      editorOnlyBehaviors.forEach(function(b) {
-        out += generateBehaviorCode(b);
-      });
-      out += '    };\n};\n\n';
-    }
     var editorOnlyMacros = keymapMacros.filter(function(m) { return m._fromEditor; });
-    if (editorOnlyMacros.length) {
-      out += '/ {\n    macros {\n';
-      editorOnlyMacros.forEach(function(m) {
-        var paramType = m.paramType || 0;
-        var compatible = 'zmk,behavior-macro';
-        var bindingCells = 0;
-        if (paramType === 1) { compatible = 'zmk,behavior-macro-one-param'; bindingCells = 1; }
-        else if (paramType === 2) { compatible = 'zmk,behavior-macro-two-param'; bindingCells = 2; }
-        out += '        ' + m.name + ': ' + m.name + ' {\n';
-        out += '            compatible = "' + compatible + '";\n';
-        out += '            #binding-cells = <' + bindingCells + '>;\n';
-        if (m.label) out += '            label = "' + m.label + '";\n';
-        if (m.waitMs) out += '            wait-ms = <' + m.waitMs + '>;\n';
-        if (m.tapMs) out += '            tap-ms = <' + m.tapMs + '>;\n';
-        out += '            bindings = <' + m.steps.join(' ') + '>;\n';
-        out += '        };\n';
-      });
-      out += '    };\n};\n\n';
+
+    // Helper: generate combo text block
+    function comboBlock(c) {
+      var s = '';
+      s += '        ' + c.name + ' {\n';
+      s += '            bindings = <' + c.binding + '>;\n';
+      s += '            key-positions = <' + c.positions.join(' ') + '>;\n';
+      if (c.layers) s += '            layers = <' + c.layers + '>;\n';
+      s += '            timeout-ms = <' + c.timeout + '>;\n';
+      if (c.requirePriorIdle) s += '            require-prior-idle-ms = <' + c.requirePriorIdle + '>;\n';
+      if (c.slowRelease) s += '            slow-release;\n';
+      s += '        };\n';
+      return s;
     }
+    function macroBlock(m) {
+      var paramType = m.paramType || 0;
+      var compatible = 'zmk,behavior-macro';
+      var bindingCells = 0;
+      if (paramType === 1) { compatible = 'zmk,behavior-macro-one-param'; bindingCells = 1; }
+      else if (paramType === 2) { compatible = 'zmk,behavior-macro-two-param'; bindingCells = 2; }
+      var s = '';
+      s += '        ' + m.name + ': ' + m.name + ' {\n';
+      s += '            compatible = "' + compatible + '";\n';
+      s += '            #binding-cells = <' + bindingCells + '>;\n';
+      if (m.label) s += '            label = "' + m.label + '";\n';
+      if (m.waitMs) s += '            wait-ms = <' + m.waitMs + '>;\n';
+      if (m.tapMs) s += '            tap-ms = <' + m.tapMs + '>;\n';
+      s += '            bindings = <' + m.steps.join(' ') + '>;\n';
+      s += '        };\n';
+      return s;
+    }
+
+    // Merge combos into existing combos section, or create new block
+    if (editorOnlyCombos.length) {
+      var comboInsert = '';
+      editorOnlyCombos.forEach(function(c) { comboInsert += comboBlock(c); });
+      // Find the section-level closing (4-space indent at start of line, not 8-space inner closings)
+      var comboCloseRe = /(combos\s*\{[^]*?)(\n    \};)/;
+      var cm = rawOut.match(comboCloseRe);
+      if (cm) {
+        var insertPos = cm.index + cm[1].length;
+        rawOut = rawOut.substring(0, insertPos) + '\n' + comboInsert + rawOut.substring(insertPos);
+      } else {
+        rawOut += '\n/ {\n    combos {\n        compatible = "zmk,combos";\n' + comboInsert + '    };\n};\n';
+      }
+    }
+
+    // Merge behaviors into existing behaviors section, or create new block
+    if (editorOnlyBehaviors.length) {
+      var behInsert = '';
+      editorOnlyBehaviors.forEach(function(b) { behInsert += generateBehaviorCode(b); });
+      var behCloseRe = /(behaviors\s*\{[^]*?)(\n    \};)/;
+      var bm = rawOut.match(behCloseRe);
+      if (bm) {
+        var bInsertPos = bm.index + bm[1].length;
+        rawOut = rawOut.substring(0, bInsertPos) + '\n' + behInsert + rawOut.substring(bInsertPos);
+      } else {
+        rawOut += '\n/ {\n    behaviors {\n' + behInsert + '    };\n};\n';
+      }
+    }
+
+    // Merge macros into existing macros section, or create new block
+    if (editorOnlyMacros.length) {
+      var macInsert = '';
+      editorOnlyMacros.forEach(function(m) { macInsert += macroBlock(m); });
+      var macCloseRe = /(macros\s*\{[^]*?)(\n    \};)/;
+      var mm = rawOut.match(macCloseRe);
+      if (mm) {
+        var mInsertPos = mm.index + mm[1].length;
+        rawOut = rawOut.substring(0, mInsertPos) + '\n' + macInsert + rawOut.substring(mInsertPos);
+      } else {
+        rawOut += '\n/ {\n    macros {\n' + macInsert + '    };\n};\n';
+      }
+    }
+
+    out += rawOut + '\n\n';
   } else {
   // No raw blocks — generate from parsed data (default behavior)
 
@@ -5292,6 +5383,28 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('addMacroBtn').onclick = addMacro;
   document.getElementById('addBehaviorBtn').onclick = addBehavior;
   document.getElementById('addComboBtn').onclick = addCombo;
+  // Combo layer picker: append selected layer as tag
+  document.getElementById('comboLayerPicker').onchange = function() {
+    if (!this.value) return;
+    var inp = document.getElementById('comboLayersInput');
+    var cur = inp.value.trim();
+    var parts = cur ? cur.split(/\s+/) : [];
+    if (parts.indexOf(this.value) < 0) {
+      parts.push(this.value);
+      inp.value = parts.join(' ');
+      renderComboLayerTags();
+    }
+    this.value = '';
+  };
+  document.getElementById('comboLayerTags').addEventListener('click', function(e) {
+    if (e.target.classList.contains('tag-x')) {
+      var layer = e.target.dataset.layer;
+      var inp = document.getElementById('comboLayersInput');
+      var parts = inp.value.trim().split(/\s+/).filter(function(p) { return p !== layer; });
+      inp.value = parts.join(' ');
+      renderComboLayerTags();
+    }
+  });
   // Show/hide RGB combo mini-keyboard and sync positions
   document.getElementById('comboPos').addEventListener('focus', function() {
     var wrap = document.getElementById('rgbComboMiniKbWrap');
@@ -5310,7 +5423,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (isNaN(ki)) return;
     var idx = rgbComboSelectedPositions.indexOf(ki);
     if (idx >= 0) rgbComboSelectedPositions.splice(idx, 1);
-    else rgbComboSelectedPositions.push(ki);
+    else if (rgbComboSelectedPositions.length < 2) rgbComboSelectedPositions.push(ki);
     renderRgbComboMiniKb();
   });
   document.getElementById('addBlinkMacroBtn').onclick = addBlinkMacro;

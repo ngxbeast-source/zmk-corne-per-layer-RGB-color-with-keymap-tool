@@ -311,9 +311,24 @@
 #   updateHeaderDropdowns() (line 2020):
 #     Refreshes all dropdown menus in the RGB macro and combo editors
 #     with the latest layer and color lists.
+#     Also populates the combo layer picker dropdown (comboLayerPicker).
 #
 #   addLayer(), addMacro(), addBehavior(), addCombo(), addBlinkMacro():
 #     Functions that append new empty items to the data arrays.
+#
+# RGB COMBO LAYER PICKER:
+#   Both the header combo form and each inline combo row have an
+#   "Add layer" dropdown (<select>). Selecting a layer adds it as a
+#   tag chip (deduped — won't add twice). Tags are removable via the
+#   × button on each tag. The underlying data is stored space-separated
+#   in a hidden input (header) or directly in the combo object (inline).
+#   renderComboLayerTags() renders header tags from the hidden input.
+#   Inline tags are rendered directly by renderComboList().
+#
+# RGB COMBO POSITION LIMIT:
+#   The mini-keyboard position picker for RGB combos enforces a maximum
+#   of 2 key presses. The COMBO() output formats positions as comma-
+#   separated values (e.g. "4, 20") via .replace(/\s+/g, ', ').
 
 # ============================================================
 # SECTION 10: .dtsi CODE PARSER (parseUserCode)
@@ -493,6 +508,10 @@
 #   6. Parses macros from ZMK_MACRO nodes.
 #   7. Parses custom behaviors (hold-tap, mod-morph, tap-dance,
 #      sticky-key, key-toggle, caps-word, sensor-rotate).
+#      Both combo and behavior parsing include name-based dedup checks
+#      (`.some()`) before pushing to `keymapCombos`/`keymapBehaviors`,
+#      preventing duplicates when items already exist from saved cross-tab
+#      sync data that was restored before re-parsing.
 #   8. Parses conditional layers.
 #
 # Layer indices are assigned sequentially: the first layer parsed
@@ -685,6 +704,23 @@
 #   _fromDtsi — Marks native dtsi behaviors (hm, ltq, td_numcaps). Excluded from output.
 #   _fromKeymap — Marks RGB layers synced from keymap tab.
 #   _fromEditor — Marks items added via the keymap editor UI (for raw-blocks path).
+#
+# DEVICETREE MERGE BEHAVIOR (raw-blocks output path):
+#   When keymapParsedRawBlocks is set (user parsed a .keymap), the output
+#   first copies the raw blocks, then MERGES any _fromEditor items into
+#   existing combos/behaviors/macros sections within those raw blocks.
+#   The merge uses regex to find the section closing `\n    };` (newline + 4-space
+#   indent) and inserts the new items just before it. The newline anchor is
+#   critical — without it, `    };` would match as a substring within deeper-
+#   indented `        };` (8-space inner block closings), causing insertions
+#   at the wrong position.
+#   If no matching section exists in the raw blocks, a new `/ { ... };`
+#   block is appended instead.
+#
+# SNAPSHOT PRESERVATION:
+#   snapshotState() and restoreState() preserve _fromEditor, slowRelease,
+#   and requirePriorIdle on combos, and _fromEditor on macros and behaviors,
+#   so undo/redo operations don't lose the editor-origin flag.
 #
 # Layer Index Matching:
 #   The keymap parser assigns indices 0, 1, 2, 3... to layers in

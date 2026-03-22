@@ -69,6 +69,24 @@ Coverage note: this reflects everything I can reliably reconstruct from availabl
 - Streamlining passes and small index/syntax corrections.
 - Cleanup/removal of obsolete files.
 
+## 2026-03-22 (Session 3) - Devicetree Merge, Combo Layers Picker, Snapshot Fixes
+
+### Major additions
+- **Devicetree merge for editor-only items**: When a parsed .keymap has raw pre-keymap blocks (combos, behaviors, macros), new items created in the editor are now **merged INTO the existing devicetree sections** instead of being appended as separate `/ { ... };` blocks. If no existing section is found, a new block is created as before.
+- **RGB combo layers picker**: The "Layers" input in the RGB combo section (both the header form and each inline combo row) now has a `+` dropdown that lists all available layers. Selecting a layer appends it to the text field (deduped).
+
+### Improvements
+- **Combo merge newline formatting**: Merged combos/behaviors/macros in keymap output now start on a new line after the previous block's closing `};` instead of appearing on the same line.
+- **COMBO() output comma-separated positions**: RGB output `COMBO()` macro now formats positions as `4, 20` instead of `4 20`.
+- **RGB combo limited to 2 key positions**: The mini-keyboard position picker for RGB combos now enforces a maximum of 2 key presses per combo.
+- **RGB combo layers picker redesigned**: Replaced the text input + tiny `+` dropdown with a full-width "Add layer" dropdown and removable layer tag chips. Both the header form and inline combo rows use the new tag-based UI.
+
+### Bug fixes
+- **`_fromEditor` flag lost through undo/redo**: `snapshotState()` and `restoreState()` were not preserving `_fromEditor`, `slowRelease`, or `requirePriorIdle` on combos, nor `_fromEditor` on macros and behaviors. This caused editor-created items to lose their flag after undo/redo, making them invisible in the output when `keymapParsedRawBlocks` was set (which filters by `_fromEditor`). All three properties are now preserved in snapshots.
+- **Cross-tab sync combo output loss**: When switching between tabs, combos created in the keymap editor would sometimes disappear from the output. Root cause was `_fromEditor` not surviving undo/redo cycles plus duplicate devicetree blocks causing visual confusion. Both underlying issues are now fixed.
+- **Devicetree merge regex inserting at wrong position**: The merge regex `(    \};)` matched as a substring within deeper-indented `        };` (8-space inner combo/behavior closings), causing new items to be injected inside the last existing block rather than at the section level. Fixed by anchoring to `(\n    \};)` (newline + 4-space indent) so only the section-level closing is matched.
+- **Duplicate behaviors in keymap editor UI**: `parseKeymap()` behavior/combo parsing pushed items without checking for existing names, causing duplicates when items were restored from cross-tab sync data before re-parsing the same text. Added name-based dedup checks to both behavior and combo push paths.
+
 ## 2026-03-21 (Session 2) - Macro Editor, Sync Architecture, Comments & Clear Layer
 
 ### Major additions — Macro Binding Editor
