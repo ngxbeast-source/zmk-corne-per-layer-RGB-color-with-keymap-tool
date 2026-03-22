@@ -72,7 +72,8 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 - Toggled layers selected from the gateway can house their own "Sub-layer" with an individual RGB color. These sub-layers let you create dedicated small sub-layouts (each with its own distinct RGB setting), think momentary layers.
 - The Toggle Layer reduces accidental activation, and less "key clutter" while allowing multiple dedicated layouts for different tasks (e.g., Photoshop, coding, emails, gaming).
 
-- When making a Toggled Layer it's ***IMPORTANT*** that you add all sub-layouts, you'll be using in the Toggled Layer, BELOW the Toggled Layer! To avoid any "layer meshing"; Layers can get "stuck" on top of each other [See zmk.dev #Layers](https://zmk.dev/docs/keymaps#layers) 
+- When making a Toggled Layer it's ***IMPORTANT*** that you add all sub-layouts, you'll be using in the Toggled Layer, BELOW the Toggled Layer! To avoid any "layer meshing"; Layers can get "stuck" on top of each other [See zmk.dev #Layers](https://zmk.dev/docs/keymaps#layers)
+- **CONSTRUCTING YOUR LAYERS RIGHT IS THE MOST IMPORTANT PART OF THIS WHOLE PROCESS, IF YOU JUST START ASSIGNING COLORS TO LAYERS WITH MACROS/BEHAVIORS AND IF THE LAYERS AREN'T "STACKED" RIGHT THEN EVERYTHING YOU DID WON'T WORK AS INTENED. PATH YOUR LAYERS CORRECTLY!**
 - or, look at my layout/keymap, or layer numbers in `corne-rgb.dtsi` for an idea of how I pathed the layers.
   - You wouldnt have Layer 12 with a key to go to layer 2, since there could be layers inbetween that may "bleed" key presses through the layer you are trying to "dig" to; or vice versa. It's good practice to put any "sub-layouts" below the toggled layer in your .keymap. Layer12 is the new "Sub-Base Layer", so Layer13 should be it's "sub-layout" in the sequence.
 
@@ -98,15 +99,18 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 I used Copilot to help modularize and refine the macros and combos. The modular structure now makes it easier to add new layers and corresponding RGB behaviors — add a layer color/macro in `corne-rgb.dtsi` and #include that file in your keymap.
 ### **NEW** AI CONSTRUCTED RGB BUILDER
 - I got lazy updating my colors and just had AI construct a tool to help streamline the process since we were mostly working with 3 macros, it just got redundant coding them.
-  - There is an integrated keymap editor I pulled mostly from (https://nickcoutsos.github.io/keymap-editor/) for an idea. I havent really tried it out but it seems mostly functional.
+  - There is an integrated keymap editor I pulled mostly from (https://nickcoutsos.github.io/keymap-editor/) for an idea, all credit goes to him for the keymap editor functionality. I havent really tried it out but it seems mostly functional.
   - There are certainly bugs(its ALL AI written), I havent really used this much yet; I can say that the RGB builder does work well enough so feel free to use it you want, there are included "helpers" in the generator.
 <br>**___Should NOTE that this has only been cofigured for Lotus58 and Corne Keymaps, it says you can add a .json but I never tried.___**
 ![editor](ZMKPer-LayerColor_RGB_Tool_with_keymap_editor1.png)
 
 ![editor2](ZMKPer-LayerColor_RGB_Tool_with_keymap_editor2.png)
+
+  - The "Blink/status" macro is experimental, it works but I'm not sure if it's really "helpful". I only use it for a few visual indications but feel free to expreiment with the idea.
+  - Any color you "assign" a layer in the RGB tool gets shown as a little colored dot on the layers in the keymap editor UI.
   - This has most of the capabilities of the orignial keymap editor, minus some bugs and obvious UI improvements that could be made, but with the added functionality of a RGB generator.
      - You should be able to edit your keymap and assign colors to the layer from the tool.
-     - Layers made in the keymap get "refelected" into the RGB tool for easy editing.
+     - Layers made in the keymap get "reflected" into the RGB tool for easy editing.
      - This is supposed to work on a 2 file system.
          - 1 is your .keymap and the other is a .dtsi file
          - In your keymap you just add `#include "corne-rgb.dtsi"` (adjust filename as needed) to the top of your keymap.
