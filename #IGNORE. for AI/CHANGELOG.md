@@ -326,3 +326,35 @@ Coverage note: this reflects everything I can reliably reconstruct from availabl
   - architecture summary
   - issue/fix ledger
 - Session memory notes and prior conversation summaries from this workspace session.
+
+## 2026-03-23 (Session 4) - Build Fix, Parser Enhancements, MO_BLINK Migration to Blink Section
+
+### Bug fix — Extra `};` Build Error in corne-rgb.dtsi
+- **Stray closing brace**: `corne-rgb.dtsi` had an extra `};` on line ~160 that prematurely closed the root `/ {}` node. This caused a `west build` parse error (`expected label reference (&foo)`) because `ZMK_MACRO(caps_blink, ...)` and everything after fell outside the device tree root. Removed the stray `};`.
+
+### Major additions — KP_BLINK Parsing & Output
+- **`KP_BLINK()` parser**: Added dedicated `kpBlinkRe` regex with balanced-paren walker to parse `KP_BLINK()` helper invocations directly into `blinkMacros[]` with `_helper: 'KP_BLINK'` flag.
+- **`HELPER_KP_BLINK` string**: New JS constant for the KP_BLINK helper `#define`. Conditionally emitted in output when blink macros have non-`&mo` keys.
+- **Output**: Blink macros with `_helper === 'KP_BLINK'` (or no `_helper`) output as `KP_BLINK()` helper calls when `includeHelpers` is on, or raw `ZMK_MACRO` when off.
+
+### Bug fix — Parentheses in Labels
+- **`splitArgs()` function**: Created a new argument splitter that respects quoted strings and balanced parentheses, replacing naive `.split(',')` or `([^)]+)` regex captures.
+- **Balanced-paren walkers**: Updated `macroRe`, `behRe`, and `kpBlinkRe` regexes to use balanced-paren walking with `lastIndex` advancement, so labels like `"F KEYS BLINK; STANDALONE"` with special characters are parsed correctly.
+
+### Major addition — Comment Preservation (allSectionComments)
+- **`allSectionComments` parser**: Scans the full dtsi code for `//` and `/* */` comments preceding `KP_BLINK`, `MO_BLINK`, `CMB`, and `RGB_HT` calls. Comments are stored by node name and re-emitted in output before each entry.
+- **Affected sections**: Blink macros, combos, and standalone MO_BLINK entries all preserve associated comments through parse → edit → output round-trips.
+
+### Major addition — Keymap Header Preservation
+- **`keymapParsedHeaderLines` global**: `parseKeymap()` now saves header comment/blank lines (copyright notices, license text) that appear before `#include` lines.
+- **Output**: `updateKeymapOutput()` outputs preserved header lines before includes.
+
+### Major change — MO_BLINK Moved from Macros to Blink Section
+- **Blink section UI redesign**: Added a Type dropdown (`KP_BLINK` / `MO_BLINK ⚠`) to the Blink / Status Macros add form. When MO_BLINK is selected, the Key input hides and a Layer dropdown appears. An amber experimental note (`⚠ MO_BLINK is experimental — binds a momentary layer + blink sequence.`) appears below the form.
+- **Macros section cleanup**: Removed `MO_BLINK ⚠` from both the macro add form dropdown and macro editor dropdown. Removed all hidden blink-specific fields (`blinkColorGroup`, `blinkReturnGroup`, `blinkWaitGroup`, `meditBlinkColorGroup`, `meditBlinkReturnGroup`, `meditBlinkWaitGroup`).
+- **Parser redirect**: `MO_BLINK(...)` invocations now push into `blinkMacros[]` (with `_helper: 'MO_BLINK'`, `layer`, `color`, `returnColor`, `wait`) instead of `macros[]`.
+- **Blink list renderer**: `renderBlinkMacroList()` detects `_helper === 'MO_BLINK'` items and renders them with an amber `⚠ MO_BLINK` badge + Layer dropdown instead of Key text input.
+- **Output generator**: MO_BLINK items generated within the blink/status macros section. Uses `MO_BLINK()` helper when helpers enabled, raw `ZMK_MACRO` with `&macro_press &mo` pattern when disabled. `HELPER_MO_BLINK` definition conditionally included based on `blinkMacros[]` (not `macros[]`).
+- **Macro editor cleanup**: Removed all MO_BLINK branching from `addMacro()`, `renderMacroList()`, `openMacroEditor()`, `macroType.onchange`, `meditType.onchange`, `meditSaveBtn.onclick`, and `updateHeaderDropdowns()`.
+- **`addBlinkMacro()` updated**: Now reads `blinkType` dropdown; for MO_BLINK, stores `layer` from `blinkLayer` select; for KP_BLINK, stores `key` from `blinkKey` input. Both tagged with `_helper` field.
+- **`updateHeaderDropdowns()` updated**: Populates `blinkLayer` dropdown, toggles Key/Layer fields and experimental note based on `blinkType` selection.

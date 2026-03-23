@@ -95,7 +95,7 @@
             tapping-term-ms = <200>; \
             flavor = "tap-preferred"; \
         };
-/* EXPERIMENTAL: Momentary + Blink helper (use with RGB_HT) */
+/* EXPERIMENTAL: Momentary + Blink helper*/
 #define MO_BLINK(node_name, node_label, layer, blink_color, return_color, wait) \
         ZMK_MACRO(node_name, \
             label = node_label; \
@@ -155,20 +155,15 @@
             BLINK_SEQ(BLINK_ON, RGB_XTRA, 80)
         >;
     };
+    // EXPERIMENTAL (STANDALONE)
         KP_BLINK(c_blink, "CAPS LOCK + BLINK", CAPS, C_BLINK_ON, RGB_ABC, 80)
         KP_BLINK(n_blink, "NUM LOCK + BLINK", KP_NUMLOCK, N_BLINK_ON, RGB_ABC, 80)
 
-    ZMK_MACRO(caps_blink,
-        label = "CAPS TOGGLE + BLINK";
-        bindings = <&macro_tap &kp CAPS BLINK_SEQ(C_BLINK_ON, RGB_ABC, 80)>;
-    )
-    ZMK_MACRO(num_blink,
-        label = "NUM TOGGLE + BLINK";
-        bindings = <&macro_tap &kp KP_NUMLOCK BLINK_SEQ(N_BLINK_ON, RGB_ABC, 80)>;
-    )
-    /* This goes to the "F Keys Layer" (that we layered "on top" of our NumberRowLayer). 
-        Used w/ RGB_HT(), w/ this "new" "color". */ 
-    MO_BLINK(f_blink, "F KEYS BLINK", FKEYS, F_BLINK_ON, RGB_NMRW, 80)
+         /* This goes to the "F Keys Layer" (that we layered "on top" of our NumberRowLayer). 
+             Used w/ RGB_HT(), w/ this "new" "color". CAN BE STANDALONE, OR USED WITH RGB_HT TO BIND WITH ANOTHER &kP */ 
+        MO_BLINK(f_blink_sa, "F KEYS BLINK; STANDALONE", FKEYS, F_BLINK_ON, RGB_NMRW, 80)
+
+
     /* ---- STEP 4: BEHAVIORS - HOLD-TAP ---- */
     behaviors {
         RGB_HT(RGB_ht_nmrw, "RGB HOLD_TAP_NMRW", nmrw_led)
@@ -180,7 +175,7 @@
         RGB_HT(RGB_ht_g2_s1, "RGB HOLD_TAP_GAME2_SUBLAYER1", g2_s1_led)
         RGB_HT(RGB_ht_t1_s1, "RGB HOLD_TAP_TOGGLELAYER1_SUBLAYER1", t1_s1_led)
 
-        RGB_HT(f_blink_test, "f blink test", f_blink)
+        RGB_HT(BLINK_ht_f, "f blink test; &kp BINDABEL", f_blink_sa)
 
         hm: homerow_mods {
             compatible = "zmk,behavior-hold-tap";

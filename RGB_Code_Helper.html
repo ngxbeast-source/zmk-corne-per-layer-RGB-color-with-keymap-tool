@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZMK RGB &amp; Keymap Editor v10</title>
+  <title>ZMK RGB &amp; Keymap Editor v11</title>
   <style>
     /* ====== THEME VARIABLES ====== */
     :root {
@@ -404,7 +404,7 @@
 
   <!-- ====== TOPBAR ====== -->
   <div class="topbar">
-    <h1>ZMK Per-Layer Color and Keymap Editor <small>v10</small></h1>
+    <h1>ZMK Per-Layer Color and Keymap Editor <small>v11</small></h1>
     <div class="tab-bar">
       <button class="tab-btn active" data-tab="tabRgb">RGB Generator</button>
       <button class="tab-btn" data-tab="tabKeymap">Keymap Editor</button>
@@ -473,15 +473,12 @@
         <div class="section-body" id="macroBody">
           <div class="input-row">
             <div class="input-group"><label>Type</label>
-              <select id="macroType"><option value="TO_RGB">TO_RGB</option><option value="MO_RGB">MO_RGB</option><option value="TO_RGB_PRESS">TO_RGB_PRESS</option><option value="MO_BLINK">MO_BLINK &#9888;</option></select>
+              <select id="macroType"><option value="TO_RGB">TO_RGB</option><option value="MO_RGB">MO_RGB</option><option value="TO_RGB_PRESS">TO_RGB_PRESS</option></select>
             </div>
             <div class="input-group"><label>Name</label><input type="text" id="macroName" placeholder="to_name" style="width:110px;"></div>
             <div class="input-group"><label>Layer</label><select id="macroLayer"></select></div>
             <div class="input-group"><label>Color</label><select id="macroColor"></select></div>
             <div class="input-group release-color-group" id="releaseColorGroup"><label>Release</label><select id="macroReleaseColor"></select></div>
-            <div class="input-group blink-field hidden" id="blinkColorGroup"><label>Blink</label><select id="macroBlinkColor"></select></div>
-            <div class="input-group blink-field hidden" id="blinkReturnGroup"><label>Return</label><select id="macroBlinkReturn"></select></div>
-            <div class="input-group blink-field hidden" id="blinkWaitGroup"><label>Wait</label><input type="number" id="macroBlinkWait" value="80" min="0" style="width:50px;"></div>
             <button id="addMacroBtn">+ Add</button>
           </div>
           <div class="item-list" id="macroList"></div>
@@ -535,13 +532,18 @@
         </div>
         <div class="section-body" id="blinkBody">
           <div class="input-row">
+            <div class="input-group"><label>Type</label>
+              <select id="blinkType"><option value="KP_BLINK">KP_BLINK</option><option value="MO_BLINK">MO_BLINK &#9888;</option></select>
+            </div>
             <div class="input-group"><label>Name</label><input type="text" id="blinkName" placeholder="blink_macro" style="width:110px;"></div>
-            <div class="input-group"><label>Key</label><input type="text" id="blinkKey" placeholder="CAPS" style="width:80px;"></div>
+            <div class="input-group" id="blinkKeyGroup"><label>Key</label><input type="text" id="blinkKey" placeholder="CAPS" style="width:80px;"></div>
+            <div class="input-group" id="blinkLayerGroup" style="display:none;"><label>Layer</label><select id="blinkLayer"></select></div>
             <div class="input-group"><label>Color</label><select id="blinkColor"></select></div>
             <div class="input-group"><label>Return</label><select id="blinkReturnColor"></select></div>
             <div class="input-group"><label>Wait</label><input type="number" id="blinkWait" value="80" min="0" style="width:50px;"></div>
             <button id="addBlinkMacroBtn">+ Add</button>
           </div>
+          <p id="blinkExperimentalNote" style="display:none;margin:4px 0 2px;font-size:0.82em;color:#e8a735;">&#9888; MO_BLINK is <b>experimental</b> &mdash; binds a momentary layer + blink sequence.</p>
           <div class="item-list" id="blinkMacroList"></div>
         </div>
       </div>
@@ -557,15 +559,11 @@
                 <option value="TO_RGB">TO_RGB</option>
                 <option value="MO_RGB">MO_RGB</option>
                 <option value="TO_RGB_PRESS">TO_RGB_PRESS</option>
-                <option value="MO_BLINK">MO_BLINK &#9888;</option>
               </select>
             </div>
             <div class="input-group"><label>Layer</label><select id="meditLayer"></select></div>
             <div class="input-group"><label>Color</label><select id="meditColor"></select></div>
             <div class="input-group" id="meditReleaseGroup"><label>Release Color</label><select id="meditReleaseColor"></select></div>
-            <div class="input-group hidden" id="meditBlinkColorGroup"><label>Blink Color</label><select id="meditBlinkColor"></select></div>
-            <div class="input-group hidden" id="meditBlinkReturnGroup"><label>Return Color</label><select id="meditBlinkReturn"></select></div>
-            <div class="input-group hidden" id="meditBlinkWaitGroup"><label>Wait (ms)</label><input type="number" id="meditBlinkWait" value="80" min="0" style="width:60px;"></div>
           </div>
           <div class="medit-actions">
             <button id="meditSaveBtn">Save</button>
@@ -1204,6 +1202,7 @@ var comboSelectedPositions = [];
 var rgbComboSelectedPositions = [];
 var rgbEditingComboIndex = -1;
 var keymapParsedIncludes = null; // Saved #include lines from the .keymap file (null = use defaults)
+var keymapParsedHeaderLines = null; // Saved header comment/blank lines above #include (preserved in output)
 var keymapParsedRawBlocks = null; // Raw devicetree blocks before the keymap{} (preserved in output)
 
 // ================================================================
@@ -1970,6 +1969,21 @@ function initResize(handleId, wrapId) {
 // After parsing, it calls rgbRenderAll() to refresh the UI.
 // More on this code can be found in 'RefDoc' line 313
 // ================================================================
+// splitArgs(str) — Split a comma-separated argument string respecting quoted strings.
+// Commas inside "..." are not treated as delimiters, so labels like
+// "F KEYS BLINK; (STANDALONE)" parse correctly.
+function splitArgs(str) {
+  var args = [], cur = '', inQuote = false;
+  for (var i = 0; i < str.length; i++) {
+    var ch = str[i];
+    if (ch === '"') { inQuote = !inQuote; cur += ch; }
+    else if (ch === ',' && !inQuote) { args.push(cur.trim()); cur = ''; }
+    else { cur += ch; }
+  }
+  args.push(cur.trim());
+  return args;
+}
+
 function parseUserCode() {
   pushRgbUndo();
   var code = document.getElementById('userCodePaste').value;
@@ -2063,22 +2077,64 @@ function parseUserCode() {
     }
   }
 
-  var macroRe = /(TO_RGB_PRESS|TO_RGB|MO_BLINK|MO_RGB)\(([^)]+)\)/g;
-  while ((m = macroRe.exec(codeNoHelpers))) {
-    var args = m[2].split(',').map(function(x) { return x.trim(); });
-    var macroLabel = (args[1] || '').replace(/^"|"$/g, '').trim();
-    if (m[1] === 'MO_BLINK') {
-      macros.push({ name: args[0], type: 'MO_BLINK', layer: args[2] || '', color: '', releaseColor: '', blinkColor: args[3] || '', returnColor: args[4] || '', wait: args[5] || '80', label: macroLabel, comment: macroSectionComments[args[0]] || '' });
-    } else if (m[1] === 'MO_RGB') {
-      macros.push({ name: args[0], type: m[1], layer: args[2] || '', color: args[3] || '', releaseColor: args[4] || '', blinkColor: '', returnColor: '', wait: '', label: macroLabel, comment: macroSectionComments[args[0]] || '' });
+  // Parse comments for standalone macros/combos (KP_BLINK, MO_BLINK outside macros{}, CMB inside combos{})
+  var allSectionComments = {};
+  var acLines = codeNoHelpers.split('\n');
+  var acPending = [];
+  var acInBlock = false;
+  for (var ai = 0; ai < acLines.length; ai++) {
+    var aline = acLines[ai].trim();
+    if (!aline) continue;
+    if (acInBlock) {
+      acPending.push(aline);
+      if (aline.indexOf('*/') !== -1) acInBlock = false;
+    } else if (aline.startsWith('//') || aline.startsWith('/*')) {
+      acPending.push(aline);
+      if (aline.startsWith('/*') && aline.indexOf('*/') === -1) acInBlock = true;
     } else {
-      macros.push({ name: args[0], type: m[1], layer: args[2] || '', color: args[3] || '', releaseColor: '', blinkColor: '', returnColor: '', wait: '', label: macroLabel, comment: macroSectionComments[args[0]] || '' });
+      if (acPending.length > 0) {
+        var acName = aline.match(/(?:KP_BLINK|MO_BLINK|MO_RGB|TO_RGB_PRESS|TO_RGB|CMB|RGB_HT)\(\s*([^,\s]+)/);
+        if (acName) allSectionComments[acName[1]] = acPending.join('\n');
+      }
+      acPending = [];
     }
   }
 
-  var behRe = /RGB_HT\(([^)]+)\)/g;
+  var macroRe = /(TO_RGB_PRESS|TO_RGB|MO_BLINK|MO_RGB)\(((?:[^)"]*"[^"]*")*[^")"]*)/g;
+  while ((m = macroRe.exec(codeNoHelpers))) {
+    // Advance past the matched content to find the real closing paren
+    var mStart = m.index + m[0].length;
+    var depth = 1;
+    for (var mp = mStart; mp < codeNoHelpers.length && depth > 0; mp++) {
+      if (codeNoHelpers[mp] === '(' ) depth++;
+      else if (codeNoHelpers[mp] === ')') depth--;
+    }
+    var fullArgs = m[2];
+    if (mp > mStart) fullArgs = m[2] + codeNoHelpers.substring(mStart, mp - 1);
+    macroRe.lastIndex = mp;
+    var args = splitArgs(fullArgs);
+    var macroLabel = (args[1] || '').replace(/^"|"$/g, '').trim();
+    if (m[1] === 'MO_BLINK') {
+      blinkMacros.push({ name: args[0], key: '', layer: args[2] || '', color: args[3] || '', returnColor: args[4] || '', wait: args[5] || '80', label: macroLabel, _helper: 'MO_BLINK', comment: macroSectionComments[args[0]] || allSectionComments[args[0]] || '' });
+    } else if (m[1] === 'MO_RGB') {
+      macros.push({ name: args[0], type: m[1], layer: args[2] || '', color: args[3] || '', releaseColor: args[4] || '', label: macroLabel, comment: macroSectionComments[args[0]] || allSectionComments[args[0]] || '' });
+    } else {
+      macros.push({ name: args[0], type: m[1], layer: args[2] || '', color: args[3] || '', releaseColor: '', label: macroLabel, comment: macroSectionComments[args[0]] || allSectionComments[args[0]] || '' });
+    }
+  }
+
+  var behRe = /RGB_HT\(((?:[^)"]*"[^"]*")*[^")"]*)/g;
   while ((m = behRe.exec(codeNoHelpers))) {
-    var bargs = m[1].split(',').map(function(x) { return x.trim(); });
+    var bStart = m.index + m[0].length;
+    var bDepth = 1;
+    for (var bp = bStart; bp < codeNoHelpers.length && bDepth > 0; bp++) {
+      if (codeNoHelpers[bp] === '(') bDepth++;
+      else if (codeNoHelpers[bp] === ')') bDepth--;
+    }
+    var bFullArgs = m[1];
+    if (bp > bStart) bFullArgs = m[1] + codeNoHelpers.substring(bStart, bp - 1);
+    behRe.lastIndex = bp;
+    var bargs = splitArgs(bFullArgs);
     behaviors.push({ name: bargs[0], label: (bargs[1] || '').replace(/"/g, ''), macro: bargs[2] || '' });
   }
 
@@ -2093,11 +2149,32 @@ function parseUserCode() {
       pos = cargs[2] || '';
       layersStr = cargs.slice(3).join(' ');
     }
-    combos.push({ name: cargs[0], bind: cargs[1], pos: pos, layers: layersStr });
+    combos.push({ name: cargs[0], bind: cargs[1], pos: pos, layers: layersStr, comment: allSectionComments[cargs[0]] || '' });
+  }
+
+  // Parse KP_BLINK helper invocations into blinkMacros[]
+  var kpBlinkRe = /KP_BLINK\(((?:[^)"]*"[^"]*")*[^")]*)/g;
+  var seenBlinkNames = {};
+  while ((m = kpBlinkRe.exec(codeNoHelpers))) {
+    var kbStart = m.index + m[0].length;
+    var kbDepth = 1;
+    for (var kp = kbStart; kp < codeNoHelpers.length && kbDepth > 0; kp++) {
+      if (codeNoHelpers[kp] === '(') kbDepth++;
+      else if (codeNoHelpers[kp] === ')') kbDepth--;
+    }
+    var kbFullArgs = m[1];
+    if (kp > kbStart) kbFullArgs = m[1] + codeNoHelpers.substring(kbStart, kp - 1);
+    kpBlinkRe.lastIndex = kp;
+    var kbargs = splitArgs(kbFullArgs);
+    var kblabel = (kbargs[1] || '').replace(/^"|"$/g, '').trim();
+    var kbName = kbargs[0];
+    if (!seenBlinkNames[kbName]) {
+      seenBlinkNames[kbName] = true;
+      blinkMacros.push({ name: kbName, key: kbargs[2] || '', color: kbargs[3] || '', returnColor: kbargs[4] || '', wait: kbargs[5] || '80', label: kblabel, _helper: 'KP_BLINK', comment: allSectionComments[kbName] || '' });
+    }
   }
 
   var blinkBlockRe = /ZMK_MACRO\(\s*([A-Za-z0-9_]+)\s*,([\s\S]*?)\n\s*\)/g;
-  var seenBlinkNames = {};
   var bb;
   while ((bb = blinkBlockRe.exec(codeNoHelpers))) {
     var bname = bb[1].trim();
@@ -2116,7 +2193,7 @@ function parseUserCode() {
     }
     var bsMatch = body.match(/BLINK_SEQ\(\s*([A-Za-z0-9_]+)\s*,\s*([A-Za-z0-9_]+)\s*,\s*(\d+)\s*\)/);
     if (bsMatch) { bcolor = bsMatch[1]; breturnColor = bsMatch[2]; bwait = parseInt(bsMatch[3]) || 80; }
-    blinkMacros.push({ name: bname, key: bkey, color: bcolor, returnColor: breturnColor, wait: bwait, label: blabel });
+    blinkMacros.push({ name: bname, key: bkey, color: bcolor, returnColor: breturnColor, wait: bwait, label: blabel, comment: allSectionComments[bname] || '' });
   }
 
   // Parse native ZMK behaviors from dtsi (hold-tap, tap-dance, mod-morph, sticky-key, sensor-rotate, macros)
@@ -2276,13 +2353,8 @@ function renderMacroList() {
   macros.forEach(function(m, i) {
     var div = document.createElement('div');
     div.className = 'item';
-    var typeLabel = m.type === 'TO_RGB' ? 'TO_RGB' : m.type === 'MO_RGB' ? 'MO_RGB' : m.type === 'MO_BLINK' ? 'MO_BLINK \u26A0' : 'TO_PRESS';
-    var infoStr;
-    if (m.type === 'MO_BLINK') {
-      infoStr = 'L:' + esc(m.layer) + ' B:' + esc(m.blinkColor || '') + ' R:' + esc(m.returnColor || '') + ' W:' + esc(m.wait || '80');
-    } else {
-      infoStr = 'L:' + esc(m.layer) + ' C:' + esc(m.color) + (m.releaseColor ? ' R:' + esc(m.releaseColor) : '');
-    }
+    var typeLabel = m.type === 'TO_RGB' ? 'TO_RGB' : m.type === 'MO_RGB' ? 'MO_RGB' : 'TO_PRESS';
+    var infoStr = 'L:' + esc(m.layer) + ' C:' + esc(m.color) + (m.releaseColor ? ' R:' + esc(m.releaseColor) : '');
     div.innerHTML =
       '<b>' + esc(m.name) + '</b>' +
       '<span style="color:#888;font-size:0.85em;margin:0 6px;">' + typeLabel + '</span>' +
@@ -2303,21 +2375,13 @@ function openMacroEditor(idx) {
   macroEditorIndex = idx;
   var m = macros[idx];
   var overlay = document.getElementById('macroEditorOverlay');
-  var isBlink = m.type === 'MO_BLINK';
   document.getElementById('meditName').value = m.name;
   document.getElementById('meditType').value = m.type;
   document.getElementById('meditLayer').innerHTML = layerOptionsHTML(m.layer);
   document.getElementById('meditColor').innerHTML = colorOptionsHTML(m.color);
-  document.getElementById('meditReleaseColor').innerHTML = colorOptionsHTML(m.releaseColor);
-  document.getElementById('meditBlinkColor').innerHTML = colorOptionsHTML(m.blinkColor || '');
-  document.getElementById('meditBlinkReturn').innerHTML = colorOptionsHTML(m.returnColor || '');
-  document.getElementById('meditBlinkWait').value = m.wait || '80';
+  document.getElementById('meditReleaseColor').innerHTML = colorOptionsHTML(m.releaseColor || '');
   var releaseGroup = document.getElementById('meditReleaseGroup');
   releaseGroup.style.display = m.type === 'MO_RGB' ? '' : 'none';
-  document.getElementById('meditColor').parentElement.style.display = isBlink ? 'none' : '';
-  document.getElementById('meditBlinkColorGroup').classList.toggle('hidden', !isBlink);
-  document.getElementById('meditBlinkReturnGroup').classList.toggle('hidden', !isBlink);
-  document.getElementById('meditBlinkWaitGroup').classList.toggle('hidden', !isBlink);
   overlay.style.display = 'flex';
 }
 
@@ -2445,11 +2509,19 @@ function renderBlinkMacroList() {
   blinkMacros.forEach(function(bm, i) {
     var colorHex = colorValueMap[bm.color] ? hsbToHex(colorValueMap[bm.color].h, colorValueMap[bm.color].s, colorValueMap[bm.color].b) : '#ccc';
     var retHex = colorValueMap[bm.returnColor] ? hsbToHex(colorValueMap[bm.returnColor].h, colorValueMap[bm.returnColor].s, colorValueMap[bm.returnColor].b) : '#ccc';
+    var isMoBlink = bm._helper === 'MO_BLINK';
     var div = document.createElement('div');
     div.className = 'item';
+    var secondField;
+    if (isMoBlink) {
+      secondField = '<span style="color:#e8a735;font-size:0.82em;margin:0 4px;" title="Experimental">&#9888; MO_BLINK</span>' +
+        '<div class="input-group"><label>Layer</label><select data-field="layer" data-i="' + i + '">' + layerOptionsHTML(bm.layer || '') + '</select></div>';
+    } else {
+      secondField = '<div class="input-group"><label>Key</label><input type="text" value="' + esc(bm.key) + '" data-field="key" data-i="' + i + '" style="width:90px"></div>';
+    }
     div.innerHTML =
       '<b>' + esc(bm.name) + '</b>' +
-      '<div class="input-group"><label>Key</label><input type="text" value="' + esc(bm.key) + '" data-field="key" data-i="' + i + '" style="width:90px"></div>' +
+      secondField +
       '<div class="input-group"><label>Color</label><select data-field="color" data-i="' + i + '">' + colorOptionsHTML(bm.color) + '</select><span class="color-preview" style="background:' + colorHex + '" title="' + esc(bm.color) + '"></span></div>' +
       '<div class="input-group"><label>Ret</label><select data-field="returnColor" data-i="' + i + '">' + colorOptionsHTML(bm.returnColor) + '</select><span class="color-preview" style="background:' + retHex + '" title="' + esc(bm.returnColor) + '"></span></div>' +
       '<div class="input-group"><label>Wait</label><input type="number" value="' + esc(bm.wait) + '" data-field="wait" data-i="' + i + '" style="width:48px"></div>' +
@@ -2481,10 +2553,9 @@ function updateHeaderDropdowns() {
   var colorOpts = colorOptionsHTML('');
   document.getElementById('macroColor').innerHTML = colorOpts;
   document.getElementById('macroReleaseColor').innerHTML = colorOpts;
-  document.getElementById('macroBlinkColor').innerHTML = colorOpts;
-  document.getElementById('macroBlinkReturn').innerHTML = colorOpts;
   document.getElementById('blinkColor').innerHTML = colorOpts;
   document.getElementById('blinkReturnColor').innerHTML = colorOpts;
+  document.getElementById('blinkLayer').innerHTML = layerOptionsHTML('');
   document.getElementById('behaviorMacro').innerHTML = macroRefOptionsHTML('');
   // Populate combo layer picker dropdown
   var clp = document.getElementById('comboLayerPicker');
@@ -2492,11 +2563,14 @@ function updateHeaderDropdowns() {
   renderComboLayerTags();
   var macroTypeEl = document.getElementById('macroType');
   var releaseGroup = document.getElementById('releaseColorGroup');
-  var isBlink = macroTypeEl.value === 'MO_BLINK';
   if (macroTypeEl.value === 'MO_RGB') releaseGroup.classList.remove('hidden');
   else releaseGroup.classList.add('hidden');
-  document.querySelectorAll('.blink-field').forEach(function(el) { el.classList.toggle('hidden', !isBlink); });
-  document.getElementById('macroColor').parentElement.style.display = isBlink ? 'none' : '';
+  // Toggle blink type fields
+  var blinkTypeEl = document.getElementById('blinkType');
+  var isMoBlink = blinkTypeEl && blinkTypeEl.value === 'MO_BLINK';
+  document.getElementById('blinkKeyGroup').style.display = isMoBlink ? 'none' : '';
+  document.getElementById('blinkLayerGroup').style.display = isMoBlink ? '' : 'none';
+  document.getElementById('blinkExperimentalNote').style.display = isMoBlink ? '' : 'none';
 }
 
 function renderComboLayerTags() {
@@ -2526,15 +2600,7 @@ function addMacro() {
   var type = document.getElementById('macroType').value;
   var rawName = document.getElementById('macroName').value.trim() || 'new_macro';
   var name = autoPrefix(rawName, type);
-  var obj = { name: name, type: type, layer: document.getElementById('macroLayer').value, color: '', releaseColor: '', blinkColor: '', returnColor: '', wait: '' };
-  if (type === 'MO_BLINK') {
-    obj.blinkColor = document.getElementById('macroBlinkColor').value;
-    obj.returnColor = document.getElementById('macroBlinkReturn').value;
-    obj.wait = document.getElementById('macroBlinkWait').value || '80';
-  } else {
-    obj.color = document.getElementById('macroColor').value;
-    obj.releaseColor = type === 'MO_RGB' ? document.getElementById('macroReleaseColor').value : '';
-  }
+  var obj = { name: name, type: type, layer: document.getElementById('macroLayer').value, color: document.getElementById('macroColor').value, releaseColor: type === 'MO_RGB' ? document.getElementById('macroReleaseColor').value : '', label: '' };
   macros.push(obj);
   rgbRenderAll();
 }
@@ -2559,7 +2625,16 @@ function addCombo() {
 }
 function addBlinkMacro() {
   pushRgbUndo();
-  blinkMacros.push({ name: document.getElementById('blinkName').value.trim() || 'new_blink', key: document.getElementById('blinkKey').value, color: document.getElementById('blinkColor').value, returnColor: document.getElementById('blinkReturnColor').value, wait: document.getElementById('blinkWait').value || '80', label: '' });
+  var btype = document.getElementById('blinkType').value;
+  var obj = { name: document.getElementById('blinkName').value.trim() || 'new_blink', color: document.getElementById('blinkColor').value, returnColor: document.getElementById('blinkReturnColor').value, wait: document.getElementById('blinkWait').value || '80', label: '', comment: '', _helper: btype };
+  if (btype === 'MO_BLINK') {
+    obj.key = '';
+    obj.layer = document.getElementById('blinkLayer').value;
+  } else {
+    obj.key = document.getElementById('blinkKey').value;
+    obj.layer = '';
+  }
+  blinkMacros.push(obj);
   rgbRenderAll();
 }
 
@@ -2653,6 +2728,16 @@ var HELPER_MO_BLINK =
   '            bindings = <&macro_press &mo layer BLINK_SEQ(blink_color, return_color, wait)>, \\\n' +
   '                       <&macro_pause_for_release>, \\\n' +
   '                       <&macro_release &mo layer>; \\\n' +
+  '        )\n';
+
+// EXPERIMENTAL: KP_BLINK helper — hardcoded &kp + blink (used with tap-dance)
+var HELPER_KP_BLINK =
+  '/* EXPERIMENTAL: Blink helper - Hardcode a &kp you want to "blink", used in conjunction with tap-dance*/\n' +
+  '#define KP_BLINK(node_name, node_label, key, blink_color, return_color, wait) \\\n' +
+  '         ZMK_MACRO(node_name, \\\n' +
+  '            label = node_label; \\\n' +
+  '            bindings = <&macro_tap &kp key>, \\\n' +
+  '            <BLINK_SEQ(blink_color, return_color, wait)>; \\\n' +
   '        )\n';
 
 // RGB output generation
@@ -2751,14 +2836,16 @@ function updateRgbOutput() {
     out += HELPER_TO_PRESS;
     out += HELPER_HOLD_TAP;
     out += HELPER_COMBO;
-    if (macros.some(function(m) { return m.type === 'MO_BLINK'; })) {
+    if (blinkMacros.some(function(bm) { return bm._helper === 'MO_BLINK'; })) {
       out += HELPER_MO_BLINK;
+    }
+    if (blinkMacros.some(function(bm) { return bm._helper !== 'MO_BLINK' && bm.key && bm.key.indexOf('&mo') !== 0; })) {
+      out += HELPER_KP_BLINK;
     }
   }
 
-  var nonBlinkMacros = macros.filter(function(m) { return m.type !== 'MO_BLINK'; });
   var hasNativeMacroBeh = dtsiNativeBehaviors.some(function(db) { return db.type === 'macro-one-param' || db.type === 'macro-two-param'; });
-  var hasMacroBlock = nonBlinkMacros.length > 0;
+  var hasMacroBlock = macros.length > 0;
   var hasMacros = macros.length || blinkMacros.length || hasNativeMacroBeh;
   var hasBehaviors = behaviors.length || dtsiNativeBehaviors.some(function(db) { return db.type !== 'macro-one-param' && db.type !== 'macro-two-param'; });
   var hasContent = hasMacros || hasBehaviors || combos.length;
@@ -2769,7 +2856,6 @@ function updateRgbOutput() {
     out += '    /* ---- STEP 2+3: MACROS ---- */\n';
     out += '    macros {\n';
     macros.forEach(function(m) {
-      if (m.type === 'MO_BLINK') return; // MO_BLINK goes outside macros{} block
       if (m.comment) out += '        ' + m.comment.replace(/\n/g, '\n        ') + '\n';
       var lbl = m.label || m.name;
       if (m.type === 'MO_RGB') {
@@ -2799,26 +2885,35 @@ function updateRgbOutput() {
       if (!bm.color || !bm.returnColor) return;
       if (seenBlink[bm.name]) return;
       seenBlink[bm.name] = true;
-      out += '    ZMK_MACRO(' + bm.name + ',\n';
-      if (bm.label) out += '        label = "' + bm.label + '";\n';
-      if (bm.key.indexOf('&mo') === 0) {
-        out += '        bindings = <&macro_press ' + bm.key + ' BLINK_SEQ(' + bm.color + ', ' + bm.returnColor + ', ' + bm.wait + ')>,\n';
-        out += '                   <&macro_pause_for_release>,\n';
-        out += '                   <&macro_release ' + bm.key + '>;\n';
+      if (bm.comment) out += '    ' + bm.comment.replace(/\n/g, '\n    ') + '\n';
+      if (bm._helper === 'MO_BLINK') {
+        // MO_BLINK output
+        var mlbl = bm.label || bm.name;
+        if (includeHelpers) {
+          out += '    MO_BLINK(' + bm.name + ', "' + mlbl + '", ' + (bm.layer || '') + ', ' + bm.color + ', ' + bm.returnColor + ', ' + (bm.wait || '80') + ')\n';
+        } else {
+          out += '    ZMK_MACRO(' + bm.name + ',\n';
+          if (bm.label) out += '        label = "' + bm.label + '";\n';
+          out += '        bindings = <&macro_press &mo ' + (bm.layer || '') + ' BLINK_SEQ(' + bm.color + ', ' + bm.returnColor + ', ' + (bm.wait || '80') + ')>,\n';
+          out += '                   <&macro_pause_for_release>,\n';
+          out += '                   <&macro_release &mo ' + (bm.layer || '') + '>;\n';
+          out += '    )\n';
+        }
+      } else if (includeHelpers && bm.key && bm.key.indexOf('&mo') !== 0) {
+        var blbl = bm.label || bm.name;
+        out += '        KP_BLINK(' + bm.name + ', "' + blbl + '", ' + bm.key + ', ' + bm.color + ', ' + bm.returnColor + ', ' + bm.wait + ')\n';
       } else {
-        out += '        bindings = <&macro_tap &kp ' + bm.key + ' BLINK_SEQ(' + bm.color + ', ' + bm.returnColor + ', ' + bm.wait + ')>;\n';
+        out += '    ZMK_MACRO(' + bm.name + ',\n';
+        if (bm.label) out += '        label = "' + bm.label + '";\n';
+        if (bm.key && bm.key.indexOf('&mo') === 0) {
+          out += '        bindings = <&macro_press ' + bm.key + ' BLINK_SEQ(' + bm.color + ', ' + bm.returnColor + ', ' + bm.wait + ')>,\n';
+          out += '                   <&macro_pause_for_release>,\n';
+          out += '                   <&macro_release ' + bm.key + '>;\n';
+        } else {
+          out += '        bindings = <&macro_tap &kp ' + bm.key + ' BLINK_SEQ(' + bm.color + ', ' + bm.returnColor + ', ' + bm.wait + ')>;\n';
+        }
+        out += '    )\n';
       }
-      out += '    )\n';
-    });
-  }
-
-  // MO_BLINK macros that are standalone (after macros{} section, like f_blink)
-  var standaloneMoBlink = macros.filter(function(m) { return m.type === 'MO_BLINK'; });
-  if (standaloneMoBlink.length) {
-    standaloneMoBlink.forEach(function(m) {
-      if (m.comment) out += '    ' + m.comment.replace(/\n/g, '\n    ') + '\n';
-      var lbl = m.label || m.name;
-      out += '    MO_BLINK(' + m.name + ', "' + lbl + '", ' + m.layer + ', ' + (m.blinkColor || '') + ', ' + (m.returnColor || '') + ', ' + (m.wait || '80') + ')\n';
     });
   }
 
@@ -3140,6 +3235,7 @@ function parseKeymap(text) {
     }
     break; // Stop once we hit non-header content
   }
+  keymapParsedHeaderLines = headerLines.length ? headerLines : null;
 
   // Capture raw pre-keymap blocks (combos, behaviors, macros) to preserve original formatting
   keymapParsedRawBlocks = null;
@@ -4982,6 +5078,10 @@ function updateKeymapOutput() {
   // Use parsed includes from user's file if available, otherwise generate defaults
   var includeRgbDtsi = document.getElementById('kmIncludeRgbDtsi') && document.getElementById('kmIncludeRgbDtsi').checked;
   if (keymapParsedIncludes && keymapParsedIncludes.length > 0) {
+    // Output preserved header lines (copyright comment, etc.) before includes
+    if (keymapParsedHeaderLines && keymapParsedHeaderLines.length) {
+      keymapParsedHeaderLines.forEach(function(line) { out += line + '\n'; });
+    }
     // Check if existing includes already have the rgb dtsi include
     var hasRgbInclude = keymapParsedIncludes.some(function(inc) { return inc.indexOf('-rgb.dtsi') >= 0; });
     keymapParsedIncludes.forEach(function(inc) { out += inc + '\n'; });
@@ -4991,7 +5091,7 @@ function updateKeymapOutput() {
       out += '#include "' + dtsiName + '"\n';
     }
   } else {
-    out += '/*\n * Generated by ZMK Keymap Editor v4\n */\n\n';
+    out += '/*\n * Generated by RGB Keymap Editor v11\n */\n\n';
     out += '#include <behaviors.dtsi>\n';
     out += '#include <dt-bindings/zmk/bt.h>\n';
     out += '#include <dt-bindings/zmk/keys.h>\n';
@@ -6015,26 +6115,23 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('macroType').onchange = function() {
     var g = document.getElementById('releaseColorGroup');
     var ni = document.getElementById('macroName');
-    var colorGrp = document.getElementById('macroColor').parentElement;
-    var blinkFields = document.querySelectorAll('.blink-field');
-    var isBlink = this.value === 'MO_BLINK';
     g.classList.add('hidden');
-    colorGrp.style.display = isBlink ? 'none' : '';
-    blinkFields.forEach(function(el) { el.classList.toggle('hidden', !isBlink); });
     if (this.value === 'MO_RGB') { g.classList.remove('hidden'); ni.placeholder = 'name_led'; }
-    else if (isBlink) { ni.placeholder = 'name_blink'; }
     else { ni.placeholder = this.value === 'TO_RGB_PRESS' ? 'top_name' : 'to_name'; }
+  };
+
+  // Blink type selector wiring
+  document.getElementById('blinkType').onchange = function() {
+    var isMo = this.value === 'MO_BLINK';
+    document.getElementById('blinkKeyGroup').style.display = isMo ? 'none' : '';
+    document.getElementById('blinkLayerGroup').style.display = isMo ? '' : 'none';
+    document.getElementById('blinkExperimentalNote').style.display = isMo ? '' : 'none';
   };
 
   // Macro editor sub-window wiring
   document.getElementById('meditType').onchange = function() {
     var rg = document.getElementById('meditReleaseGroup');
-    var isBlink = this.value === 'MO_BLINK';
     rg.style.display = this.value === 'MO_RGB' ? '' : 'none';
-    document.getElementById('meditColor').parentElement.style.display = isBlink ? 'none' : '';
-    document.getElementById('meditBlinkColorGroup').classList.toggle('hidden', !isBlink);
-    document.getElementById('meditBlinkReturnGroup').classList.toggle('hidden', !isBlink);
-    document.getElementById('meditBlinkWaitGroup').classList.toggle('hidden', !isBlink);
   };
   document.getElementById('meditSaveBtn').onclick = function() {
     if (macroEditorIndex < 0 || macroEditorIndex >= macros.length) return;
@@ -6044,18 +6141,9 @@ document.addEventListener('DOMContentLoaded', function() {
     macros[macroEditorIndex].name = autoPrefix(rawName, newType);
     macros[macroEditorIndex].type = newType;
     macros[macroEditorIndex].layer = document.getElementById('meditLayer').value;
-    macros[macroEditorIndex].color = newType === 'MO_BLINK' ? '' : document.getElementById('meditColor').value;
+    macros[macroEditorIndex].color = document.getElementById('meditColor').value;
     macros[macroEditorIndex].releaseColor = newType === 'MO_RGB'
       ? document.getElementById('meditReleaseColor').value : '';
-    if (newType === 'MO_BLINK') {
-      macros[macroEditorIndex].blinkColor = document.getElementById('meditBlinkColor').value;
-      macros[macroEditorIndex].returnColor = document.getElementById('meditBlinkReturn').value;
-      macros[macroEditorIndex].wait = document.getElementById('meditBlinkWait').value || '80';
-    } else {
-      macros[macroEditorIndex].blinkColor = '';
-      macros[macroEditorIndex].returnColor = '';
-      macros[macroEditorIndex].wait = '';
-    }
     closeMacroEditor();
     rgbRenderAll();
   };
