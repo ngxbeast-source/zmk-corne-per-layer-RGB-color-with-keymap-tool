@@ -34,7 +34,7 @@
 #define RGB_GAME2_SUBLR1 RGB_COLOR_HSB(67,55,20)   /* SUB-LAYOUT */
 
 /* ---- (OPTIONAL) BLINK HELPERS ---- */
-#define BLINK_ON     RGB_COLOR_HSB(39,100,75)    /* Blink On - Bright Yellow */
+#define BLINK_ON     RGB_COLOR_HSB(39,100,75)    /* Blink On - Bright Yellow (change to whatever you want, multiple colors can be made like shown below)/
 #define N_BLINK_ON   RGB_COLOR_HSB(0,100,60)     /* Num On - Bright Red */
 #define C_BLINK_ON   RGB_COLOR_HSB(200,100,60)   /* Caps On - Cyan */
 
@@ -103,7 +103,14 @@
                        <&macro_pause_for_release>, \
                        <&macro_release &mo layer>; \
         )
-/* ---- (optional) COMBO HELPER ---- */
+/* EXPERIMENTAL: Blink helper - Hardcode a &kp you want to "blink", used in conjunction with tap-dance*/
+#define KP_BLINK(node_name, node_label, key, blink_color, return_color, wait) \
+         ZMK_MACRO(node_name, \
+            label = node_label; \
+            bindings = <&macro_tap &kp key>; \ 
+            <BLINK_SEQ(blink_color, return_color, wait)>; \
+        )
+/* ---- COMBO HELPER ---- */
 #define CMB(name, bind, p1, p2, ...) \
     name { bindings = <bind>; key-positions = <p1 p2>; layers = <__VA_ARGS__>; timeout-ms = <50>; }
  /{
@@ -148,6 +155,9 @@
             BLINK_SEQ(BLINK_ON, RGB_XTRA, 80)
         >;
     };
+    KP_BLINK(c_blink, "CAPS LOCK + BLINK", CAPS, N_BLINK_ON, RGB_ABC, 80)
+    KP_BLINK(n_blink, "NUM LOCK + BLINK", KP_NUMLOCK, C_BLINK_ON, RGB_ABC, 80) 
+
     ZMK_MACRO(caps_blink,
         label = "CAPS TOGGLE + BLINK";
         bindings = <&macro_tap &kp CAPS BLINK_SEQ(C_BLINK_ON, RGB_ABC, 80)>;
@@ -220,6 +230,6 @@
         compatible = "zmk,behavior-tap-dance";
         #binding-cells = <0>;
         tapping-term-ms = <300>;
-        bindings = <&kp LSFT>, <&caps_blink>, <&num_blink>;
+        bindings = <&kp LSFT>, <&c_blink>, <&n_blink>;
     };
  };

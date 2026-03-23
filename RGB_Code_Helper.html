@@ -89,7 +89,7 @@
     button:active { transform: scale(0.97); }
     .btn-danger { background: var(--danger); } .btn-danger:hover { background: #a5281b; }
     .btn-sm { padding: 0.2em 0.55em; font-size: 0.8em; }
-    .btn-edit { background: var(--accent); color: #fff; margin-left: auto; }
+    .btn-edit { background: var(--accent); color: #fff; }
     .btn-edit:hover { background: var(--accent2); }
     .item-detail { color: var(--text); font-size: 0.9em; }
     .item-detail.muted { color: var(--muted); font-size: 0.82em; }
@@ -182,9 +182,6 @@
 
     /* Layer header bar */
     .layer-header { display: flex; align-items: center; gap: 0.6em; margin-bottom: 0.5em; padding: 0.3em 0; }
-    .layer-name-display { font-size: 1.1em; font-weight: 600; color: var(--text); cursor: text; padding: 0.15em 0.4em; border-radius: 4px; border: 1px solid transparent; min-width: 80px; }
-    .layer-name-display:hover { border-color: var(--border); background: var(--item-bg); }
-    .layer-name-input { font-size: 1.1em; font-weight: 600; color: var(--text); padding: 0.15em 0.4em; border-radius: 4px; border: 1px solid var(--accent); background: var(--card); outline: none; width: 200px; }
     .layer-ctx-btn { background: var(--item-bg); border: 1px solid var(--border); border-radius: 4px; padding: 0.2em 0.5em; font-size: 0.9em; cursor: pointer; color: var(--muted); line-height: 1; }
     .layer-ctx-btn:hover { background: var(--key-hover); border-color: var(--accent); color: var(--text); }
 
@@ -435,6 +432,8 @@
             <button id="parseBtn">Parse &amp; Reflect</button>
             <button id="rgbClearSyncBtn" title="Remove data synced from Keymap tab" style="background:#6a3030;color:#eee;border:1px solid #944;font-size:0.85em;padding:0.25em 0.7em;border-radius:4px;cursor:pointer;">Clear Keymap Data</button>
             <span id="userCodeStatus" class="status-msg" style="display:none;"></span>
+            <button class="btn-sm" id="rgbUndoBtn" title="Undo (Ctrl+Z)" disabled style="margin-left:auto;background:var(--item-bg);color:var(--text);border:1px solid var(--border);">&#x21B6; Undo</button>
+            <button class="btn-sm" id="rgbRedoBtn" title="Redo (Ctrl+Y)" disabled style="background:var(--item-bg);color:var(--text);border:1px solid var(--border);">&#x21B7; Redo</button>
           </div>
         </div>
       </div>
@@ -448,10 +447,10 @@
         <div class="section-body" id="layerBody">
           <div class="input-row">
             <div class="input-group"><label>Name</label><input type="text" id="layerName" placeholder="L_ABC" style="width:120px;"></div>
-            <div class="input-group"><label>Idx</label><input type="number" id="layerIndex" min="0" placeholder="—" style="width:42px;"></div>
-            <div class="input-group"><label>H</label><input type="range" id="hue" min="0" max="360" value="0"><input type="number" id="hueNum" min="0" max="360" value="0" style="width:44px;"></div>
-            <div class="input-group"><label>S</label><input type="range" id="sat" min="0" max="100" value="100"><input type="number" id="satNum" min="0" max="100" value="100" style="width:44px;"></div>
-            <div class="input-group"><label>B</label><input type="range" id="bri" min="0" max="100" value="50"><input type="number" id="briNum" min="0" max="100" value="50" style="width:44px;"></div>
+            <div class="input-group"><label>Idx</label><input type="number" id="layerIndex" min="0" placeholder="—" style="width:52px;"></div>
+            <div class="input-group"><label>H</label><input type="range" id="hue" min="0" max="360" value="0"><input type="number" id="hueNum" min="0" max="360" value="0" style="width:52px;"></div>
+            <div class="input-group"><label>S</label><input type="range" id="sat" min="0" max="100" value="100"><input type="number" id="satNum" min="0" max="100" value="100" style="width:52px;"></div>
+            <div class="input-group"><label>B</label><input type="range" id="bri" min="0" max="100" value="50"><input type="number" id="briNum" min="0" max="100" value="50" style="width:52px;"></div>
             <div class="color-swatch" id="colorPreview">
               <input type="color" id="colorWheel" value="#ff0000" title="Pick a color">
             </div>
@@ -664,7 +663,11 @@
 
       <!-- LAYER HEADER -->
       <div class="layer-header" id="layerHeader">
-        <span class="layer-name-display" id="layerNameDisplay">No layer</span>
+        <div id="layerInlineEdit" style="display:flex;align-items:center;gap:0.5em;flex-wrap:wrap;">
+          <div class="input-group" style="gap:3px;"><label style="font-size:0.75em;color:var(--muted);">Display</label><input type="text" id="lcInlineDisplay" style="width:120px;font-size:1.05em;font-weight:600;color:var(--accent2);background:var(--item-bg);border:1px solid var(--border);border-radius:4px;padding:0.15em 0.4em;" placeholder="Display name"></div>
+          <div class="input-group" style="gap:3px;"><label style="font-size:0.75em;color:var(--muted);">Name</label><input type="text" id="lcInlineName" style="width:120px;font-size:0.85em;color:var(--text);background:var(--item-bg);border:1px solid var(--border);border-radius:4px;padding:0.15em 0.4em;" placeholder="layer_name"></div>
+          <span style="font-size:0.8em;color:var(--muted);" id="lcInlineIdx"></span>
+        </div>
         <button class="layer-ctx-btn" id="layerCtxBtn" title="Layer actions">&#8943;</button>
         <span style="margin-left:auto;display:flex;gap:4px;">
           <button class="btn-sm" id="kmUndoBtn" title="Undo (Ctrl+Z)" disabled style="background:var(--item-bg);color:var(--text);border:1px solid var(--border);">&#x21B6; Undo</button>
@@ -1148,21 +1151,6 @@
   <!-- Context menu (hidden, positioned dynamically) -->
   <div class="ctx-menu" id="layerCtxMenu" style="display:none;"></div>
 
-  <!-- Layer Customize Dialog -->
-  <div id="layerCustomizeOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;">
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.5em;min-width:340px;max-width:420px;color:var(--text);">
-      <h3 style="margin:0 0 1em 0;color:var(--text);">Customize Layer <code id="lcTitle" style="background:var(--item-bg);padding:2px 8px;border-radius:4px;font-size:0.9em;"></code></h3>
-      <div style="display:flex;flex-direction:column;gap:0.7em;">
-        <div class="input-group"><label style="min-width:100px;">Name</label><input type="text" id="lcName" style="width:200px;"></div>
-        <div class="input-group"><label style="min-width:100px;">Display Name</label><input type="text" id="lcLabel" placeholder="OLED display name" style="width:200px;"></div>
-      </div>
-      <div style="margin-top:1.2em;display:flex;gap:0.5em;justify-content:flex-end;">
-        <button id="lcOkBtn" style="background:var(--success);color:#fff;border:none;border-radius:4px;padding:0.35em 1.2em;cursor:pointer;font-weight:600;">OK</button>
-        <button id="lcCancelBtn" style="background:none;border:1px solid var(--border);color:var(--text);border-radius:4px;padding:0.35em 1.2em;cursor:pointer;">Cancel</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Hidden: Layout JSON import dialog -->
   <div id="layoutJsonOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;">
     <div style="background:var(--card);border-radius:10px;padding:1.2em;width:90%;max-width:600px;max-height:80vh;overflow:auto;border:1px solid var(--border);">
@@ -1335,6 +1323,75 @@ function updateUndoRedoBtns() {
   var rb = document.getElementById('kmRedoBtn');
   if (ub) ub.disabled = undoStack.length === 0;
   if (rb) rb.disabled = redoStack.length === 0;
+}
+
+// ================================================================
+// SECTION: RGB UNDO/REDO SYSTEM
+// Parallel undo/redo for the RGB Generator tab. Works the same as
+// keymap undo/redo but snapshots RGB-specific arrays.
+// ================================================================
+var rgbUndoStack = [];
+var rgbRedoStack = [];
+var RGB_UNDO_LIMIT = 50;
+
+function rgbSnapshotState() {
+  return {
+    layers: layers.map(function(l) {
+      var o = {}; for (var k in l) o[k] = l[k]; return o;
+    }),
+    macros: macros.map(function(m) {
+      var o = {}; for (var k in m) o[k] = m[k]; return o;
+    }),
+    behaviors: behaviors.map(function(b) {
+      var o = {}; for (var k in b) o[k] = b[k]; return o;
+    }),
+    combos: combos.map(function(c) {
+      var o = {}; for (var k in c) o[k] = c[k]; return o;
+    }),
+    blinkMacros: blinkMacros.map(function(bm) {
+      var o = {}; for (var k in bm) o[k] = bm[k]; return o;
+    })
+  };
+}
+
+function rgbRestoreState(snap) {
+  layers = snap.layers.map(function(l) { var o = {}; for (var k in l) o[k] = l[k]; return o; });
+  macros = snap.macros.map(function(m) { var o = {}; for (var k in m) o[k] = m[k]; return o; });
+  behaviors = snap.behaviors.map(function(b) { var o = {}; for (var k in b) o[k] = b[k]; return o; });
+  combos = snap.combos.map(function(c) { var o = {}; for (var k in c) o[k] = c[k]; return o; });
+  blinkMacros = snap.blinkMacros.map(function(bm) { var o = {}; for (var k in bm) o[k] = bm[k]; return o; });
+  colorValueMap = {}; colorLabelMap = {};
+  layers.forEach(function(_, i) { updateColorMapFromLayer(i); });
+}
+
+function pushRgbUndo() {
+  rgbUndoStack.push(rgbSnapshotState());
+  if (rgbUndoStack.length > RGB_UNDO_LIMIT) rgbUndoStack.shift();
+  rgbRedoStack = [];
+  updateRgbUndoRedoBtns();
+}
+
+function performRgbUndo() {
+  if (rgbUndoStack.length === 0) return;
+  rgbRedoStack.push(rgbSnapshotState());
+  rgbRestoreState(rgbUndoStack.pop());
+  rgbRenderAll();
+  updateRgbUndoRedoBtns();
+}
+
+function performRgbRedo() {
+  if (rgbRedoStack.length === 0) return;
+  rgbUndoStack.push(rgbSnapshotState());
+  rgbRestoreState(rgbRedoStack.pop());
+  rgbRenderAll();
+  updateRgbUndoRedoBtns();
+}
+
+function updateRgbUndoRedoBtns() {
+  var ub = document.getElementById('rgbUndoBtn');
+  var rb = document.getElementById('rgbRedoBtn');
+  if (ub) ub.disabled = rgbUndoStack.length === 0;
+  if (rb) rb.disabled = rgbRedoStack.length === 0;
 }
 
 // ================================================================
@@ -1756,6 +1813,7 @@ function applyHsbPickerValue(h, s, b) {
 }
 
 function openHsbPicker(layerIdx, anchorEl) {
+  pushRgbUndo();
   ensureHsbPicker();
   hsbPickerLayerIdx = layerIdx;
   var popup = document.getElementById('hsbPickerPopup');
@@ -1913,6 +1971,7 @@ function initResize(handleId, wrapId) {
 // More on this code can be found in 'RefDoc' line 313
 // ================================================================
 function parseUserCode() {
+  pushRgbUndo();
   var code = document.getElementById('userCodePaste').value;
   // Preserve cross-tab data (items synced from Keymap tab)
   var savedBehaviors = behaviors.filter(function(b) { return b._fromKeymap; });
@@ -2161,24 +2220,29 @@ function renderLayerList() {
       : '';
     div.innerHTML =
       toggleHTML +
-      '<b>' + esc(l.name) + '</b>' +
-      '<div class="input-group"><label>Idx</label><input type="number" value="' + esc(l.index) + '" min="0" style="width:38px" data-field="index" data-i="' + i + '"></div>' +
-      '<div class="input-group"><label>H</label><input type="number" min="0" max="360" value="' + esc(l.h) + '" style="width:44px" data-field="h" data-i="' + i + '"></div>' +
-      '<div class="input-group"><label>S</label><input type="number" min="0" max="100" value="' + esc(l.s) + '" style="width:44px" data-field="s" data-i="' + i + '"></div>' +
-      '<div class="input-group"><label>B</label><input type="number" min="0" max="100" value="' + esc(l.b) + '" style="width:44px" data-field="b" data-i="' + i + '"></div>' +
+      '<div class="input-group"><label>Name</label><input type="text" value="' + esc(l.name) + '" data-field="name" data-i="' + i + '" style="width:110px;font-weight:600;color:var(--accent2);"></div>' +
+      '<div class="input-group"><label>Idx</label><input type="number" value="' + esc(l.index) + '" min="0" style="width:52px" data-field="index" data-i="' + i + '"></div>' +
+      '<div class="input-group"><label>H</label><input type="number" min="0" max="360" value="' + esc(l.h) + '" style="width:52px" data-field="h" data-i="' + i + '"></div>' +
+      '<div class="input-group"><label>S</label><input type="number" min="0" max="100" value="' + esc(l.s) + '" style="width:52px" data-field="s" data-i="' + i + '"></div>' +
+      '<div class="input-group"><label>B</label><input type="number" min="0" max="100" value="' + esc(l.b) + '" style="width:52px" data-field="b" data-i="' + i + '"></div>' +
       '<div class="color-swatch" style="background:' + hex + ';" data-color-pick="' + i + '" title="Pick color (HSB)"></div>' +
       '<div class="input-group"><label>Lbl</label><input type="text" value="' + esc(l.label || '') + '" data-field="label" data-i="' + i + '" style="width:110px"></div>' +
       '<button class="btn-danger btn-sm" data-remove="layer" data-i="' + i + '">&#10005;</button>';
     list.appendChild(div);
   });
   list.onclick = function(e) {
-    if (e.target.dataset.remove === 'layer') { layers.splice(parseInt(e.target.dataset.i), 1); rgbRenderAll(); return; }
+    if (e.target.dataset.remove === 'layer') { pushRgbUndo(); layers.splice(parseInt(e.target.dataset.i), 1); rgbRenderAll(); return; }
     // Open HSB picker on swatch click
     var swatch = e.target.closest('[data-color-pick]');
     if (swatch && swatch.dataset.colorPick !== undefined) {
       openHsbPicker(parseInt(swatch.dataset.colorPick), swatch);
     }
   };
+  var _rgbLayerUndoPushed = false;
+  list.addEventListener('focusin', function(e) {
+    if (e.target.dataset.field && !_rgbLayerUndoPushed) { _rgbLayerUndoPushed = true; pushRgbUndo(); }
+  });
+  list.addEventListener('focusout', function() { _rgbLayerUndoPushed = false; });
   list.oninput = list.onchange = function(e) {
     var idx = parseInt(e.target.dataset.i), field = e.target.dataset.field;
     if (field === undefined || isNaN(idx)) return;
@@ -2190,6 +2254,11 @@ function renderLayerList() {
       return;
     }
     layers[idx][field] = e.target.value;
+    if (field === 'name') {
+      colorValueMap = {}; colorLabelMap = {};
+      layers.forEach(function(_, li) { updateColorMapFromLayer(li); });
+      updateHeaderDropdowns();
+    }
     if (field === 'h' || field === 's' || field === 'b') {
       var newHex = hsbToHex(layers[idx].h, layers[idx].s, layers[idx].b);
       var swatch = e.target.closest('.item').querySelector('.color-swatch');
@@ -2223,7 +2292,7 @@ function renderMacroList() {
     list.appendChild(div);
   });
   list.onclick = function(e) {
-    if (e.target.dataset.remove === 'macro') { macros.splice(parseInt(e.target.dataset.i), 1); rgbRenderAll(); }
+    if (e.target.dataset.remove === 'macro') { pushRgbUndo(); macros.splice(parseInt(e.target.dataset.i), 1); rgbRenderAll(); }
     if (e.target.dataset.editMacro !== undefined) { openMacroEditor(parseInt(e.target.dataset.editMacro)); }
   };
 }
@@ -2340,7 +2409,7 @@ function renderBehaviorList() {
     list.appendChild(div);
   });
   list.onclick = function(e) {
-    if (e.target.dataset.remove === 'behavior') { behaviors.splice(parseInt(e.target.dataset.i), 1); rgbRenderAll(); }
+    if (e.target.dataset.remove === 'behavior') { pushRgbUndo(); behaviors.splice(parseInt(e.target.dataset.i), 1); rgbRenderAll(); }
     if (e.target.dataset.edit === 'behavior') { openBehaviorEditor(parseInt(e.target.dataset.i)); }
   };
 }
@@ -2365,7 +2434,7 @@ function renderComboList() {
     list.appendChild(div);
   });
   list.onclick = function(e) {
-    if (e.target.dataset.remove === 'combo') { combos.splice(parseInt(e.target.dataset.i), 1); rgbRenderAll(); }
+    if (e.target.dataset.remove === 'combo') { pushRgbUndo(); combos.splice(parseInt(e.target.dataset.i), 1); rgbRenderAll(); }
     if (e.target.dataset.edit === 'combo') { openComboEditor(parseInt(e.target.dataset.i)); }
   };
 }
@@ -2387,7 +2456,12 @@ function renderBlinkMacroList() {
       '<button class="btn-danger btn-sm" data-remove="blink" data-i="' + i + '">&#10005;</button>';
     list.appendChild(div);
   });
-  list.onclick = function(e) { if (e.target.dataset.remove === 'blink') { blinkMacros.splice(parseInt(e.target.dataset.i), 1); rgbRenderAll(); } };
+  list.onclick = function(e) { if (e.target.dataset.remove === 'blink') { pushRgbUndo(); blinkMacros.splice(parseInt(e.target.dataset.i), 1); rgbRenderAll(); } };
+  var _rgbBlinkUndoPushed = false;
+  list.addEventListener('focusin', function(e) {
+    if (e.target.dataset.field && !_rgbBlinkUndoPushed) { _rgbBlinkUndoPushed = true; pushRgbUndo(); }
+  });
+  list.addEventListener('focusout', function() { _rgbBlinkUndoPushed = false; });
   list.oninput = list.onchange = function(e) {
     var idx = parseInt(e.target.dataset.i), field = e.target.dataset.field;
     if (field !== undefined && !isNaN(idx)) {
@@ -2436,6 +2510,7 @@ function renderComboLayerTags() {
 }
 
 function addLayer() {
+  pushRgbUndo();
   var name = document.getElementById('layerName').value.trim() || 'NEW_COLOR';
   var idxVal = document.getElementById('layerIndex').value;
   layers.push({ name: name, index: idxVal, h: document.getElementById('hue').value, s: document.getElementById('sat').value, b: document.getElementById('bri').value, label: document.getElementById('layerLabel').value });
@@ -2447,6 +2522,7 @@ function autoPrefix(name, type) {
   return name;
 }
 function addMacro() {
+  pushRgbUndo();
   var type = document.getElementById('macroType').value;
   var rawName = document.getElementById('macroName').value.trim() || 'new_macro';
   var name = autoPrefix(rawName, type);
@@ -2463,10 +2539,12 @@ function addMacro() {
   rgbRenderAll();
 }
 function addBehavior() {
+  pushRgbUndo();
   behaviors.push({ name: document.getElementById('behaviorName').value.trim() || 'new_behavior', label: document.getElementById('behaviorLabel').value, macro: document.getElementById('behaviorMacro').value });
   rgbRenderAll();
 }
 function addCombo() {
+  pushRgbUndo();
   var pos = document.getElementById('comboPos').value.trim();
   if (!pos && rgbComboSelectedPositions.length) {
     pos = rgbComboSelectedPositions.slice().sort(function(a,b) { return a-b; }).join(' ');
@@ -2480,6 +2558,7 @@ function addCombo() {
   rgbRenderAll();
 }
 function addBlinkMacro() {
+  pushRgbUndo();
   blinkMacros.push({ name: document.getElementById('blinkName').value.trim() || 'new_blink', key: document.getElementById('blinkKey').value, color: document.getElementById('blinkColor').value, returnColor: document.getElementById('blinkReturnColor').value, wait: document.getElementById('blinkWait').value || '80', label: '' });
   rgbRenderAll();
 }
@@ -3414,14 +3493,24 @@ function renderLayerTabs() {
 }
 
 function updateLayerHeader() {
-  var nameEl = document.getElementById('layerNameDisplay');
+  var displayEl = document.getElementById('lcInlineDisplay');
+  var nameEl = document.getElementById('lcInlineName');
+  var idxEl = document.getElementById('lcInlineIdx');
+  // Skip update if user is actively typing in the inline fields
+  if (document.activeElement === displayEl || document.activeElement === nameEl) return;
   if (keymapLayers.length > 0 && keymapLayers[activeLayerIndex] && keymapLayers[activeLayerIndex].status !== 'reserved') {
     var l = keymapLayers[activeLayerIndex];
-    nameEl.textContent = (l.displayName || l.name) + ' (layer ' + activeLayerIndex + ')';
-    nameEl.dataset.layerIndex = activeLayerIndex;
+    displayEl.value = l.displayName || '';
+    nameEl.value = l.name;
+    idxEl.textContent = '(layer ' + activeLayerIndex + ')';
+    displayEl.disabled = false;
+    nameEl.disabled = false;
   } else {
-    nameEl.textContent = 'No layer';
-    delete nameEl.dataset.layerIndex;
+    displayEl.value = '';
+    nameEl.value = '';
+    idxEl.textContent = 'No layer';
+    displayEl.disabled = true;
+    nameEl.disabled = true;
   }
 }
 
@@ -3436,8 +3525,6 @@ function updateLayerHeader() {
 function showLayerContextMenu(anchorEl) {
   var menu = document.getElementById('layerCtxMenu');
   var items = [
-    { label: 'Customize Layer...', action: 'customize' },
-    { sep: true },
     { label: 'Duplicate Layer', action: 'duplicate' },
     { label: 'Delete Layer', action: 'delete', danger: true },
     { sep: true },
@@ -3478,10 +3565,6 @@ function closeCtxMenu() {
 function handleCtxAction(action) {
   closeCtxMenu();
   if (!keymapLayers[activeLayerIndex] || keymapLayers[activeLayerIndex].status === 'reserved') return;
-  if (action === 'customize') {
-    openLayerCustomizeDialog();
-    return;
-  }
   pushUndo();
   var layer = keymapLayers[activeLayerIndex];
 
@@ -3555,17 +3638,9 @@ function handleCtxAction(action) {
 }
 
 function openLayerCustomizeDialog() {
-  var layer = keymapLayers[activeLayerIndex];
-  if (!layer) return;
-  var overlay = document.getElementById('layerCustomizeOverlay');
-  document.getElementById('lcTitle').textContent = layer.name;
-  document.getElementById('lcName').value = layer.name;
-  document.getElementById('lcLabel').value = layer.displayName || '';
-  overlay.style.display = 'flex';
-}
-
-function closeLayerCustomizeDialog() {
-  document.getElementById('layerCustomizeOverlay').style.display = 'none';
+  // Inline editing — just focus the display name field
+  var el = document.getElementById('lcInlineDisplay');
+  if (el) { el.focus(); el.select(); }
 }
 
 // ================================================================
@@ -5874,6 +5949,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // --- RGB Generator wiring (Tab 1) ---
   document.getElementById('parseBtn').onclick = parseUserCode;
   document.getElementById('rgbClearSyncBtn').onclick = function() {
+    pushRgbUndo();
     // Remove items synced from Keymap tab
     layers = layers.filter(function(l) { return !l._fromKeymap; });
     behaviors = behaviors.filter(function(b) { return !b._fromKeymap; });
@@ -5884,6 +5960,8 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('addLayerBtn').onclick = addLayer;
   document.getElementById('addMacroBtn').onclick = addMacro;
   document.getElementById('addBehaviorBtn').onclick = addBehavior;
+  document.getElementById('rgbUndoBtn').onclick = performRgbUndo;
+  document.getElementById('rgbRedoBtn').onclick = performRgbRedo;
   document.getElementById('addComboBtn').onclick = addCombo;
   // Combo layer picker: append selected layer as tag
   document.getElementById('comboLayerPicker').onchange = function() {
@@ -5960,6 +6038,7 @@ document.addEventListener('DOMContentLoaded', function() {
   };
   document.getElementById('meditSaveBtn').onclick = function() {
     if (macroEditorIndex < 0 || macroEditorIndex >= macros.length) return;
+    pushRgbUndo();
     var newType = document.getElementById('meditType').value;
     var rawName = document.getElementById('meditName').value.trim() || macros[macroEditorIndex].name;
     macros[macroEditorIndex].name = autoPrefix(rawName, newType);
@@ -5988,6 +6067,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // ---- Combo editor popup wiring ----
   document.getElementById('ceditSaveBtn').onclick = function() {
     if (comboEditorIndex < 0 || comboEditorIndex >= combos.length) return;
+    pushRgbUndo();
     combos[comboEditorIndex].name = document.getElementById('ceditName').value.trim() || combos[comboEditorIndex].name;
     combos[comboEditorIndex].bind = document.getElementById('ceditBind').value.trim();
     combos[comboEditorIndex].layers = ceditGetLayers();
@@ -6031,6 +6111,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // ---- Behavior editor popup wiring ----
   document.getElementById('beditSaveBtn').onclick = function() {
     if (behaviorEditorIndex < 0 || behaviorEditorIndex >= behaviors.length) return;
+    pushRgbUndo();
     behaviors[behaviorEditorIndex].name = document.getElementById('beditName').value.trim() || behaviors[behaviorEditorIndex].name;
     behaviors[behaviorEditorIndex].label = document.getElementById('beditLabel').value.trim();
     behaviors[behaviorEditorIndex].macro = document.getElementById('beditMacro').value;
@@ -6273,41 +6354,6 @@ document.addEventListener('DOMContentLoaded', function() {
     updateKeymapOutput();
   });
 
-  // --- Layer name inline rename on click ---
-  document.getElementById('layerNameDisplay').addEventListener('dblclick', function(e) {
-    var nameEl = e.target;
-    var layerIdx = parseInt(nameEl.dataset.layerIndex);
-    if (isNaN(layerIdx) || !keymapLayers[layerIdx]) return;
-    var layer = keymapLayers[layerIdx];
-    var currentName = layer.displayName || layer.name;
-    var input = document.createElement('input');
-    input.type = 'text';
-    input.className = 'layer-name-input';
-    input.value = currentName;
-    nameEl.textContent = '';
-    nameEl.appendChild(input);
-    input.focus();
-    input.select();
-    var committed = false;
-    function commitRename() {
-      if (committed) return;
-      committed = true;
-      var newName = input.value.trim();
-      if (newName && newName !== currentName) {
-        pushUndo();
-        layer.displayName = newName;
-        layer.name = newName.toLowerCase().replace(/[^a-z0-9_]/g, '_');
-        updateKeymapOutput();
-      }
-      renderLayerTabs();
-    }
-    input.addEventListener('blur', commitRename);
-    input.addEventListener('keydown', function(ev) {
-      if (ev.key === 'Enter') { ev.preventDefault(); input.blur(); }
-      if (ev.key === 'Escape') { ev.preventDefault(); input.value = currentName; input.blur(); }
-    });
-  });
-
   // --- Layer context menu ---
   document.getElementById('layerCtxBtn').addEventListener('click', function(e) {
     e.stopPropagation();
@@ -6411,14 +6457,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // --- Global keyboard shortcuts ---
   document.addEventListener('keydown', function(e) {
-    // Only active when keymap tab is visible
-    if (document.getElementById('tabKeymap').style.display === 'none') return;
-    // Don't intercept when typing in inputs
     var tag = (e.target.tagName || '').toLowerCase();
     if (tag === 'input' || tag === 'textarea' || tag === 'select' || e.target.isContentEditable) return;
-    if (e.ctrlKey && !e.shiftKey && e.key === 'z') { e.preventDefault(); performUndo(); }
-    else if ((e.ctrlKey && e.key === 'y') || (e.ctrlKey && e.shiftKey && e.key === 'z') || (e.ctrlKey && e.shiftKey && e.key === 'Z')) { e.preventDefault(); performRedo(); }
-    else if (e.key === 'Escape') { cancelBindingEditor(); closeValuePicker(); }
+    var rgbVisible = document.getElementById('tabRgb').classList.contains('active');
+    var kmVisible = document.getElementById('tabKeymap').classList.contains('active');
+    if (e.ctrlKey && !e.shiftKey && e.key === 'z') {
+      e.preventDefault();
+      if (rgbVisible) performRgbUndo(); else if (kmVisible) performUndo();
+    } else if ((e.ctrlKey && e.key === 'y') || (e.ctrlKey && e.shiftKey && e.key === 'z') || (e.ctrlKey && e.shiftKey && e.key === 'Z')) {
+      e.preventDefault();
+      if (rgbVisible) performRgbRedo(); else if (kmVisible) performRedo();
+    } else if (e.key === 'Escape' && kmVisible) { cancelBindingEditor(); closeValuePicker(); }
   });
 
   // --- Floating ValuePicker events ---
@@ -6562,23 +6611,23 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   };
 
-  // --- Layer Customize dialog ---
-  document.getElementById('lcOkBtn').onclick = function() {
+  // --- Inline layer name/display editing ---
+  var _lcUndoPushed = false;
+  function lcInlineHandler(e) {
     var layer = keymapLayers[activeLayerIndex];
     if (!layer) return;
-    pushUndo();
-    var newName = document.getElementById('lcName').value.trim();
-    var newLabel = document.getElementById('lcLabel').value.trim();
+    if (!_lcUndoPushed) { _lcUndoPushed = true; pushUndo(); }
+    var newName = document.getElementById('lcInlineName').value.trim();
+    var newDisplay = document.getElementById('lcInlineDisplay').value.trim();
     if (newName) layer.name = newName.toLowerCase().replace(/[^a-z0-9_]/g, '_');
-    layer.displayName = newLabel || layer.name;
-    closeLayerCustomizeDialog();
+    layer.displayName = newDisplay || layer.name;
     renderLayerTabs();
     updateKeymapOutput();
-  };
-  document.getElementById('lcCancelBtn').onclick = closeLayerCustomizeDialog;
-  document.getElementById('layerCustomizeOverlay').addEventListener('click', function(e) {
-    if (e.target === this) closeLayerCustomizeDialog();
-  });
+  }
+  document.getElementById('lcInlineName').addEventListener('input', lcInlineHandler);
+  document.getElementById('lcInlineDisplay').addEventListener('input', lcInlineHandler);
+  document.getElementById('lcInlineName').addEventListener('blur', function() { _lcUndoPushed = false; });
+  document.getElementById('lcInlineDisplay').addEventListener('blur', function() { _lcUndoPushed = false; });
 
   // --- Combo editor ---
   document.getElementById('kmAddComboBtn').onclick = function() {
