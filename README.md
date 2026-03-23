@@ -103,8 +103,10 @@ I used Copilot to help modularize and refine the macros and combos. The modular 
   - There are certainly bugs(its ALL AI written), I havent really used this much yet; I can say that the RGB builder does work well enough so feel free to use it you want, there are included "helpers" in the generator.
 <br>**___Should NOTE that this has only been cofigured for Lotus58 and Corne Keymaps, it says you can add a .json but I never tried.___**
 ![editor](ZMKPer-LayerColor_RGB_Tool_with_keymap_editor1.png)
+![editor4](ZMKPer-LayerColor_RGB_Tool_with_keymap_editor4.png)
 
 ![editor2](ZMKPer-LayerColor_RGB_Tool_with_keymap_editor2.png)
+![editor3](ZMKPer-LayerColor_RGB_Tool_with_keymap_editor3.png)
 
   - The "Blink/status" macro is experimental, it works but I'm not sure if it's really "helpful". I only use it for a few visual indications but feel free to expreiment with the idea.
   - Any color you "assign" a layer in the RGB tool gets shown as a little colored dot on the layers in the keymap editor UI.
