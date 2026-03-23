@@ -8,7 +8,7 @@
  * WHEN YOU SEE "UNCOMMENT //, OR /*...*/ TO USE", DELETE THE SYMBOLS IN THE GIVEN Lines
  * WHEN YOU SEE: 
 
-                /* -------------------REMOVE & BUILD HERE------------------- */
+                /* -------------------REMOVE & BUILD/DEFINE HERE------------------- */
 
  * DELETE THE LINE AND START YOUR BUILD IN THE SAME LINE. THIS PUTS YOUR CODE "IN" THE DEVICETREE.
  */
@@ -26,7 +26,7 @@
                 /* -------------------REMOVE & DEFINE HERE------------------- */
 
 
-            /* -------------------BUILD END; CONTINUES AT LINE 135------------------- */
+            /* -------------------BUILD END; CONTINUES AT LINE 156------------------- */
 
 /* ---- (OPTIONAL) BLINK HELPERS ---- */
 // "flashes" LEDs a chosen color twice
@@ -124,7 +124,7 @@
 
                 /* -------------------END DEFINES------------------- */
 
-                /* -------------------BUILD START------------------- */
+                /* -------------------MACRO BUILD START------------------- */
 
 
 
@@ -133,12 +133,9 @@
 / {
     /* ---- STEP 2+3: MACROS (define your macros for each layer/behavior) ---- */
     macros {
-                /* -------------------REMOVE & BUILD HERE------------------- */
-
-    };
     /* ---- (OPTIONAL) BLINK/STATUS MACROS ---- 
      * Define blink/caps/num macros here if needed 
-     * UNCOMMENT /*...*/ (lines 129 & 144) IF YOU WANT TO USE. */
+     * UNCOMMENT /*...*/ (lines 139 & 154) IF YOU WANT TO USE. */
 /*    
 // "Unviversal BLINK" can be bound to any key in ZMK.Studio (EXPERIMENTAL)
     blnk: blnk {
@@ -156,30 +153,30 @@
     KP_BLINK(c_blink, "CAPS LOCK + BLINK", CAPS, C_BLINK_ON, RGB_ABC, 80)
     KP_BLINK(n_blink, "NUM LOCK + BLINK", KP_NUMLOCK, N_BLINK_ON, RGB_ABC, 80) */
 
-
+                /* -------------------REMOVE & BUILD HERE------------------- */
 
 
 
     /* ---- STEP 4: BEHAVIORS - HOLD-TAP ---- */
 /* Build behaviors for momentary layers here, using the macros you built above */
     behaviors {
-                /* -------------------REMOVE & BUILD HERE------------------- */
-
         // Example:
         // RGB_HOLD_TAP(hold_tap_fn, "HOLD_TAP_FN", fn_led)
+                /* -------------------REMOVE & BUILD HERE------------------- */
+
     };
 
     /* ---- STEP 5: COMBOS - ACCESSING/LEAVING OUR ToggleLayer  ---- */
     combos {
         compatible = "zmk,combos";
-                /* -------------------REMOVE & BUILD HERE------------------- */
         // Example:
         // COMBO(my_combo, &kp ESC, 0, 1, LAYER_BASE)
+                /* -------------------REMOVE & BUILD HERE------------------- */
     };
 
     /* ---- (OPTIONAL) Tap dance ---- */
     /* Define tap dance behaviors here if needed
-        UNCOMMENT /*...*/ (lines 166 & 171) TO USE */
+        UNCOMMENT /*...*/ (lines 181 & 186) TO USE */
         //TAP DANCE FOR SHIFT CAPS AND NUMLOCK; DIFFENET COLOR BLINK FOR WHEN EACH IS TOGGLED.
 /*        td_numcaps: td_numcapsBLINK {
         compatible = "zmk,behavior-tap-dance";
