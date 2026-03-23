@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZMK RGB &amp; Keymap Editor v9.5</title>
+  <title>ZMK RGB &amp; Keymap Editor v10</title>
   <style>
     /* ====== THEME VARIABLES ====== */
     :root {
@@ -66,10 +66,12 @@
     pre.output-pre .hl-string { color: #ce9178; }
     .output-stats { color: var(--output-muted); font-size: 0.75em; padding: 0.3em 1em; border-top: 1px solid var(--output-border); text-align: right; }
 
-    .section { background: var(--card); border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); margin-bottom: 0.7em; border: 1px solid var(--border); overflow: hidden; }
-    .section-head { display: flex; align-items: center; justify-content: space-between; padding: 0.55em 0.9em; cursor: pointer; user-select: none; background: var(--card); border-bottom: 1px solid var(--border); }
+    .section { background: var(--card); border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); margin-bottom: 0.7em; border: 1px solid var(--border); overflow: hidden; transition: box-shadow 0.2s; }
+    .section:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+    .section-head { display: flex; align-items: center; justify-content: space-between; padding: 0.55em 0.9em; cursor: pointer; user-select: none; background: var(--card); border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    .section-head:hover { background: var(--item-bg); }
     .section-head h2 { font-size: 0.95em; color: var(--accent2); font-weight: 600; }
-    .section-head .toggle-icon { color: var(--muted); font-size: 0.85em; transition: transform 0.2s; }
+    .section-head .toggle-icon { color: var(--muted); font-size: 0.85em; transition: transform 0.25s ease; }
     .section-head .toggle-icon.collapsed { transform: rotate(-90deg); }
     .section-body { padding: 0.7em 0.9em; }
     .section-body.collapsed { display: none; }
@@ -77,15 +79,21 @@
     .input-row { display: flex; flex-wrap: wrap; gap: 0.4em; align-items: center; margin-bottom: 0.4em; }
     .input-group { display: flex; align-items: center; gap: 0.2em; }
     label { font-weight: 500; color: var(--muted); font-size: 0.85em; white-space: nowrap; }
-    input[type="text"], input[type="number"], select { border: 1px solid var(--border); border-radius: 4px; padding: 0.25em 0.4em; font-size: 0.88em; background: var(--item-bg); color: var(--text); }
-    input[type="text"]:focus, input[type="number"]:focus, select:focus { border-color: var(--accent); outline: none; background: var(--card); }
+    input[type="text"], input[type="number"], select { border: 1px solid var(--border); border-radius: 5px; padding: 0.3em 0.5em; font-size: 0.88em; background: var(--item-bg); color: var(--text); transition: border-color 0.15s, background 0.15s; }
+    input[type="text"]:focus, input[type="number"]:focus, select:focus { border-color: var(--accent); outline: none; background: var(--card); box-shadow: 0 0 0 2px rgba(90,140,200,0.15); }
     input[type="range"] { accent-color: var(--accent); width: 70px; height: 16px; }
     textarea { font-family: 'Fira Mono','Consolas',monospace; font-size: 0.88em; border-radius: 5px; border: 1px solid var(--border); padding: 0.5em; resize: vertical; width: 100%; background: var(--item-bg); color: var(--text); }
     textarea:focus { border-color: var(--accent); outline: none; background: var(--card); }
-    button { background: var(--accent); color: #fff; border: none; border-radius: 4px; padding: 0.3em 0.8em; font-size: 0.88em; font-weight: 500; cursor: pointer; transition: background 0.15s; }
-    button:hover { background: var(--accent2); }
+    button { background: var(--accent); color: #fff; border: none; border-radius: 5px; padding: 0.3em 0.8em; font-size: 0.88em; font-weight: 500; cursor: pointer; transition: background 0.15s, transform 0.1s, box-shadow 0.15s; }
+    button:hover { background: var(--accent2); box-shadow: 0 2px 6px rgba(0,0,0,0.12); }
+    button:active { transform: scale(0.97); }
     .btn-danger { background: var(--danger); } .btn-danger:hover { background: #a5281b; }
     .btn-sm { padding: 0.2em 0.55em; font-size: 0.8em; }
+    .btn-edit { background: var(--accent); color: #fff; margin-left: auto; }
+    .btn-edit:hover { background: var(--accent2); }
+    .item-detail { color: var(--text); font-size: 0.9em; }
+    .item-detail.muted { color: var(--muted); font-size: 0.82em; }
+    .item-tags { display: inline-flex; flex-wrap: wrap; gap: 3px; margin-left: auto; margin-right: 4px; }
 
     .color-swatch { position: relative; display: inline-block; width: 28px; height: 28px; border-radius: 6px; border: 2px solid var(--border); cursor: pointer; vertical-align: middle; transition: border-color 0.15s; flex-shrink: 0; }
     .color-swatch:hover { border-color: var(--accent); }
@@ -106,7 +114,8 @@
     .hsbp-row .input-group input { width: 46px; }
     .hsbp-preview { width: 32px; height: 32px; border-radius: 5px; border: 1px solid var(--border); margin-left: auto; flex-shrink: 0; }
     .item-list { margin-top: 0.3em; }
-    .item { background: var(--item-bg); border-radius: 5px; padding: 0.35em 0.6em; margin-bottom: 0.3em; border: 1px solid var(--border); display: flex; flex-wrap: wrap; align-items: center; gap: 0.35em; font-size: 0.86em; }
+    .item { background: var(--item-bg); border-radius: 6px; padding: 0.4em 0.7em; margin-bottom: 0.35em; border: 1px solid var(--border); display: flex; flex-wrap: wrap; align-items: center; gap: 0.4em; font-size: 0.86em; transition: border-color 0.15s, box-shadow 0.15s; }
+    .item:hover { border-color: var(--accent); box-shadow: 0 1px 6px rgba(90,140,200,0.1); }
     .item b { color: var(--accent2); min-width: 80px; font-size: 0.92em; }
     .item input[type="text"], .item input[type="number"] { width: 75px; }
     .item select { max-width: 160px; }
@@ -124,6 +133,7 @@
     .status-msg { color: var(--success); font-size: 0.85em; margin-left: 0.5em; }
     .release-color-group { transition: opacity 0.2s; }
     .release-color-group.hidden { opacity: 0.3; pointer-events: none; }
+    .hidden { display: none !important; }
     .filter-bar { display: flex; align-items: center; gap: 0.6em; margin-bottom: 0.4em; font-size: 0.85em; }
     .filter-bar label { cursor: pointer; }
 
@@ -241,19 +251,27 @@
     .kc-search-wrap .search-clear { position: absolute; right: 0.4em; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.9em; padding: 0; line-height: 1; }
     .keycode-btn.hidden { display: none; }
 
-    /* Binding editor panel */
-    .binding-editor { background: var(--card); border-radius: 8px; border: 1px solid var(--border); padding: 0.8em; margin-bottom: 0.7em; display: none; }
-    .binding-editor.visible { display: block; }
-    .binding-editor h3 { font-size: 0.95em; color: var(--accent2); margin-bottom: 0.5em; }
-    .be-row { display: flex; flex-wrap: wrap; gap: 0.5em; align-items: center; margin-bottom: 0.4em; }
-    .be-row label { min-width: 70px; }
+    /* Binding editor overlay */
+    .binding-editor-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.45); z-index: 300; display: none; align-items: center; justify-content: center; animation: fadeIn 0.15s ease; }
+    .binding-editor-overlay.visible { display: flex; }
+    .be-dialog { background: var(--card); border: 1px solid var(--border); border-radius: 10px; width: 520px; max-width: 95vw; max-height: 85vh; color: var(--text); box-shadow: 0 12px 40px rgba(0,0,0,0.35); animation: slideUp 0.2s ease; display: flex; flex-direction: column; overflow: hidden; }
+    .be-header { padding: 0.7em 1.2em; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.6em; }
+    .be-header h3 { margin: 0; font-size: 1em; color: var(--accent2); font-weight: 600; }
+    .be-header .be-key-badge { background: var(--item-bg); border: 1px solid var(--border); border-radius: 4px; padding: 0.1em 0.5em; font-size: 0.8em; color: var(--muted); }
+    .be-header .be-quick-btns { margin-left: auto; display: flex; gap: 4px; }
+    .be-body { padding: 0.8em 1.2em; overflow-y: auto; flex: 1; }
+    .be-row { display: flex; flex-wrap: wrap; gap: 0.5em; align-items: center; margin-bottom: 0.5em; }
+    .be-row label { min-width: 70px; font-weight: 600; font-size: 0.85em; }
     .be-row select, .be-row input { min-width: 120px; }
-    .keycode-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 3px; max-height: 200px; overflow-y: auto; padding: 0.3em; border: 1px solid var(--border); border-radius: 4px; background: var(--item-bg); margin-top: 0.3em; }
-    .keycode-btn { background: var(--card); border: 1px solid var(--border); border-radius: 3px; padding: 0.2em 0.15em; font-size: 0.72em; cursor: pointer; text-align: center; color: var(--text); transition: all 0.1s; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; min-width: 0; }
-    .keycode-btn:hover { background: var(--key-hover); border-color: var(--accent); }
+    .be-kc-scroll { max-height: 320px; overflow-y: auto; margin-top: 0.3em; padding-right: 4px; }
+    .keycode-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 3px; max-height: 180px; overflow-y: auto; padding: 0.3em; border: 1px solid var(--border); border-radius: 5px; background: var(--item-bg); margin-top: 0.3em; }
+    .keycode-btn { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 0.25em 0.15em; font-size: 0.72em; cursor: pointer; text-align: center; color: var(--text); transition: all 0.1s; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; min-width: 0; }
+    .keycode-btn:hover { background: var(--key-hover); border-color: var(--accent); transform: scale(1.04); }
     .keycode-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-    .keycode-category { margin-top: 0.4em; }
-    .keycode-category summary { font-size: 0.85em; font-weight: 600; color: var(--accent2); cursor: pointer; margin-bottom: 0.2em; }
+    .keycode-category { margin-top: 0.3em; }
+    .keycode-category summary { font-size: 0.82em; font-weight: 600; color: var(--accent2); cursor: pointer; margin-bottom: 0.15em; padding: 0.2em 0; }
+    .be-actions { padding: 0.6em 1.2em; border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: center; }
+    .be-actions .be-spacer { flex: 1; }
 
     /* Combo editor */
     .combo-mini-kb { max-width: 500px; margin: 0.4em 0; }
@@ -274,6 +292,35 @@
     .combo-mini-kb .key-rect { cursor: pointer; }
     .combo-mini-kb .key-group.combo-selected .key-rect { fill: var(--accent); stroke: var(--accent2); }
     .combo-mini-kb .key-group.combo-selected .key-label { fill: #fff; }
+
+    /* Generic keymap popup overlay (shared by combo, macro, behavior, cond-layer editors) */
+    .km-popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.45); z-index: 300; display: none; align-items: center; justify-content: center; animation: fadeIn 0.15s ease; }
+    .km-popup-overlay.visible { display: flex; }
+    .km-popup-dialog { background: var(--card); border: 1px solid var(--border); border-radius: 10px; width: 560px; max-width: 95vw; max-height: 85vh; color: var(--text); box-shadow: 0 12px 40px rgba(0,0,0,0.35); animation: slideUp 0.2s ease; display: flex; flex-direction: column; overflow: hidden; }
+    .km-popup-header { padding: 0.7em 1.2em; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.6em; }
+    .km-popup-header h3 { margin: 0; font-size: 1em; color: var(--accent2); font-weight: 600; flex: 1; }
+    .km-popup-header .km-popup-close { background: none; border: none; color: var(--muted); font-size: 1.3em; cursor: pointer; padding: 0 0.2em; line-height: 1; }
+    .km-popup-header .km-popup-close:hover { color: var(--danger); }
+    .km-popup-body { padding: 0.8em 1.2em; overflow-y: auto; flex: 1; }
+    .km-popup-body .input-row { display: flex; flex-wrap: wrap; gap: 0.5em; align-items: center; margin-bottom: 0.5em; }
+    .km-popup-body .input-group { display: flex; flex-direction: column; gap: 0.15em; }
+    .km-popup-body .input-group label { font-weight: 600; font-size: 0.82em; color: var(--accent2); }
+    .km-popup-body .input-group input, .km-popup-body .input-group select { font-size: 0.88em; padding: 0.3em 0.5em; border: 1px solid var(--border); border-radius: 4px; background: var(--item-bg); color: var(--text); }
+    .km-popup-body .input-group input:focus, .km-popup-body .input-group select:focus { border-color: var(--accent); outline: none; background: var(--card); }
+    .km-popup-body .km-search-wrap { position: relative; margin-bottom: 0.5em; }
+    .km-popup-body .km-search-wrap input { width: 100%; padding: 0.35em 0.5em 0.35em 1.8em; border: 1px solid var(--border); border-radius: 4px; font-size: 0.85em; background: var(--item-bg); color: var(--text); box-sizing: border-box; }
+    .km-popup-body .km-search-wrap input:focus { border-color: var(--accent); outline: none; background: var(--card); }
+    .km-popup-body .km-search-wrap .search-icon { position: absolute; left: 0.5em; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 0.85em; pointer-events: none; }
+    .km-popup-body .km-search-wrap .search-clear { position: absolute; right: 0.4em; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.9em; padding: 0; line-height: 1; }
+    .km-popup-footer { padding: 0.6em 1.2em; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
+    .km-popup-footer button { min-width: 80px; }
+
+    /* Section list search (outside popup, in section body) */
+    .section-body .km-search-wrap { position: relative; }
+    .section-body .km-search-wrap input { width: 100%; padding: 0.35em 0.5em 0.35em 1.8em; border: 1px solid var(--border); border-radius: 4px; font-size: 0.85em; background: var(--item-bg); color: var(--text); box-sizing: border-box; }
+    .section-body .km-search-wrap input:focus { border-color: var(--accent); outline: none; background: var(--card); }
+    .section-body .km-search-wrap .search-icon { position: absolute; left: 0.5em; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 0.85em; pointer-events: none; }
+    .section-body .km-search-wrap .search-clear { position: absolute; right: 0.4em; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.9em; padding: 0; line-height: 1; }
 
     /* Quick-Assign overlay */
     .qa-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.55); z-index: 300; display: flex; align-items: center; justify-content: center; }
@@ -308,13 +355,18 @@
     @keyframes qa-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
     .qa-actions { display: flex; gap: 0.5em; margin-top: 0.8em; }
 
-    /* ====== MACRO EDITOR OVERLAY ====== */
+    /* ====== EDITOR OVERLAYS (shared) ====== */
+    .editor-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 300; display: flex; align-items: center; justify-content: center; animation: fadeIn 0.15s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
     #macroEditorOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 300; align-items: center; justify-content: center; }
-    .macro-editor-dialog { background: #1e1e2e; border: 1px solid #555; border-radius: 8px; padding: 20px; min-width: 380px; max-width: 500px; color: #e0e0e0; }
-    .macro-editor-dialog h3 { margin: 0 0 12px 0; }
-    .macro-editor-dialog .medit-fields { display: flex; flex-direction: column; gap: 8px; }
-    .macro-editor-dialog .medit-actions { margin-top: 14px; display: flex; gap: 8px; justify-content: flex-end; }
-    .macro-editor-dialog .medit-actions button { padding: 4px 14px; }
+    .editor-dialog, .macro-editor-dialog { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.4em 1.6em; min-width: 380px; max-width: 540px; color: var(--text); box-shadow: 0 12px 40px rgba(0,0,0,0.35); animation: slideUp 0.2s ease; }
+    .editor-dialog h3, .macro-editor-dialog h3 { margin: 0 0 1em 0; font-size: 1.05em; color: var(--accent2); border-bottom: 1px solid var(--border); padding-bottom: 0.6em; }
+    .macro-editor-dialog .medit-fields, .editor-dialog .medit-fields { display: flex; flex-direction: column; gap: 10px; }
+    .macro-editor-dialog .medit-actions, .editor-dialog .medit-actions { margin-top: 1.2em; display: flex; gap: 8px; justify-content: flex-end; border-top: 1px solid var(--border); padding-top: 0.8em; }
+    .macro-editor-dialog .medit-actions button, .editor-dialog .medit-actions button { padding: 6px 18px; border-radius: 5px; font-weight: 500; }
+    .editor-dialog .medit-fields .input-group { display: flex; align-items: center; gap: 0.5em; }
+    .editor-dialog .medit-fields .input-group label { min-width: 70px; font-weight: 600; font-size: 0.85em; }
 
     /* ====== FLOATING VALUE PICKER ====== */
     .vp-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 250; background: rgba(0,0,0,0.25); }
@@ -355,7 +407,7 @@
 
   <!-- ====== TOPBAR ====== -->
   <div class="topbar">
-    <h1>ZMK Per-Layer Color and Keymap Editor <small>v9.5</small></h1>
+    <h1>ZMK Per-Layer Color and Keymap Editor <small>v10</small></h1>
     <div class="tab-bar">
       <button class="tab-btn active" data-tab="tabRgb">RGB Generator</button>
       <button class="tab-btn" data-tab="tabKeymap">Keymap Editor</button>
@@ -395,7 +447,7 @@
         </div>
         <div class="section-body" id="layerBody">
           <div class="input-row">
-            <div class="input-group"><label>Name</label><input type="text" id="layerName" placeholder="LAYER_ABC" style="width:120px;"></div>
+            <div class="input-group"><label>Name</label><input type="text" id="layerName" placeholder="L_ABC" style="width:120px;"></div>
             <div class="input-group"><label>Idx</label><input type="number" id="layerIndex" min="0" placeholder="—" style="width:42px;"></div>
             <div class="input-group"><label>H</label><input type="range" id="hue" min="0" max="360" value="0"><input type="number" id="hueNum" min="0" max="360" value="0" style="width:44px;"></div>
             <div class="input-group"><label>S</label><input type="range" id="sat" min="0" max="100" value="100"><input type="number" id="satNum" min="0" max="100" value="100" style="width:44px;"></div>
@@ -422,12 +474,15 @@
         <div class="section-body" id="macroBody">
           <div class="input-row">
             <div class="input-group"><label>Type</label>
-              <select id="macroType"><option value="TO_RGB_MACRO">TO_RGB_MACRO</option><option value="MOMENTARY_RGB_MACRO">MOMENTARY_RGB_MACRO</option><option value="TO_RGB_PRESS_MACRO">TO_RGB_PRESS_MACRO</option></select>
+              <select id="macroType"><option value="TO_RGB">TO_RGB</option><option value="MO_RGB">MO_RGB</option><option value="TO_RGB_PRESS">TO_RGB_PRESS</option><option value="MO_BLINK">MO_BLINK &#9888;</option></select>
             </div>
-            <div class="input-group"><label>Name</label><input type="text" id="macroName" placeholder="macro_name" style="width:110px;"></div>
+            <div class="input-group"><label>Name</label><input type="text" id="macroName" placeholder="to_name" style="width:110px;"></div>
             <div class="input-group"><label>Layer</label><select id="macroLayer"></select></div>
             <div class="input-group"><label>Color</label><select id="macroColor"></select></div>
             <div class="input-group release-color-group" id="releaseColorGroup"><label>Release</label><select id="macroReleaseColor"></select></div>
+            <div class="input-group blink-field hidden" id="blinkColorGroup"><label>Blink</label><select id="macroBlinkColor"></select></div>
+            <div class="input-group blink-field hidden" id="blinkReturnGroup"><label>Return</label><select id="macroBlinkReturn"></select></div>
+            <div class="input-group blink-field hidden" id="blinkWaitGroup"><label>Wait</label><input type="number" id="macroBlinkWait" value="80" min="0" style="width:50px;"></div>
             <button id="addMacroBtn">+ Add</button>
           </div>
           <div class="item-list" id="macroList"></div>
@@ -442,7 +497,7 @@
         </div>
         <div class="section-body" id="behaviorBody">
           <div class="input-row">
-            <div class="input-group"><label>Name</label><input type="text" id="behaviorName" placeholder="behavior_name" style="width:120px;"></div>
+            <div class="input-group"><label>Name</label><input type="text" id="behaviorName" placeholder="RGB_ht_name" style="width:120px;"></div>
             <div class="input-group"><label>Label</label><input type="text" id="behaviorLabel" placeholder="Label" style="width:120px;"></div>
             <div class="input-group"><label>Macro</label><select id="behaviorMacro"></select></div>
             <button id="addBehaviorBtn">+ Add</button>
@@ -500,19 +555,62 @@
             <div class="input-group"><label>Name</label><input type="text" id="meditName" style="width:160px;"></div>
             <div class="input-group"><label>Type</label>
               <select id="meditType">
-                <option value="TO_RGB_MACRO">TO_RGB_MACRO</option>
-                <option value="MOMENTARY_RGB_MACRO">MOMENTARY_RGB_MACRO</option>
-                <option value="TO_RGB_PRESS_MACRO">TO_RGB_PRESS_MACRO</option>
+                <option value="TO_RGB">TO_RGB</option>
+                <option value="MO_RGB">MO_RGB</option>
+                <option value="TO_RGB_PRESS">TO_RGB_PRESS</option>
+                <option value="MO_BLINK">MO_BLINK &#9888;</option>
               </select>
             </div>
             <div class="input-group"><label>Layer</label><select id="meditLayer"></select></div>
             <div class="input-group"><label>Color</label><select id="meditColor"></select></div>
             <div class="input-group" id="meditReleaseGroup"><label>Release Color</label><select id="meditReleaseColor"></select></div>
+            <div class="input-group hidden" id="meditBlinkColorGroup"><label>Blink Color</label><select id="meditBlinkColor"></select></div>
+            <div class="input-group hidden" id="meditBlinkReturnGroup"><label>Return Color</label><select id="meditBlinkReturn"></select></div>
+            <div class="input-group hidden" id="meditBlinkWaitGroup"><label>Wait (ms)</label><input type="number" id="meditBlinkWait" value="80" min="0" style="width:60px;"></div>
           </div>
           <div class="medit-actions">
             <button id="meditSaveBtn">Save</button>
             <button id="meditCancelBtn">Cancel</button>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMBO EDITOR OVERLAY -->
+    <div id="comboEditorOverlay" class="editor-overlay" style="display:none;">
+      <div class="editor-dialog">
+        <h3>&#128279; Edit Combo</h3>
+        <div class="medit-fields">
+          <div class="input-group"><label>Name</label><input type="text" id="ceditName" style="width:180px;"></div>
+          <div class="input-group"><label>Binding</label><input type="text" id="ceditBind" style="width:220px;"></div>
+          <div class="input-group"><label>Layers</label>
+            <select id="ceditLayerPicker" style="width:140px;cursor:pointer;" title="Pick a layer"><option value="">+ Add layer</option></select>
+            <span id="ceditLayerTags" class="layer-tags"></span>
+          </div>
+          <div>
+            <label style="margin-bottom:4px;display:block;">Positions <small style="color:var(--muted);">(click keys)</small></label>
+            <div class="combo-mini-kb" id="ceditMiniKb" style="max-width:440px;"></div>
+          </div>
+        </div>
+        <div class="medit-actions">
+          <button id="ceditSaveBtn">Save</button>
+          <button id="ceditCancelBtn">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BEHAVIOR EDITOR OVERLAY -->
+    <div id="behaviorEditorOverlay" class="editor-overlay" style="display:none;">
+      <div class="editor-dialog">
+        <h3>&#128260; Edit Behavior</h3>
+        <div class="medit-fields">
+          <div class="input-group"><label>Name</label><input type="text" id="beditName" style="width:180px;"></div>
+          <div class="input-group"><label>Label</label><input type="text" id="beditLabel" style="width:220px;"></div>
+          <div class="input-group"><label>Macro Ref</label><select id="beditMacro" style="width:220px;"></select></div>
+        </div>
+        <div class="medit-actions">
+          <button id="beditSaveBtn">Save</button>
+          <button id="beditCancelBtn">Cancel</button>
         </div>
       </div>
     </div>
@@ -586,112 +684,121 @@
         <div class="sensor-cards" id="sensorCards"></div>
       </div>
 
-      <!-- BINDING EDITOR -->
-      <div class="binding-editor" id="bindingEditor">
-        <h3>Edit Key Binding <span id="beKeyIndex" style="color:var(--muted);font-weight:400;font-size:0.85em;"></span></h3>
-        <div class="be-row">
-          <label>Behavior</label>
-          <select id="beBehavior" style="width:160px;"></select>
-        </div>
-        <div class="be-row" id="beParam1Row">
-          <label id="beParam1Label">Param 1</label>
-          <div id="beParam1Container"></div>
-        </div>
-        <div class="be-row" id="beParam2Row" style="display:none;">
-          <label id="beParam2Label">Param 2</label>
-          <div id="beParam2Container"></div>
-        </div>
-        <!-- Modifier checkboxes -->
-        <div id="beModSection" style="display:none;">
-          <label style="font-weight:600;font-size:0.82em;color:var(--accent2);margin-bottom:0.1em;">Modifiers</label>
-          <div class="mod-checkboxes" id="beModCheckboxes">
-            <label class="mod-cb-label"><input type="checkbox" data-mod="LSHFT"> LSHFT</label>
-            <label class="mod-cb-label"><input type="checkbox" data-mod="LALT"> LALT</label>
-            <label class="mod-cb-label"><input type="checkbox" data-mod="LCTRL"> LCTRL</label>
-            <label class="mod-cb-label"><input type="checkbox" data-mod="LGUI"> LGUI</label>
-            <label class="mod-cb-label"><input type="checkbox" data-mod="RSHFT"> RSHFT</label>
-            <label class="mod-cb-label"><input type="checkbox" data-mod="RALT"> RALT</label>
-            <label class="mod-cb-label"><input type="checkbox" data-mod="RCTRL"> RCTRL</label>
-            <label class="mod-cb-label"><input type="checkbox" data-mod="RGUI"> RGUI</label>
+      <!-- BINDING EDITOR OVERLAY -->
+      <div class="binding-editor-overlay" id="bindingEditor">
+        <div class="be-dialog">
+          <div class="be-header">
+            <h3>&#9000; Edit Key Binding</h3>
+            <span class="be-key-badge" id="beKeyIndex">Key 0</span>
+            <div class="be-quick-btns">
+              <button id="beSetNone" title="Set &amp;none" style="font-size:0.78em; padding:3px 10px; background:var(--danger);">&amp;none</button>
+              <button id="beSetTrans" title="Set &amp;trans" style="font-size:0.78em; padding:3px 10px; background:var(--accent2);">&amp;trans</button>
+            </div>
           </div>
-        </div>
-        <div id="beKeycodeSection" style="display:none;">
-          <div class="kc-search-wrap">
-            <span class="search-icon">&#128269;</span>
-            <input type="text" id="kcSearchInput" placeholder="Search keycodes...">
-            <button class="search-clear" id="kcSearchClear" style="display:none;">&times;</button>
+          <div class="be-body">
+            <div class="be-row">
+              <label>Behavior</label>
+              <select id="beBehavior" style="width:200px;"></select>
+            </div>
+            <div class="be-row" id="beParam1Row">
+              <label id="beParam1Label">Param 1</label>
+              <div id="beParam1Container"></div>
+            </div>
+            <div class="be-row" id="beParam2Row" style="display:none;">
+              <label id="beParam2Label">Param 2</label>
+              <div id="beParam2Container"></div>
+            </div>
+            <div id="beModSection" style="display:none;">
+              <label style="font-weight:600;font-size:0.82em;color:var(--accent2);margin-bottom:0.1em;">Modifiers</label>
+              <div class="mod-checkboxes" id="beModCheckboxes">
+                <label class="mod-cb-label"><input type="checkbox" data-mod="LSHFT"> LSHFT</label>
+                <label class="mod-cb-label"><input type="checkbox" data-mod="LALT"> LALT</label>
+                <label class="mod-cb-label"><input type="checkbox" data-mod="LCTRL"> LCTRL</label>
+                <label class="mod-cb-label"><input type="checkbox" data-mod="LGUI"> LGUI</label>
+                <label class="mod-cb-label"><input type="checkbox" data-mod="RSHFT"> RSHFT</label>
+                <label class="mod-cb-label"><input type="checkbox" data-mod="RALT"> RALT</label>
+                <label class="mod-cb-label"><input type="checkbox" data-mod="RCTRL"> RCTRL</label>
+                <label class="mod-cb-label"><input type="checkbox" data-mod="RGUI"> RGUI</label>
+              </div>
+            </div>
+            <div id="beKeycodeSection" style="display:none;">
+              <div class="kc-search-wrap">
+                <span class="search-icon">&#128269;</span>
+                <input type="text" id="kcSearchInput" placeholder="Search keycodes...">
+                <button class="search-clear" id="kcSearchClear" style="display:none;">&times;</button>
+              </div>
+              <div class="be-kc-scroll">
+                <details class="keycode-category" open>
+                  <summary>Letters</summary>
+                  <div class="keycode-grid" id="kcLetters"></div>
+                </details>
+                <details class="keycode-category">
+                  <summary>Numbers</summary>
+                  <div class="keycode-grid" id="kcNumbers"></div>
+                </details>
+                <details class="keycode-category">
+                  <summary>Modifiers</summary>
+                  <div class="keycode-grid" id="kcMods"></div>
+                </details>
+                <details class="keycode-category">
+                  <summary>Control &amp; Whitespace</summary>
+                  <div class="keycode-grid" id="kcControl"></div>
+                </details>
+                <details class="keycode-category">
+                  <summary>Navigation</summary>
+                  <div class="keycode-grid" id="kcNav"></div>
+                </details>
+                <details class="keycode-category">
+                  <summary>Locks</summary>
+                  <div class="keycode-grid" id="kcLocks"></div>
+                </details>
+                <details class="keycode-category">
+                  <summary>Symbols</summary>
+                  <div class="keycode-grid" id="kcSymbols"></div>
+                </details>
+                <details class="keycode-category">
+                  <summary>Function Keys</summary>
+                  <div class="keycode-grid" id="kcFkeys"></div>
+                </details>
+                <details class="keycode-category">
+                  <summary>Numpad</summary>
+                  <div class="keycode-grid" id="kcNumpad"></div>
+                </details>
+                <details class="keycode-category">
+                  <summary>Media</summary>
+                  <div class="keycode-grid" id="kcMedia"></div>
+                </details>
+                <details class="keycode-category">
+                  <summary>Editing</summary>
+                  <div class="keycode-grid" id="kcEdit"></div>
+                </details>
+                <details class="keycode-category">
+                  <summary>Applications</summary>
+                  <div class="keycode-grid" id="kcApps"></div>
+                </details>
+                <details class="keycode-category">
+                  <summary>Miscellaneous</summary>
+                  <div class="keycode-grid" id="kcMisc"></div>
+                </details>
+                <details class="keycode-category">
+                  <summary>International</summary>
+                  <div class="keycode-grid" id="kcInternational"></div>
+                </details>
+                <details class="keycode-category">
+                  <summary>Language</summary>
+                  <div class="keycode-grid" id="kcLanguage"></div>
+                </details>
+                <details class="keycode-category">
+                  <summary>Power &amp; Lock</summary>
+                  <div class="keycode-grid" id="kcPower"></div>
+                </details>
+              </div>
+            </div>
           </div>
-          <details class="keycode-category" open>
-            <summary>Letters</summary>
-            <div class="keycode-grid" id="kcLetters"></div>
-          </details>
-          <details class="keycode-category">
-            <summary>Numbers</summary>
-            <div class="keycode-grid" id="kcNumbers"></div>
-          </details>
-          <details class="keycode-category">
-            <summary>Modifiers</summary>
-            <div class="keycode-grid" id="kcMods"></div>
-          </details>
-          <details class="keycode-category">
-            <summary>Control &amp; Whitespace</summary>
-            <div class="keycode-grid" id="kcControl"></div>
-          </details>
-          <details class="keycode-category">
-            <summary>Navigation</summary>
-            <div class="keycode-grid" id="kcNav"></div>
-          </details>
-          <details class="keycode-category">
-            <summary>Locks</summary>
-            <div class="keycode-grid" id="kcLocks"></div>
-          </details>
-          <details class="keycode-category">
-            <summary>Symbols</summary>
-            <div class="keycode-grid" id="kcSymbols"></div>
-          </details>
-          <details class="keycode-category">
-            <summary>Function Keys</summary>
-            <div class="keycode-grid" id="kcFkeys"></div>
-          </details>
-          <details class="keycode-category">
-            <summary>Numpad</summary>
-            <div class="keycode-grid" id="kcNumpad"></div>
-          </details>
-          <details class="keycode-category">
-            <summary>Media</summary>
-            <div class="keycode-grid" id="kcMedia"></div>
-          </details>
-          <details class="keycode-category">
-            <summary>Editing</summary>
-            <div class="keycode-grid" id="kcEdit"></div>
-          </details>
-          <details class="keycode-category">
-            <summary>Applications</summary>
-            <div class="keycode-grid" id="kcApps"></div>
-          </details>
-          <details class="keycode-category">
-            <summary>Miscellaneous</summary>
-            <div class="keycode-grid" id="kcMisc"></div>
-          </details>
-          <details class="keycode-category">
-            <summary>International</summary>
-            <div class="keycode-grid" id="kcInternational"></div>
-          </details>
-          <details class="keycode-category">
-            <summary>Language</summary>
-            <div class="keycode-grid" id="kcLanguage"></div>
-          </details>
-          <details class="keycode-category">
-            <summary>Power &amp; Lock</summary>
-            <div class="keycode-grid" id="kcPower"></div>
-          </details>
-        </div>
-        <div style="margin-top:0.5em; display:flex; gap:0.4em; align-items:center; flex-wrap:wrap;">
-          <button id="beApplyBtn">Apply</button>
-          <button id="beCancelBtn" style="background:var(--muted);">Cancel</button>
-          <span style="flex:1;"></span>
-          <button id="beSetNone" title="Set binding to &amp;none" style="font-size:0.8em; padding:2px 8px; background:var(--danger); color:#fff; border:none; border-radius:3px; cursor:pointer;">&amp;none</button>
-          <button id="beSetTrans" title="Set binding to &amp;trans" style="font-size:0.8em; padding:2px 8px; background:var(--accent2); color:#fff; border:none; border-radius:3px; cursor:pointer;">&amp;trans</button>
+          <div class="be-actions">
+            <button id="beApplyBtn">&#10003; Apply</button>
+            <button id="beCancelBtn" style="background:var(--muted);">Cancel</button>
+          </div>
         </div>
       </div>
 
@@ -705,25 +812,45 @@
           <div class="input-row">
             <button id="kmAddComboBtn">+ Add Combo</button>
           </div>
-          <div id="kmComboEditor" style="display:none;">
-            <div class="input-row">
-              <div class="input-group"><label>Name</label><input type="text" id="kmComboName" style="width:120px;"></div>
-              <div class="input-group"><label>Binding</label><input type="text" id="kmComboBind" placeholder="&amp;kp ESC" style="width:140px;"></div>
-              <div class="input-group"><label>Timeout</label><input type="number" id="kmComboTimeout" value="50" min="0" style="width:55px;"></div>
-              <div class="input-group"><label>Layers</label><input type="text" id="kmComboLayers" placeholder="0 1 2 (blank=all)" style="width:130px;"></div>
-            </div>
-            <div class="input-row">
-              <div class="input-group"><label>Require Prior Idle (ms)</label><input type="number" id="kmComboRequirePriorIdle" value="" min="0" placeholder="none" style="width:70px;"></div>
-              <label style="display:flex;align-items:center;gap:0.3em;cursor:pointer;margin-left:0.5em;"><input type="checkbox" id="kmComboSlowRelease"> Slow Release</label>
-            </div>
-            <p style="font-size:0.82em;color:var(--muted);margin:0.2em 0;">Click keys below to select combo trigger positions:</p>
-            <div class="combo-mini-kb" id="comboMiniKb"></div>
-            <div class="input-row">
-              <button id="kmComboSaveBtn">Save Combo</button>
-              <button id="kmComboCancelBtn" style="background:var(--muted);">Cancel</button>
-            </div>
+          <div class="km-search-wrap" id="comboListSearchWrap" style="margin-top:0.4em;">
+            <span class="search-icon">&#128269;</span>
+            <input type="text" id="comboListSearch" placeholder="Filter combos...">
+            <button class="search-clear" id="comboListSearchClear" style="display:none;">&times;</button>
           </div>
           <div class="item-list" id="kmComboList"></div>
+        </div>
+      </div>
+
+      <!-- Combo editor popup overlay -->
+      <div class="km-popup-overlay" id="kmComboOverlay">
+        <div class="km-popup-dialog">
+          <div class="km-popup-header">
+            <h3>&#128279; Edit Combo</h3>
+            <button class="km-popup-close" id="kmComboCancelBtn">&times;</button>
+          </div>
+          <div class="km-popup-body">
+            <div class="input-row">
+              <div class="input-group"><label>Name</label><input type="text" id="kmComboName" style="width:140px;"></div>
+              <div class="input-group"><label>Binding</label><input type="text" id="kmComboBind" placeholder="&amp;kp ESC" style="width:160px;"></div>
+            </div>
+            <div class="input-row">
+              <div class="input-group"><label>Timeout (ms)</label><input type="number" id="kmComboTimeout" value="50" min="0" style="width:70px;"></div>
+              <div class="input-group"><label>Layers</label>
+                <select id="kmComboLayerPicker" style="width:140px;cursor:pointer;" title="Pick a layer"><option value="">+ Add layer</option></select>
+                <span id="kmComboLayerTags" class="layer-tags"></span>
+              </div>
+            </div>
+            <div class="input-row">
+              <div class="input-group"><label>Require Prior Idle (ms)</label><input type="number" id="kmComboRequirePriorIdle" value="" min="0" placeholder="none" style="width:80px;"></div>
+              <label style="display:flex;align-items:center;gap:0.3em;cursor:pointer;margin-left:0.5em;"><input type="checkbox" id="kmComboSlowRelease"> Slow Release</label>
+            </div>
+            <p style="font-size:0.82em;color:var(--muted);margin:0.4em 0 0.2em;">Click keys to select combo trigger positions:</p>
+            <div class="combo-mini-kb" id="comboMiniKb"></div>
+          </div>
+          <div class="km-popup-footer">
+            <button id="kmComboSaveBtn">&#10003; Save Combo</button>
+            <button id="kmComboCancelBtn2" style="background:var(--muted);">Cancel</button>
+          </div>
         </div>
       </div>
 
@@ -737,10 +864,26 @@
           <div class="input-row">
             <button id="kmAddMacroBtn">+ Add Macro</button>
           </div>
-          <div id="kmMacroEditor" style="display:none;">
+          <div class="km-search-wrap" id="macroListSearchWrap" style="margin-top:0.4em;">
+            <span class="search-icon">&#128269;</span>
+            <input type="text" id="macroListSearch" placeholder="Filter macros...">
+            <button class="search-clear" id="macroListSearchClear" style="display:none;">&times;</button>
+          </div>
+          <div class="item-list" id="kmMacroList"></div>
+        </div>
+      </div>
+
+      <!-- Macro editor popup overlay -->
+      <div class="km-popup-overlay" id="kmMacroOverlay">
+        <div class="km-popup-dialog" style="width:600px;">
+          <div class="km-popup-header">
+            <h3>&#9881; Edit Macro</h3>
+            <button class="km-popup-close" id="kmMacroCancelBtn">&times;</button>
+          </div>
+          <div class="km-popup-body">
             <div class="input-row">
-              <div class="input-group"><label>Name</label><input type="text" id="kmMacroName" style="width:140px;"></div>
-              <div class="input-group"><label>Label</label><input type="text" id="kmMacroLabel" style="width:140px;"></div>
+              <div class="input-group"><label>Name</label><input type="text" id="kmMacroName" style="width:160px;"></div>
+              <div class="input-group"><label>Label</label><input type="text" id="kmMacroLabel" style="width:160px;"></div>
               <div class="input-group"><label>Params</label>
                 <select id="kmMacroParamType">
                   <option value="0">None (0 params)</option>
@@ -753,16 +896,22 @@
               <label>Wait (ms) <input type="number" id="kmMacroWaitMs" value="" min="0" placeholder="default" title="Default macro wait time between steps"></label>
               <label>Tap (ms) <input type="number" id="kmMacroTapMs" value="" min="0" placeholder="default" title="Default macro tap time for keypresses"></label>
             </div>
-            <p style="font-size:0.78em;color:var(--muted);margin:0.2em 0;">Each step is a macro action. Use the dropdown to pick the step type, then configure its parameters.</p>
+            <p style="font-size:0.78em;color:var(--muted);margin:0.2em 0;">Each step is a macro action. Use the dropdown to pick the step type.</p>
+            <div class="km-search-wrap">
+              <span class="search-icon">&#128269;</span>
+              <input type="text" id="macroStepSearch" placeholder="Search steps...">
+              <button class="search-clear" id="macroStepSearchClear" style="display:none;">&times;</button>
+            </div>
             <div id="kmMacroSteps" class="item-list"></div>
             <div class="input-row" style="margin-top:0.3em;flex-wrap:wrap;">
               <button id="kmMacroAddStep" class="btn-sm">+ Add Step</button>
               <button id="kmMacroAddString" class="btn-sm" style="background:var(--success);">+ String Sequence</button>
-              <button id="kmMacroSaveBtn">Save</button>
-              <button id="kmMacroCancelBtn" style="background:var(--muted);">Cancel</button>
             </div>
           </div>
-          <div class="item-list" id="kmMacroList"></div>
+          <div class="km-popup-footer">
+            <button id="kmMacroSaveBtn">&#10003; Save</button>
+            <button id="kmMacroCancelBtn2" style="background:var(--muted);">Cancel</button>
+          </div>
         </div>
       </div>
 
@@ -788,9 +937,25 @@
           <div class="input-row">
             <button id="kmAddBehaviorBtn">+ Add Behavior</button>
           </div>
-          <div id="kmBehaviorEditor" style="display:none;">
+          <div class="km-search-wrap" id="behaviorListSearchWrap" style="margin-top:0.4em;">
+            <span class="search-icon">&#128269;</span>
+            <input type="text" id="behaviorListSearch" placeholder="Filter behaviors...">
+            <button class="search-clear" id="behaviorListSearchClear" style="display:none;">&times;</button>
+          </div>
+          <div class="item-list" id="kmBehaviorList"></div>
+        </div>
+      </div>
+
+      <!-- Behavior editor popup overlay -->
+      <div class="km-popup-overlay" id="kmBehaviorOverlay">
+        <div class="km-popup-dialog" style="width:580px;">
+          <div class="km-popup-header">
+            <h3>&#128260; Edit Behavior</h3>
+            <button class="km-popup-close" id="kmBehaviorCancelBtn">&times;</button>
+          </div>
+          <div class="km-popup-body">
             <div class="input-row">
-              <div class="input-group"><label>Name</label><input type="text" id="kmBehaviorName" style="width:140px;"></div>
+              <div class="input-group"><label>Name</label><input type="text" id="kmBehaviorName" style="width:160px;"></div>
               <div class="input-group"><label>Type</label>
                 <select id="kmBehaviorType">
                   <option value="hold-tap">Hold-Tap</option>
@@ -803,15 +968,16 @@
                   <option value="sensor-rotate">Sensor Rotation</option>
                 </select>
               </div>
-              <div class="input-group"><label>Label</label><input type="text" id="kmBehaviorLabel" style="width:140px;"></div>
+              <div class="input-group"><label>Label</label><input type="text" id="kmBehaviorLabel" style="width:160px;"></div>
             </div>
             <div id="kmBehaviorConfig"></div>
-            <div class="input-row" style="margin-top:0.3em;">
-              <button id="kmBehaviorSaveBtn">Save</button>
-              <button id="kmBehaviorCancelBtn" style="background:var(--muted);">Cancel</button>
-            </div>
+            <datalist id="behBindingDL"></datalist>
+            <datalist id="behModsDL"></datalist>
           </div>
-          <div class="item-list" id="kmBehaviorList"></div>
+          <div class="km-popup-footer">
+            <button id="kmBehaviorSaveBtn">&#10003; Save</button>
+            <button id="kmBehaviorCancelBtn2" style="background:var(--muted);">Cancel</button>
+          </div>
         </div>
       </div>
 
@@ -825,26 +991,41 @@
           <div class="input-row">
             <button id="kmAddCondLayerBtn">+ Add Conditional Layer</button>
           </div>
-          <div id="kmCondLayerEditor" style="display:none;">
+          <div class="km-search-wrap" id="condLayerListSearchWrap" style="margin-top:0.4em;">
+            <span class="search-icon">&#128269;</span>
+            <input type="text" id="condLayerListSearch" placeholder="Filter layers...">
+            <button class="search-clear" id="condLayerListSearchClear" style="display:none;">&times;</button>
+          </div>
+          <div class="item-list" id="kmCondLayerList"></div>
+        </div>
+      </div>
+
+      <!-- Conditional layer editor popup overlay -->
+      <div class="km-popup-overlay" id="kmCondLayerOverlay">
+        <div class="km-popup-dialog" style="width:440px;">
+          <div class="km-popup-header">
+            <h3>&#128256; Edit Conditional Layer</h3>
+            <button class="km-popup-close" id="kmCondCancelBtn">&times;</button>
+          </div>
+          <div class="km-popup-body">
             <div class="input-row">
-              <div class="input-group"><label>Condition name</label><input type="text" id="kmCondName" placeholder="tri_layer" style="width:140px;"></div>
+              <div class="input-group"><label>Condition name</label><input type="text" id="kmCondName" placeholder="tri_layer" style="width:180px;"></div>
             </div>
             <div class="input-row">
               <div class="input-group"><label>When these layers are active</label>
-                <select id="kmCondIfLayers" multiple style="width:220px;min-height:70px;"></select>
+                <select id="kmCondIfLayers" multiple style="width:100%;min-height:90px;"></select>
               </div>
             </div>
             <div class="input-row">
               <div class="input-group"><label>Activate this layer</label>
-                <select id="kmCondThenLayer" style="width:220px;"></select>
+                <select id="kmCondThenLayer" style="width:100%;"></select>
               </div>
             </div>
-            <div class="input-row" style="margin-top:0.3em;">
-              <button id="kmCondSaveBtn">Okay</button>
-              <button id="kmCondCancelBtn" style="background:var(--muted);">Cancel</button>
-            </div>
           </div>
-          <div class="item-list" id="kmCondLayerList"></div>
+          <div class="km-popup-footer">
+            <button id="kmCondSaveBtn">&#10003; Save</button>
+            <button id="kmCondCancelBtn2" style="background:var(--muted);">Cancel</button>
+          </div>
         </div>
       </div>
 
@@ -1005,7 +1186,7 @@
 
 // --- RGB Tab data (filled when you parse .dtsi code) ---
 var layers = [];            // Each entry: { name, index, h, s, b, label } — one per keyboard layer
-var macros = [];            // RGB macro definitions (MOMENTARY_RGB_MACRO, etc.)
+var macros = [];            // RGB macro definitions (MO_RGB, TO_RGB, etc.)
 var behaviors = [];         // RGB tab behavior references
 var combos = [];            // RGB tab combo definitions
 var blinkMacros = [];       // Blink macro LED sequences
@@ -1120,10 +1301,10 @@ function fullRender() {
   editingCondLayerIndex = -1;
   editingSensorIndex = -1;
   document.getElementById('bindingEditor').classList.remove('visible');
-  var kmComboEd = document.getElementById('kmComboEditor'); if (kmComboEd) kmComboEd.style.display = 'none';
-  var kmMacroEd = document.getElementById('kmMacroEditor'); if (kmMacroEd) kmMacroEd.style.display = 'none';
-  var kmBehEd = document.getElementById('kmBehaviorEditor'); if (kmBehEd) kmBehEd.style.display = 'none';
-  var kmCondEd = document.getElementById('kmCondLayerEditor'); if (kmCondEd) kmCondEd.style.display = 'none';
+  document.getElementById('kmComboOverlay').classList.remove('visible');
+  document.getElementById('kmMacroOverlay').classList.remove('visible');
+  document.getElementById('kmBehaviorOverlay').classList.remove('visible');
+  document.getElementById('kmCondLayerOverlay').classList.remove('visible');
   var sensorOverlay = document.getElementById('sensorModalOverlay'); if (sensorOverlay) sensorOverlay.style.display = 'none';
   renderLayerTabs();
   renderKeyboardSvg('keyboardSvg');
@@ -1371,7 +1552,7 @@ var BUILTIN_BEHAVIORS = [
 //   hexToRgb(hex) — turns a #hex color into r,g,b numbers
 //   rgbToHsb(r,g,b) — turns r,g,b numbers into h,s,b
 //   hasHsbVal(v) — checks if a value is non-empty
-//   baseKey(name) — strips "LAYER_" or "RGB_" prefix from a name
+//   baseKey(name) — strips "L_" or "RGB_" prefix from a name
 //   esc(str) — makes a string safe for HTML (prevents code injection)
 // More on this code can be found in 'RefDoc' line 232
 // ================================================================
@@ -1404,7 +1585,7 @@ function rgbToHsb(r, g, b) {
   return { h: Math.round(h), s: Math.round(s * 100), b: Math.round(v * 100) };
 }
 function hasHsbVal(v) { return v !== '' && v !== undefined && v !== null; }
-function baseKey(name) { return name.replace(/^LAYER_/i, '').replace(/^RGB_/i, '').toUpperCase(); }
+function baseKey(name) { return name.replace(/^L_/i, '').replace(/^RGB_/i, '').toUpperCase(); }
 function esc(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // ================================================================
@@ -1750,11 +1931,11 @@ function parseUserCode() {
     colorLabelMap[m[1]] = (m[5] || m[6] || '').trim();
   }
 
-  var layerRe = /^#define\s+(LAYER_[A-Za-z0-9_]+)\s+(\d+)\s*$/gm;
+  var layerRe = /^#define\s+(L_[A-Za-z0-9_]+)\s+(\d+)\s*$/gm;
   var foundLayer = false;
   while ((m = layerRe.exec(code))) {
     foundLayer = true;
-    var stripped = m[1].replace(/^LAYER_/, '');
+    var stripped = m[1].replace(/^L_/, '');
     var cv = colorValueMap['RGB_' + stripped] || colorValueMap[stripped] || colorValueMap[m[1]];
     var cl = colorLabelMap['RGB_' + stripped] || colorLabelMap[stripped] || colorLabelMap[m[1]] || '';
     layers.push({ name: m[1], index: m[2], h: cv ? String(cv.h) : '', s: cv ? String(cv.s) : '', b: cv ? String(cv.b) : '', label: cl });
@@ -1762,8 +1943,8 @@ function parseUserCode() {
   if (!foundLayer) {
     layerRe = /^#define\s+([A-Za-z0-9_]+)\s+(\d+)\s*$/gm;
     while ((m = layerRe.exec(code))) {
-      var cv2 = colorValueMap[m[1]];
-      var cl2 = colorLabelMap[m[1]] || '';
+      var cv2 = colorValueMap['RGB_' + m[1]] || colorValueMap[m[1]];
+      var cl2 = colorLabelMap['RGB_' + m[1]] || colorLabelMap[m[1]] || '';
       layers.push({ name: m[1], index: m[2], h: cv2 ? String(cv2.h) : '', s: cv2 ? String(cv2.s) : '', b: cv2 ? String(cv2.b) : '', label: cl2 });
     }
   }
@@ -1799,47 +1980,55 @@ function parseUserCode() {
   var codeNoHelpers = code.replace(/^#define\s+[A-Za-z0-9_]+\([^)]*\)\s*\\[\s\S]*?(?:\n(?!.*\\)\s*[^\n]*)/gm, '');
 
   // Parse macro section comments (// and /* */ lines preceding each macro call)
+  // Handles multi-line /* ... */ blocks that span several lines
   var macroSectionComments = {};
   var macroSectionMatch = codeNoHelpers.match(/macros\s*\{([\s\S]*?)\};/);
   if (macroSectionMatch) {
     var mLines = macroSectionMatch[1].split('\n');
     var pendingComments = [];
+    var inBlockComment = false;
     for (var mi = 0; mi < mLines.length; mi++) {
       var mline = mLines[mi].trim();
       if (!mline) continue;
-      if (mline.startsWith('//') || mline.startsWith('/*')) {
+      if (inBlockComment) {
         pendingComments.push(mline);
+        if (mline.indexOf('*/') !== -1) inBlockComment = false;
+      } else if (mline.startsWith('//') || mline.startsWith('/*')) {
+        pendingComments.push(mline);
+        if (mline.startsWith('/*') && mline.indexOf('*/') === -1) inBlockComment = true;
       } else if (pendingComments.length > 0) {
-        var mcName = mline.match(/(?:MOMENTARY_RGB_MACRO|TO_RGB_MACRO|TO_RGB_PRESS_MACRO)\(\s*([^,\s]+)/);
+        var mcName = mline.match(/(?:MO_BLINK|MO_RGB|TO_RGB|TO_RGB_PRESS)\(\s*([^,\s]+)/);
         if (mcName) macroSectionComments[mcName[1]] = pendingComments.join('\n');
         pendingComments = [];
       }
     }
   }
 
-  var macroRe = /(TO_RGB_MACRO|MOMENTARY_RGB_MACRO|TO_RGB_PRESS_MACRO)\(([^)]+)\)/g;
+  var macroRe = /(TO_RGB_PRESS|TO_RGB|MO_BLINK|MO_RGB)\(([^)]+)\)/g;
   while ((m = macroRe.exec(codeNoHelpers))) {
     var args = m[2].split(',').map(function(x) { return x.trim(); });
     var macroLabel = (args[1] || '').replace(/^"|"$/g, '').trim();
-    if (m[1] === 'MOMENTARY_RGB_MACRO') {
-      macros.push({ name: args[0], type: m[1], layer: args[2] || '', color: args[3] || '', releaseColor: args[4] || '', label: macroLabel, comment: macroSectionComments[args[0]] || '' });
+    if (m[1] === 'MO_BLINK') {
+      macros.push({ name: args[0], type: 'MO_BLINK', layer: args[2] || '', color: '', releaseColor: '', blinkColor: args[3] || '', returnColor: args[4] || '', wait: args[5] || '80', label: macroLabel, comment: macroSectionComments[args[0]] || '' });
+    } else if (m[1] === 'MO_RGB') {
+      macros.push({ name: args[0], type: m[1], layer: args[2] || '', color: args[3] || '', releaseColor: args[4] || '', blinkColor: '', returnColor: '', wait: '', label: macroLabel, comment: macroSectionComments[args[0]] || '' });
     } else {
-      macros.push({ name: args[0], type: m[1], layer: args[2] || '', color: args[3] || '', releaseColor: '', label: macroLabel, comment: macroSectionComments[args[0]] || '' });
+      macros.push({ name: args[0], type: m[1], layer: args[2] || '', color: args[3] || '', releaseColor: '', blinkColor: '', returnColor: '', wait: '', label: macroLabel, comment: macroSectionComments[args[0]] || '' });
     }
   }
 
-  var behRe = /RGB_HOLD_TAP\(([^)]+)\)/g;
+  var behRe = /RGB_HT\(([^)]+)\)/g;
   while ((m = behRe.exec(codeNoHelpers))) {
     var bargs = m[1].split(',').map(function(x) { return x.trim(); });
     behaviors.push({ name: bargs[0], label: (bargs[1] || '').replace(/"/g, ''), macro: bargs[2] || '' });
   }
 
-  var comboRe = /COMBO\(([^)]+)\)/g;
+  var comboRe = /C\(([^)]+)\)/g;
   while ((m = comboRe.exec(codeNoHelpers))) {
     var cargs = m[1].split(',').map(function(x) { return x.trim(); });
     var pos, layersStr;
     if (cargs.length > 3 && /^\d+$/.test(cargs[3])) {
-      pos = cargs[2] + ', ' + cargs[3];
+      pos = cargs[2] + ' ' + cargs[3];
       layersStr = cargs.slice(4).join(' ');
     } else {
       pos = cargs[2] || '';
@@ -1871,15 +2060,15 @@ function parseUserCode() {
     blinkMacros.push({ name: bname, key: bkey, color: bcolor, returnColor: breturnColor, wait: bwait, label: blabel });
   }
 
-  // Parse native ZMK behaviors from dtsi (hold-tap, tap-dance, mod-morph, sticky-key, sensor-rotate)
-  var dtsiBehRe = /(\w+)\s*:\s*\w+\s*\{([^}]*compatible\s*=\s*"zmk,behavior-[^"]*"[^}]*)\}/g;
+  // Parse native ZMK behaviors from dtsi (hold-tap, tap-dance, mod-morph, sticky-key, sensor-rotate, macros)
+  var dtsiBehRe = /(\w+)\s*:\s*(\w+)\s*\{([^}]*compatible\s*=\s*"zmk,behavior-[^"]*"[^}]*)\}/g;
   var dbm;
   var rgbBehNames = {};
   behaviors.forEach(function(b) { rgbBehNames[b.name] = true; });
   while ((dbm = dtsiBehRe.exec(codeNoHelpers))) {
     var dbname = dbm[1];
-    if (rgbBehNames[dbname]) continue; // skip RGB_HOLD_TAP behaviors already parsed
-    var dbbody = dbm[2];
+    if (rgbBehNames[dbname]) continue; // skip RGB_HT behaviors already parsed
+    var dbbody = dbm[3];
     var dbcompat = dbbody.match(/compatible\s*=\s*"([^"]*)"/);
     if (!dbcompat) continue;
     var dblabel = dbbody.match(/label\s*=\s*"([^"]*)"/);
@@ -1912,11 +2101,11 @@ function parseUserCode() {
       var dst = dbbody.match(/tap-ms\s*=\s*<(\d+)>/);
       dbconfig = { sensorCW: dbn5 ? dbn5[1].trim() : '', sensorCCW: dbn5 ? dbn5[2].trim() : '', sensorTap: dst ? dst[1] : '' };
     } else if (dbcompat[1] === 'zmk,behavior-macro-one-param' || dbcompat[1] === 'zmk,behavior-macro-two-param') {
-      continue; // macros handled separately
+      dbtype = dbcompat[1] === 'zmk,behavior-macro-one-param' ? 'macro-one-param' : 'macro-two-param';
     } else {
       continue;
     }
-    dtsiNativeBehaviors.push({ name: dbname, type: dbtype, label: dblabel ? dblabel[1] : '', config: dbconfig, _fromDtsi: true });
+    dtsiNativeBehaviors.push({ name: dbname, type: dbtype, label: dblabel ? dblabel[1] : '', config: dbconfig, _fromDtsi: true, _rawText: dbm[0] });
   }
 
   // Sort layers by index so they display in sequential order (0, 1, 2...)
@@ -2018,12 +2207,17 @@ function renderMacroList() {
   macros.forEach(function(m, i) {
     var div = document.createElement('div');
     div.className = 'item';
-    var isToggle = (m.type === 'TO_RGB_MACRO' || m.type === 'TO_RGB_PRESS_MACRO');
-    var typeLabel = m.type === 'TO_RGB_MACRO' ? 'TO_RGB' : m.type === 'MOMENTARY_RGB_MACRO' ? 'MO_RGB' : 'TO_PRESS';
+    var typeLabel = m.type === 'TO_RGB' ? 'TO_RGB' : m.type === 'MO_RGB' ? 'MO_RGB' : m.type === 'MO_BLINK' ? 'MO_BLINK \u26A0' : 'TO_PRESS';
+    var infoStr;
+    if (m.type === 'MO_BLINK') {
+      infoStr = 'L:' + esc(m.layer) + ' B:' + esc(m.blinkColor || '') + ' R:' + esc(m.returnColor || '') + ' W:' + esc(m.wait || '80');
+    } else {
+      infoStr = 'L:' + esc(m.layer) + ' C:' + esc(m.color) + (m.releaseColor ? ' R:' + esc(m.releaseColor) : '');
+    }
     div.innerHTML =
       '<b>' + esc(m.name) + '</b>' +
       '<span style="color:#888;font-size:0.85em;margin:0 6px;">' + typeLabel + '</span>' +
-      '<span style="color:#aaa;font-size:0.85em;">L:' + esc(m.layer) + ' C:' + esc(m.color) + (m.releaseColor ? ' R:' + esc(m.releaseColor) : '') + '</span>' +
+      '<span style="color:#aaa;font-size:0.85em;">' + infoStr + '</span>' +
       '<button class="btn-sm" data-edit-macro="' + i + '" style="margin-left:auto;padding:2px 8px;background:#3a3a5a;color:#e0e0e0;border:1px solid #555;border-radius:4px;cursor:pointer;">&#9998; Edit</button>' +
       '<button class="btn-danger btn-sm" data-remove="macro" data-i="' + i + '" style="margin-left:4px;">&#10005;</button>';
     list.appendChild(div);
@@ -2040,14 +2234,21 @@ function openMacroEditor(idx) {
   macroEditorIndex = idx;
   var m = macros[idx];
   var overlay = document.getElementById('macroEditorOverlay');
+  var isBlink = m.type === 'MO_BLINK';
   document.getElementById('meditName').value = m.name;
   document.getElementById('meditType').value = m.type;
   document.getElementById('meditLayer').innerHTML = layerOptionsHTML(m.layer);
   document.getElementById('meditColor').innerHTML = colorOptionsHTML(m.color);
   document.getElementById('meditReleaseColor').innerHTML = colorOptionsHTML(m.releaseColor);
+  document.getElementById('meditBlinkColor').innerHTML = colorOptionsHTML(m.blinkColor || '');
+  document.getElementById('meditBlinkReturn').innerHTML = colorOptionsHTML(m.returnColor || '');
+  document.getElementById('meditBlinkWait').value = m.wait || '80';
   var releaseGroup = document.getElementById('meditReleaseGroup');
-  if (m.type === 'MOMENTARY_RGB_MACRO') releaseGroup.style.display = '';
-  else releaseGroup.style.display = 'none';
+  releaseGroup.style.display = m.type === 'MO_RGB' ? '' : 'none';
+  document.getElementById('meditColor').parentElement.style.display = isBlink ? 'none' : '';
+  document.getElementById('meditBlinkColorGroup').classList.toggle('hidden', !isBlink);
+  document.getElementById('meditBlinkReturnGroup').classList.toggle('hidden', !isBlink);
+  document.getElementById('meditBlinkWaitGroup').classList.toggle('hidden', !isBlink);
   overlay.style.display = 'flex';
 }
 
@@ -2056,23 +2257,91 @@ function closeMacroEditor() {
   macroEditorIndex = -1;
 }
 
+// ---- COMBO EDITOR POPUP ----
+var comboEditorIndex = -1;
+var ceditSelectedPositions = [];
+
+function openComboEditor(idx) {
+  comboEditorIndex = idx;
+  var c = combos[idx];
+  document.getElementById('ceditName').value = c.name;
+  document.getElementById('ceditBind').value = c.bind;
+  // Layer picker
+  document.getElementById('ceditLayerPicker').innerHTML = '<option value="">+ Add layer</option>' + layerOptionsHTML('');
+  // Layer tags
+  ceditRenderLayerTags(c.layers);
+  // Mini-kb positions
+  var posStr = (c.pos || '').trim();
+  ceditSelectedPositions = posStr ? posStr.split(/[\s,]+/).map(Number).filter(function(n) { return !isNaN(n); }) : [];
+  ceditRenderMiniKb();
+  document.getElementById('comboEditorOverlay').style.display = 'flex';
+}
+
+function closeComboEditor() {
+  document.getElementById('comboEditorOverlay').style.display = 'none';
+  comboEditorIndex = -1;
+}
+
+function ceditRenderLayerTags(layersStr) {
+  var tagsEl = document.getElementById('ceditLayerTags');
+  var parts = (layersStr || '').trim() ? layersStr.trim().split(/\s+/) : [];
+  tagsEl.innerHTML = parts.map(function(p) {
+    return '<span class="layer-tag">' + esc(p) + '<span class="tag-x" data-layer="' + esc(p) + '">&times;</span></span>';
+  }).join('');
+}
+
+function ceditGetLayers() {
+  var tags = document.getElementById('ceditLayerTags').querySelectorAll('.layer-tag');
+  var parts = [];
+  tags.forEach(function(t) {
+    var txt = t.childNodes[0].textContent.trim();
+    if (txt) parts.push(txt);
+  });
+  return parts.join(' ');
+}
+
+function ceditRenderMiniKb() {
+  var container = document.getElementById('ceditMiniKb');
+  if (!keyboardLayout) { container.innerHTML = '<em>No layout loaded</em>'; return; }
+  container.innerHTML = '<svg class="keyboard-svg combo-mini-kb-svg" id="ceditMiniSvg"></svg>';
+  renderKeyboardSvg('ceditMiniSvg', { scale: 36, keySize: 33, comboMode: true, comboPositions: ceditSelectedPositions });
+}
+
+// ---- BEHAVIOR EDITOR POPUP ----
+var behaviorEditorIndex = -1;
+
+function openBehaviorEditor(idx) {
+  behaviorEditorIndex = idx;
+  var b = behaviors[idx];
+  document.getElementById('beditName').value = b.name;
+  document.getElementById('beditLabel').value = b.label;
+  document.getElementById('beditMacro').innerHTML = macroRefOptionsHTML(b.macro);
+  document.getElementById('behaviorEditorOverlay').style.display = 'flex';
+}
+
+function closeBehaviorEditor() {
+  document.getElementById('behaviorEditorOverlay').style.display = 'none';
+  behaviorEditorIndex = -1;
+}
+
 function renderBehaviorList() {
   var list = document.getElementById('behaviorList');
   list.innerHTML = '';
   behaviors.forEach(function(b, i) {
     var div = document.createElement('div');
     div.className = 'item';
+    var macroLabel = b.macro || '—';
     div.innerHTML =
       '<b>' + esc(b.name) + '</b>' +
-      '<div class="input-group"><label>Label</label><input type="text" value="' + esc(b.label) + '" data-field="label" data-i="' + i + '" style="width:140px"></div>' +
-      '<div class="input-group"><label>Macro</label><select data-field="macro" data-i="' + i + '">' + macroRefOptionsHTML(b.macro) + '</select></div>' +
+      '<span class="item-detail">' + esc(b.label) + '</span>' +
+      '<span class="item-detail muted">&rarr; ' + esc(macroLabel) + '</span>' +
+      '<button class="btn-edit btn-sm" data-edit="behavior" data-i="' + i + '">&#9998; Edit</button>' +
       '<button class="btn-danger btn-sm" data-remove="behavior" data-i="' + i + '">&#10005;</button>';
     list.appendChild(div);
   });
-  list.onclick = function(e) { if (e.target.dataset.remove === 'behavior') { behaviors.splice(parseInt(e.target.dataset.i), 1); rgbRenderAll(); } };
-  list.oninput = function(e) {
-    var idx = parseInt(e.target.dataset.i), field = e.target.dataset.field;
-    if (field !== undefined && !isNaN(idx)) { behaviors[idx][field] = e.target.value; updateRgbOutput(); }
+  list.onclick = function(e) {
+    if (e.target.dataset.remove === 'behavior') { behaviors.splice(parseInt(e.target.dataset.i), 1); rgbRenderAll(); }
+    if (e.target.dataset.edit === 'behavior') { openBehaviorEditor(parseInt(e.target.dataset.i)); }
   };
 }
 
@@ -2084,56 +2353,20 @@ function renderComboList() {
     div.className = 'item';
     var layerParts = (c.layers || '').trim() ? c.layers.trim().split(/\s+/) : [];
     var tagsHtml = layerParts.map(function(p) {
-      return '<span class="layer-tag">' + esc(p) + '<span class="tag-x" data-layer="' + esc(p) + '" data-i="' + i + '">&times;</span></span>';
-    }).join('');
+      return '<span class="layer-tag">' + esc(p) + '</span>';
+    }).join(' ');
     div.innerHTML =
       '<b>' + esc(c.name) + '</b>' +
-      '<div class="input-group"><label>Bind</label><input type="text" value="' + esc(c.bind) + '" data-field="bind" data-i="' + i + '" style="width:120px"></div>' +
-      '<div class="input-group"><label>Pos</label><input type="text" value="' + esc(c.pos) + '" data-field="pos" data-i="' + i + '" style="width:55px;cursor:pointer;" readonly title="Click to edit on keyboard"></div>' +
-      '<div class="input-group"><label>Layers</label><select data-field="layerpick" data-i="' + i + '" style="width:120px;cursor:pointer;" title="Pick a layer to add"><option value="">+ Add layer</option>' + layerOptionsHTML('') + '</select><span class="layer-tags" data-tags="' + i + '">' + tagsHtml + '</span></div>' +
+      '<span class="item-detail">' + esc(c.bind) + '</span>' +
+      '<span class="item-detail muted">P:' + esc(c.pos) + '</span>' +
+      '<span class="item-tags">' + tagsHtml + '</span>' +
+      '<button class="btn-edit btn-sm" data-edit="combo" data-i="' + i + '">&#9998; Edit</button>' +
       '<button class="btn-danger btn-sm" data-remove="combo" data-i="' + i + '">&#10005;</button>';
     list.appendChild(div);
   });
   list.onclick = function(e) {
     if (e.target.dataset.remove === 'combo') { combos.splice(parseInt(e.target.dataset.i), 1); rgbRenderAll(); }
-    // Click on Pos field to open mini-kb for that combo
-    if (e.target.dataset.field === 'pos' && e.target.readOnly) {
-      var ci = parseInt(e.target.dataset.i);
-      rgbEditingComboIndex = ci;
-      var posStr = combos[ci].pos || '';
-      rgbComboSelectedPositions = posStr.split(/[\s,]+/).map(Number).filter(function(n) { return !isNaN(n); });
-      document.getElementById('rgbComboMiniKbWrap').style.display = '';
-      renderRgbComboMiniKb();
-    }
-    // Remove layer tag from inline combo row
-    if (e.target.classList.contains('tag-x') && e.target.dataset.i !== undefined) {
-      var idx = parseInt(e.target.dataset.i);
-      var layer = e.target.dataset.layer;
-      if (combos[idx]) {
-        var parts = (combos[idx].layers || '').trim().split(/\s+/).filter(function(p) { return p !== layer; });
-        combos[idx].layers = parts.join(' ');
-        rgbRenderAll();
-      }
-    }
-  };
-  list.oninput = function(e) {
-    var idx = parseInt(e.target.dataset.i), field = e.target.dataset.field;
-    if (field !== undefined && !isNaN(idx)) { combos[idx][field] = e.target.value; updateRgbOutput(); }
-  };
-  list.onchange = function(e) {
-    if (e.target.dataset.field === 'layerpick') {
-      var sel = e.target;
-      if (!sel.value) return;
-      var idx = parseInt(sel.dataset.i);
-      var cur = (combos[idx].layers || '').trim();
-      var parts = cur ? cur.split(/\s+/) : [];
-      if (parts.indexOf(sel.value) < 0) {
-        parts.push(sel.value);
-        combos[idx].layers = parts.join(' ');
-        rgbRenderAll();
-      }
-      sel.value = '';
-    }
+    if (e.target.dataset.edit === 'combo') { openComboEditor(parseInt(e.target.dataset.i)); }
   };
 }
 
@@ -2174,6 +2407,8 @@ function updateHeaderDropdowns() {
   var colorOpts = colorOptionsHTML('');
   document.getElementById('macroColor').innerHTML = colorOpts;
   document.getElementById('macroReleaseColor').innerHTML = colorOpts;
+  document.getElementById('macroBlinkColor').innerHTML = colorOpts;
+  document.getElementById('macroBlinkReturn').innerHTML = colorOpts;
   document.getElementById('blinkColor').innerHTML = colorOpts;
   document.getElementById('blinkReturnColor').innerHTML = colorOpts;
   document.getElementById('behaviorMacro').innerHTML = macroRefOptionsHTML('');
@@ -2183,8 +2418,11 @@ function updateHeaderDropdowns() {
   renderComboLayerTags();
   var macroTypeEl = document.getElementById('macroType');
   var releaseGroup = document.getElementById('releaseColorGroup');
-  if (macroTypeEl.value === 'MOMENTARY_RGB_MACRO') releaseGroup.classList.remove('hidden');
+  var isBlink = macroTypeEl.value === 'MO_BLINK';
+  if (macroTypeEl.value === 'MO_RGB') releaseGroup.classList.remove('hidden');
   else releaseGroup.classList.add('hidden');
+  document.querySelectorAll('.blink-field').forEach(function(el) { el.classList.toggle('hidden', !isBlink); });
+  document.getElementById('macroColor').parentElement.style.display = isBlink ? 'none' : '';
 }
 
 function renderComboLayerTags() {
@@ -2203,9 +2441,25 @@ function addLayer() {
   layers.push({ name: name, index: idxVal, h: document.getElementById('hue').value, s: document.getElementById('sat').value, b: document.getElementById('bri').value, label: document.getElementById('layerLabel').value });
   rgbRenderAll();
 }
+function autoPrefix(name, type) {
+  if (type === 'TO_RGB' && !name.startsWith('to_')) return 'to_' + name;
+  if (type === 'TO_RGB_PRESS' && !name.startsWith('top_')) return 'top_' + name;
+  return name;
+}
 function addMacro() {
   var type = document.getElementById('macroType').value;
-  macros.push({ name: document.getElementById('macroName').value.trim() || 'new_macro', type: type, layer: document.getElementById('macroLayer').value, color: document.getElementById('macroColor').value, releaseColor: type === 'MOMENTARY_RGB_MACRO' ? document.getElementById('macroReleaseColor').value : '' });
+  var rawName = document.getElementById('macroName').value.trim() || 'new_macro';
+  var name = autoPrefix(rawName, type);
+  var obj = { name: name, type: type, layer: document.getElementById('macroLayer').value, color: '', releaseColor: '', blinkColor: '', returnColor: '', wait: '' };
+  if (type === 'MO_BLINK') {
+    obj.blinkColor = document.getElementById('macroBlinkColor').value;
+    obj.returnColor = document.getElementById('macroBlinkReturn').value;
+    obj.wait = document.getElementById('macroBlinkWait').value || '80';
+  } else {
+    obj.color = document.getElementById('macroColor').value;
+    obj.releaseColor = type === 'MO_RGB' ? document.getElementById('macroReleaseColor').value : '';
+  }
+  macros.push(obj);
   rgbRenderAll();
 }
 function addBehavior() {
@@ -2232,7 +2486,7 @@ function addBlinkMacro() {
 
 function updateColorMapFromLayer(i) {
   var l = layers[i];
-  var ck = l.name.replace(/^LAYER_/, '');
+  var ck = l.name.replace(/^L_/, '');
   if (hasHsbVal(l.h) && hasHsbVal(l.s) && hasHsbVal(l.b)) {
     colorValueMap['RGB_' + ck] = { h: parseInt(l.h) || 0, s: parseInt(l.s) || 0, b: parseInt(l.b) || 0 };
     colorLabelMap['RGB_' + ck] = l.label || '';
@@ -2259,7 +2513,7 @@ var HELPER_BLINK_SEQ =
   '    &macro_tap &rgb_ug OFF\n';
 
 var HELPER_MOMENTARY =
-  '#define MOMENTARY_RGB_MACRO(node_name, node_label, layer, active_color, release_color) \\\n' +
+  '#define MO_RGB(node_name, node_label, layer, active_color, release_color) \\\n' +
   '        ZMK_MACRO(node_name, \\\n' +
   '            bindings = \\\n' +
   '                <&macro_press>, \\\n' +
@@ -2275,7 +2529,7 @@ var HELPER_MOMENTARY =
   '        )\n';
 
 var HELPER_TO =
-  '#define TO_RGB_MACRO(node_name, node_label, layer, color) \\\n' +
+  '#define TO_RGB(node_name, node_label, layer, color) \\\n' +
   '        ZMK_MACRO(node_name, \\\n' +
   '            bindings = \\\n' +
   '                <&macro_tap>, \\\n' +
@@ -2286,7 +2540,7 @@ var HELPER_TO =
   '        )\n';
 
 var HELPER_TO_PRESS =
-  '#define TO_RGB_PRESS_MACRO(node_name, node_label, layer, color) \\\n' +
+  '#define TO_RGB_PRESS(node_name, node_label, layer, color) \\\n' +
   '        ZMK_MACRO(node_name, \\\n' +
   '            bindings = \\\n' +
   '                <&macro_tap>, \\\n' +
@@ -2297,7 +2551,7 @@ var HELPER_TO_PRESS =
   '        )\n';
 
 var HELPER_HOLD_TAP =
-  '#define RGB_HOLD_TAP(node_name, node_label, macro_ref) \\\n' +
+  '#define RGB_HT(node_name, node_label, macro_ref) \\\n' +
   '        node_name: node_name { \\\n' +
   '            compatible = "zmk,behavior-hold-tap"; \\\n' +
   '            label = node_label; \\\n' +
@@ -2308,8 +2562,19 @@ var HELPER_HOLD_TAP =
   '        };\n';
 
 var HELPER_COMBO =
-  '#define COMBO(name, bind, p1, p2, ...) \\\n' +
+  '#define C(name, bind, p1, p2, ...) \\\n' +
   '    name { bindings = <bind>; key-positions = <p1 p2>; layers = <__VA_ARGS__>; timeout-ms = <50>; }\n';
+
+// EXPERIMENTAL: Momentary-layer + blink sequence helper
+var HELPER_MO_BLINK =
+  '/* EXPERIMENTAL: Momentary + Blink helper (use with RGB_HT) */\n' +
+  '#define MO_BLINK(node_name, node_label, layer, blink_color, return_color, wait) \\\n' +
+  '        ZMK_MACRO(node_name, \\\n' +
+  '            label = node_label; \\\n' +
+  '            bindings = <&macro_press &mo layer BLINK_SEQ(blink_color, return_color, wait)>, \\\n' +
+  '                       <&macro_pause_for_release>, \\\n' +
+  '                       <&macro_release &mo layer>; \\\n' +
+  '        )\n';
 
 // RGB output generation
 // updateRgbOutput() — Generates the .dtsi output text for the RGB tab.
@@ -2359,7 +2624,7 @@ function updateRgbOutput() {
   out += '/* ---- STEP 1: DEFINE LAYERS ---- */\n';
   mergedArr.forEach(function(l) {
     if (l.index !== '') {
-      var name = l.name.startsWith('LAYER_') ? l.name : 'LAYER_' + l.bk;
+      var name = l.name;
       out += '#define ' + name + ' ' + l.index + '\n';
     }
   });
@@ -2407,57 +2672,108 @@ function updateRgbOutput() {
     out += HELPER_TO_PRESS;
     out += HELPER_HOLD_TAP;
     out += HELPER_COMBO;
+    if (macros.some(function(m) { return m.type === 'MO_BLINK'; })) {
+      out += HELPER_MO_BLINK;
+    }
   }
 
-  if (macros.length) {
-    out += '\n/* ---- STEP 2+3: MACROS ---- */\n';
+  var nonBlinkMacros = macros.filter(function(m) { return m.type !== 'MO_BLINK'; });
+  var hasNativeMacroBeh = dtsiNativeBehaviors.some(function(db) { return db.type === 'macro-one-param' || db.type === 'macro-two-param'; });
+  var hasMacroBlock = nonBlinkMacros.length > 0;
+  var hasMacros = macros.length || blinkMacros.length || hasNativeMacroBeh;
+  var hasBehaviors = behaviors.length || dtsiNativeBehaviors.some(function(db) { return db.type !== 'macro-one-param' && db.type !== 'macro-two-param'; });
+  var hasContent = hasMacros || hasBehaviors || combos.length;
+
+  if (hasContent) out += ' /{\n';
+
+  if (hasMacroBlock) {
+    out += '    /* ---- STEP 2+3: MACROS ---- */\n';
+    out += '    macros {\n';
     macros.forEach(function(m) {
-      if (m.comment) out += m.comment + '\n';
+      if (m.type === 'MO_BLINK') return; // MO_BLINK goes outside macros{} block
+      if (m.comment) out += '        ' + m.comment.replace(/\n/g, '\n        ') + '\n';
       var lbl = m.label || m.name;
-      if (m.type === 'MOMENTARY_RGB_MACRO') {
-        out += 'MOMENTARY_RGB_MACRO(' + m.name + ', "' + lbl + '", ' + m.layer + ', ' + m.color + ', ' + m.releaseColor + ')\n';
-      } else if (m.type === 'TO_RGB_PRESS_MACRO') {
-        out += 'TO_RGB_PRESS_MACRO(' + m.name + ', "' + lbl + '", ' + m.layer + ', ' + m.color + ')\n';
+      if (m.type === 'MO_RGB') {
+        out += '        MO_RGB(' + m.name + ', "' + lbl + '", ' + m.layer + ', ' + m.color + ', ' + m.releaseColor + ')\n';
+      } else if (m.type === 'TO_RGB_PRESS') {
+        out += '        TO_RGB_PRESS(' + m.name + ', "' + lbl + '", ' + m.layer + ', ' + m.color + ')\n';
       } else {
-        out += 'TO_RGB_MACRO(' + m.name + ', "' + lbl + '", ' + m.layer + ', ' + m.color + ')\n';
+        out += '        TO_RGB(' + m.name + ', "' + lbl + '", ' + m.layer + ', ' + m.color + ')\n';
+      }
+    });
+    out += '    };\n';
+  }
+
+  // Native macro behaviors (macro-one-param, etc.) go after macros section but inside / {}
+  if (hasNativeMacroBeh) {
+    dtsiNativeBehaviors.forEach(function(db) {
+      if (db.type === 'macro-one-param' || db.type === 'macro-two-param') {
+        out += '    ' + db._rawText.replace(/\n/g, '\n    ') + '\n';
       }
     });
   }
 
   if (blinkMacros.length) {
-    out += '\n/* ---- BLINK/STATUS MACROS ---- */\n';
+    out += '    /* ---- (optional) BLINK/STATUS MACROS ---- */\n';
     var seenBlink = {};
     blinkMacros.forEach(function(bm) {
       if (!bm.color || !bm.returnColor) return;
       if (seenBlink[bm.name]) return;
       seenBlink[bm.name] = true;
-      out += 'ZMK_MACRO(' + bm.name + ',\n';
-      if (bm.label) out += '    label = "' + bm.label + '";\n';
+      out += '    ZMK_MACRO(' + bm.name + ',\n';
+      if (bm.label) out += '        label = "' + bm.label + '";\n';
       if (bm.key.indexOf('&mo') === 0) {
-        // Momentary-style blink: press + pause + release
-        out += '    bindings = <&macro_press ' + bm.key + ' BLINK_SEQ(' + bm.color + ', ' + bm.returnColor + ', ' + bm.wait + ')>,\n';
-        out += '               <&macro_pause_for_release>,\n';
-        out += '               <&macro_release ' + bm.key + '>;\n';
+        out += '        bindings = <&macro_press ' + bm.key + ' BLINK_SEQ(' + bm.color + ', ' + bm.returnColor + ', ' + bm.wait + ')>,\n';
+        out += '                   <&macro_pause_for_release>,\n';
+        out += '                   <&macro_release ' + bm.key + '>;\n';
       } else {
-        out += '    bindings = <&macro_tap &kp ' + bm.key + ' BLINK_SEQ(' + bm.color + ', ' + bm.returnColor + ', ' + bm.wait + ')>;\n';
+        out += '        bindings = <&macro_tap &kp ' + bm.key + ' BLINK_SEQ(' + bm.color + ', ' + bm.returnColor + ', ' + bm.wait + ')>;\n';
       }
-      out += ')\n';
+      out += '    )\n';
     });
   }
 
-  if (behaviors.length) {
-    out += '\n/* ---- STEP 4: BEHAVIORS ---- */\n';
-    behaviors.forEach(function(b) {
-      out += 'RGB_HOLD_TAP(' + b.name + ', "' + b.label + '", ' + b.macro + ')\n';
+  // MO_BLINK macros that are standalone (after macros{} section, like f_blink)
+  var standaloneMoBlink = macros.filter(function(m) { return m.type === 'MO_BLINK'; });
+  if (standaloneMoBlink.length) {
+    standaloneMoBlink.forEach(function(m) {
+      if (m.comment) out += '    ' + m.comment.replace(/\n/g, '\n    ') + '\n';
+      var lbl = m.label || m.name;
+      out += '    MO_BLINK(' + m.name + ', "' + lbl + '", ' + m.layer + ', ' + (m.blinkColor || '') + ', ' + (m.returnColor || '') + ', ' + (m.wait || '80') + ')\n';
     });
+  }
+
+  if (hasBehaviors) {
+    out += '    /* ---- STEP 4: BEHAVIORS - HOLD-TAP ---- */\n';
+    out += '    behaviors {\n';
+    behaviors.forEach(function(b) {
+      out += '        RGB_HT(' + b.name + ', "' + b.label + '", ' + b.macro + ')\n';
+    });
+    // Native behaviors (hold-tap, tap-dance, etc.) inside behaviors section
+    dtsiNativeBehaviors.forEach(function(db) {
+      if (db.type !== 'macro-one-param' && db.type !== 'macro-two-param') {
+        out += '\n        ' + db._rawText.replace(/\n/g, '\n        ') + '\n';
+      }
+    });
+    out += '    };\n';
   }
 
   if (combos.length) {
-    out += '\n/* ---- STEP 5: COMBOS ---- */\n';
+    out += '    /* ---- (OPTIONAL) STEP 5: COMBOS ---- */\n';
+    out += '    combos {\n';
+    out += '        compatible = "zmk,combos";\n';
     combos.forEach(function(c) {
-      out += 'COMBO(' + c.name + ', ' + c.bind + ', ' + c.pos.replace(/\s+/g, ', ') + ', ' + c.layers + ')\n';
+      if (c.comment) out += '        ' + c.comment.replace(/\n/g, '\n        ') + '\n';
+      out += '        C(' + c.name + ', ' + c.bind + ', ' + c.pos.replace(/\s+/g, ', ') + ', ' + c.layers + ');\n';
     });
+    out += '    };\n';
   }
+
+  // Any standalone native behaviors that go after combos (like td_numcaps tap-dance)
+  // These are behaviors placed outside the behaviors{} block in the dtsi
+  // (Already included inside behaviors{} above)
+
+  if (hasContent) out += ' };\n';
 
   document.getElementById('output').value = out;
   var layerCount = mergedArr.filter(function(l) { return l.index !== ''; }).length;
@@ -2641,7 +2957,7 @@ function bindingToLabels(binding) {
   if (behavior === '&out') {
     return { main: (parts[1] || '').replace('OUT_', ''), top: 'OUT' };
   }
-  // Custom behaviors: &hm, &hold_tap_*, &td_*, &f_blink_test, etc.
+  // Custom behaviors: &hm, &RGB_ht_*, &td_*, &f_blink_test, etc.
   var behName = behavior.replace('&', '');
   if (parts.length === 3) {
     // Two-param custom behavior (like hold-tap): show tap key, hold behavior on top
@@ -3076,7 +3392,7 @@ function renderLayerTabs() {
       // Index match (most reliable across name differences)
       if (rl.index !== '' && rl.index !== undefined && String(rl.index) === idxStr) return true;
       // Name match fallbacks
-      if (rl.name === l.name || rl.name === 'LAYER_' + lName) return true;
+      if (rl.name === l.name || rl.name === 'L_' + lName) return true;
       if (dispUpper && baseKey(rl.name) === dispUpper) return true;
       return false;
     });
@@ -3403,7 +3719,7 @@ function showBindingEditor(keyIdx) {
   selectedKeyIndex = keyIdx;
   var editor = document.getElementById('bindingEditor');
   editor.classList.add('visible');
-  document.getElementById('beKeyIndex').textContent = '(Key ' + keyIdx + ')';
+  document.getElementById('beKeyIndex').textContent = 'Key ' + keyIdx;
 
   var binding = keymapLayers[activeLayerIndex].bindings[keyIdx] || '';
   var parts = binding.trim().split(/\s+/);
@@ -4116,6 +4432,51 @@ function toggleBuiltinBehavior(presetId, enable) {
   updateKeymapOutput();
 }
 
+// --- Keymap Combo Layer Picker (tag chips) ---
+function kmComboLayerOptionsHTML() {
+  return keymapLayers.map(function(l, i) {
+    return '<option value="' + i + '">' + esc(l.name || 'Layer ' + i) + ' (' + i + ')</option>';
+  }).join('');
+}
+function kmComboRenderLayerTags(layersStr) {
+  var tagsEl = document.getElementById('kmComboLayerTags');
+  var parts = (layersStr || '').trim() ? layersStr.trim().split(/\s+/) : [];
+  tagsEl.innerHTML = parts.map(function(p) {
+    return '<span class="layer-tag">' + esc(p) + '<span class="tag-x" data-layer="' + esc(p) + '">&times;</span></span>';
+  }).join('');
+}
+function kmComboGetLayers() {
+  var tags = document.getElementById('kmComboLayerTags').querySelectorAll('.layer-tag');
+  var parts = [];
+  tags.forEach(function(t) {
+    var txt = t.childNodes[0].textContent.trim();
+    if (txt) parts.push(txt);
+  });
+  return parts.join(' ');
+}
+
+// --- Behavior binding / modifier datalist helpers ---
+function populateBehDataLists() {
+  var html = '';
+  ZMK_BEHAVIORS.forEach(function(b) {
+    html += '<option value="' + esc(b.name) + '">';
+  });
+  keymapBehaviors.forEach(function(cb) {
+    html += '<option value="&' + esc(cb.name) + '">';
+  });
+  var added = {};
+  keymapMacros.forEach(function(m) {
+    var ref = '&' + m.name;
+    if (!added[ref]) { added[ref] = true; html += '<option value="' + esc(ref) + '">'; }
+  });
+  var dl = document.getElementById('behBindingDL');
+  if (dl) dl.innerHTML = html;
+  var mods = ['MOD_LSFT','MOD_RSFT','MOD_LCTL','MOD_RCTL','MOD_LALT','MOD_RALT','MOD_LGUI','MOD_RGUI'];
+  var mhtml = mods.map(function(m) { return '<option value="' + m + '">'; }).join('');
+  var mdl = document.getElementById('behModsDL');
+  if (mdl) mdl.innerHTML = mhtml;
+}
+
 // showBehaviorConfig(type) — Opens the behavior editor with fields for
 // the selected behavior type (timing, flavor, bindings, etc.).
 // Each type shows different config options relevant to that behavior.
@@ -4125,8 +4486,8 @@ function showBehaviorConfig(type) {
     container.innerHTML =
       '<div class="input-row"><div class="input-group"><label>Tapping Term</label><input type="number" id="kmBehTappingTerm" value="200" min="0" style="width:70px;"> ms</div></div>' +
       '<div class="input-row"><div class="input-group"><label>Flavor</label><select id="kmBehFlavor"><option value="tap-preferred">tap-preferred</option><option value="hold-preferred">hold-preferred</option><option value="balanced">balanced</option></select></div></div>' +
-      '<div class="input-row"><div class="input-group"><label>Hold Binding</label><input type="text" id="kmBehHoldBinding" placeholder="&mo 1" style="width:160px;"></div></div>' +
-      '<div class="input-row"><div class="input-group"><label>Tap Binding</label><input type="text" id="kmBehTapBinding" placeholder="&kp" style="width:160px;"></div></div>' +
+      '<div class="input-row"><div class="input-group"><label>Hold Binding</label><input type="text" id="kmBehHoldBinding" list="behBindingDL" placeholder="&mo 1" style="width:160px;"></div></div>' +
+      '<div class="input-row"><div class="input-group"><label>Tap Binding</label><input type="text" id="kmBehTapBinding" list="behBindingDL" placeholder="&kp" style="width:160px;"></div></div>' +
       '<div class="input-row"><div class="input-group"><label>Quick Tap (ms)</label><input type="number" id="kmBehQuickTap" value="" min="0" placeholder="none" style="width:70px;"></div>' +
       '<div class="input-group"><label>Require Prior Idle (ms)</label><input type="number" id="kmBehRequirePriorIdle" value="" min="0" placeholder="none" style="width:70px;"></div></div>' +
       '<div class="input-row"><div class="input-group"><label>Positional Hold (key positions)</label><input type="text" id="kmBehHoldTriggerPositions" placeholder="0 1 2 3 (blank=off)" style="width:180px;"></div></div>' +
@@ -4143,13 +4504,13 @@ function showBehaviorConfig(type) {
       '<div class="input-row"><div class="input-group"><label>Bindings</label><input type="text" id="kmBehTdBindings" placeholder="<&kp A>, <&kp B>, <&kp C>" style="width:300px;"></div></div>';
   } else if (type === 'mod-morph') {
     container.innerHTML =
-      '<div class="input-row"><div class="input-group"><label>Normal</label><input type="text" id="kmBehMmNormal" placeholder="&kp A" style="width:160px;"></div></div>' +
-      '<div class="input-row"><div class="input-group"><label>Morphed</label><input type="text" id="kmBehMmMorphed" placeholder="&kp B" style="width:160px;"></div></div>' +
-      '<div class="input-row"><div class="input-group"><label>Mods</label><input type="text" id="kmBehMmMods" placeholder="MOD_LSFT" style="width:160px;"></div></div>';
+      '<div class="input-row"><div class="input-group"><label>Normal</label><input type="text" id="kmBehMmNormal" list="behBindingDL" placeholder="&kp A" style="width:160px;"></div></div>' +
+      '<div class="input-row"><div class="input-group"><label>Morphed</label><input type="text" id="kmBehMmMorphed" list="behBindingDL" placeholder="&kp B" style="width:160px;"></div></div>' +
+      '<div class="input-row"><div class="input-group"><label>Mods</label><input type="text" id="kmBehMmMods" list="behModsDL" placeholder="MOD_LSFT" style="width:160px;"></div></div>';
   } else if (type === 'sticky-key') {
     container.innerHTML =
       '<div class="input-row"><div class="input-group"><label>Release After (ms)</label><input type="number" id="kmBehSkRelease" value="1000" min="0" style="width:80px;"></div></div>' +
-      '<div class="input-row"><div class="input-group"><label>Binding</label><input type="text" id="kmBehSkBinding" placeholder="&kp" style="width:160px;"></div></div>' +
+      '<div class="input-row"><div class="input-group"><label>Binding</label><input type="text" id="kmBehSkBinding" list="behBindingDL" placeholder="&kp" style="width:160px;"></div></div>' +
       '<div class="input-row" style="gap:1em;flex-wrap:wrap;">' +
       '<label style="display:flex;align-items:center;gap:0.3em;cursor:pointer;"><input type="checkbox" id="kmBehSkQuickRelease"> Quick Release</label>' +
       '<label style="display:flex;align-items:center;gap:0.3em;cursor:pointer;"><input type="checkbox" id="kmBehSkLazy"> Lazy</label>' +
@@ -4164,8 +4525,8 @@ function showBehaviorConfig(type) {
       '<div class="input-row"><div class="input-group"><label>Bindings</label><input type="text" id="kmBehMacroBindings" placeholder="&macro_tap &kp A &kp B" style="width:300px;"></div></div>';
   } else if (type === 'sensor-rotate') {
     container.innerHTML =
-      '<div class="input-row"><div class="input-group"><label>CW Binding</label><input type="text" id="kmBehSensorCW" placeholder="&kp C_VOL_UP" style="width:160px;"></div></div>' +
-      '<div class="input-row"><div class="input-group"><label>CCW Binding</label><input type="text" id="kmBehSensorCCW" placeholder="&kp C_VOL_DN" style="width:160px;"></div></div>' +
+      '<div class="input-row"><div class="input-group"><label>CW Binding</label><input type="text" id="kmBehSensorCW" list="behBindingDL" placeholder="&kp C_VOL_UP" style="width:160px;"></div></div>' +
+      '<div class="input-row"><div class="input-group"><label>CCW Binding</label><input type="text" id="kmBehSensorCCW" list="behBindingDL" placeholder="&kp C_VOL_DN" style="width:160px;"></div></div>' +
       '<div class="input-row"><div class="input-group"><label>Tap (ms)</label><input type="number" id="kmBehSensorTap" value="" min="0" placeholder="default" style="width:70px;"></div></div>';
   } else if (type === 'key-toggle') {
     container.innerHTML =
@@ -4182,10 +4543,11 @@ function showBehaviorConfig(type) {
     container.innerHTML =
       '<p style="font-size:0.82em;color:var(--muted);margin:0 0 0.3em;">Caps Word capitalizes letters until a break key is pressed. Customize which keys continue the caps-word effect and which modifiers to apply.</p>' +
       '<div class="input-row"><div class="input-group"><label>Continue List</label><input type="text" id="kmBehCwContinueList" placeholder="UNDERSCORE MINUS BSPC" style="width:280px;"></div></div>' +
-      '<div class="input-row"><div class="input-group"><label>Mods</label><input type="text" id="kmBehCwMods" placeholder="MOD_LSFT" style="width:160px;"></div></div>';
+      '<div class="input-row"><div class="input-group"><label>Mods</label><input type="text" id="kmBehCwMods" list="behModsDL" placeholder="MOD_LSFT" style="width:160px;"></div></div>';
   } else {
     container.innerHTML = '';
   }
+  populateBehDataLists();
 }
 
 // ================================================================
@@ -4907,7 +5269,8 @@ function updateKeymapOutput() {
       var sensorParts = layerSensors.map(function(s) { return s.bindings.join(' '); });
       out += '            sensor-bindings = <' + sensorParts.join(' ') + '>;\n';
     }
-    out += '        };\n\n';
+    out += '        };\n';
+    if (li < keymapLayers.length - 1) out += '\n'; // blank line between layers, not after last
     layerMarkers.push({ start: layerStart, end: out.length, layerIndex: li });
   });
   out += '    };\n};\n';
@@ -5077,7 +5440,7 @@ function syncCrossTabData() {
     var dispBase = kl.displayName ? kl.displayName.toUpperCase().replace(/[^A-Z0-9]/g, '_') : '';
     if (existingBaseKeys[klBase] || existingBaseKeys[klBaseStripped] || (dispBase && existingBaseKeys[dispBase])) return;
     // Push as a real layer entry so user can assign RGB color
-    var layerName = 'LAYER_' + (dispBase || klBaseStripped || klBase);
+    var layerName = 'L_' + (dispBase || klBaseStripped || klBase);
     layers.push({
       name: layerName,
       index: idxStr,
@@ -5122,7 +5485,7 @@ function syncRgbToKeymap() {
   var existingComboNames = {};
   keymapCombos.forEach(function(c) { existingComboNames[c.name] = true; });
 
-  // Sync RGB macros (TO_RGB_MACRO, MOMENTARY_RGB_MACRO, TO_RGB_PRESS_MACRO)
+  // Sync RGB macros (TO_RGB, MO_RGB, TO_RGB_PRESS)
   macros.forEach(function(rm) {
     if (!existingMacNames[rm.name]) {
       existingMacNames[rm.name] = true;
@@ -5150,7 +5513,7 @@ function syncRgbToKeymap() {
     }
   });
 
-  // Sync RGB behaviors (RGB_HOLD_TAP instances)
+  // Sync RGB behaviors (RGB_HT instances)
   behaviors.forEach(function(rb) {
     if (!existingBehNames[rb.name]) {
       existingBehNames[rb.name] = true;
@@ -5573,24 +5936,47 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('includeHelpers').onchange = updateRgbOutput;
   document.getElementById('macroType').onchange = function() {
     var g = document.getElementById('releaseColorGroup');
-    if (this.value === 'MOMENTARY_RGB_MACRO') g.classList.remove('hidden');
-    else g.classList.add('hidden');
+    var ni = document.getElementById('macroName');
+    var colorGrp = document.getElementById('macroColor').parentElement;
+    var blinkFields = document.querySelectorAll('.blink-field');
+    var isBlink = this.value === 'MO_BLINK';
+    g.classList.add('hidden');
+    colorGrp.style.display = isBlink ? 'none' : '';
+    blinkFields.forEach(function(el) { el.classList.toggle('hidden', !isBlink); });
+    if (this.value === 'MO_RGB') { g.classList.remove('hidden'); ni.placeholder = 'name_led'; }
+    else if (isBlink) { ni.placeholder = 'name_blink'; }
+    else { ni.placeholder = this.value === 'TO_RGB_PRESS' ? 'top_name' : 'to_name'; }
   };
 
   // Macro editor sub-window wiring
   document.getElementById('meditType').onchange = function() {
     var rg = document.getElementById('meditReleaseGroup');
-    if (this.value === 'MOMENTARY_RGB_MACRO') rg.style.display = '';
-    else rg.style.display = 'none';
+    var isBlink = this.value === 'MO_BLINK';
+    rg.style.display = this.value === 'MO_RGB' ? '' : 'none';
+    document.getElementById('meditColor').parentElement.style.display = isBlink ? 'none' : '';
+    document.getElementById('meditBlinkColorGroup').classList.toggle('hidden', !isBlink);
+    document.getElementById('meditBlinkReturnGroup').classList.toggle('hidden', !isBlink);
+    document.getElementById('meditBlinkWaitGroup').classList.toggle('hidden', !isBlink);
   };
   document.getElementById('meditSaveBtn').onclick = function() {
     if (macroEditorIndex < 0 || macroEditorIndex >= macros.length) return;
-    macros[macroEditorIndex].name = document.getElementById('meditName').value.trim() || macros[macroEditorIndex].name;
-    macros[macroEditorIndex].type = document.getElementById('meditType').value;
+    var newType = document.getElementById('meditType').value;
+    var rawName = document.getElementById('meditName').value.trim() || macros[macroEditorIndex].name;
+    macros[macroEditorIndex].name = autoPrefix(rawName, newType);
+    macros[macroEditorIndex].type = newType;
     macros[macroEditorIndex].layer = document.getElementById('meditLayer').value;
-    macros[macroEditorIndex].color = document.getElementById('meditColor').value;
-    macros[macroEditorIndex].releaseColor = document.getElementById('meditType').value === 'MOMENTARY_RGB_MACRO'
+    macros[macroEditorIndex].color = newType === 'MO_BLINK' ? '' : document.getElementById('meditColor').value;
+    macros[macroEditorIndex].releaseColor = newType === 'MO_RGB'
       ? document.getElementById('meditReleaseColor').value : '';
+    if (newType === 'MO_BLINK') {
+      macros[macroEditorIndex].blinkColor = document.getElementById('meditBlinkColor').value;
+      macros[macroEditorIndex].returnColor = document.getElementById('meditBlinkReturn').value;
+      macros[macroEditorIndex].wait = document.getElementById('meditBlinkWait').value || '80';
+    } else {
+      macros[macroEditorIndex].blinkColor = '';
+      macros[macroEditorIndex].returnColor = '';
+      macros[macroEditorIndex].wait = '';
+    }
     closeMacroEditor();
     rgbRenderAll();
   };
@@ -5598,6 +5984,64 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('macroEditorOverlay').onclick = function(e) {
     if (e.target === this) closeMacroEditor();
   };
+
+  // ---- Combo editor popup wiring ----
+  document.getElementById('ceditSaveBtn').onclick = function() {
+    if (comboEditorIndex < 0 || comboEditorIndex >= combos.length) return;
+    combos[comboEditorIndex].name = document.getElementById('ceditName').value.trim() || combos[comboEditorIndex].name;
+    combos[comboEditorIndex].bind = document.getElementById('ceditBind').value.trim();
+    combos[comboEditorIndex].layers = ceditGetLayers();
+    combos[comboEditorIndex].pos = ceditSelectedPositions.slice().sort(function(a,b){return a-b;}).join(' ');
+    closeComboEditor();
+    rgbRenderAll();
+  };
+  document.getElementById('ceditCancelBtn').onclick = closeComboEditor;
+  document.getElementById('comboEditorOverlay').onclick = function(e) {
+    if (e.target === this) closeComboEditor();
+  };
+  document.getElementById('ceditLayerPicker').onchange = function() {
+    if (!this.value) return;
+    var cur = ceditGetLayers();
+    var parts = cur ? cur.split(/\s+/) : [];
+    if (parts.indexOf(this.value) < 0) {
+      parts.push(this.value);
+      ceditRenderLayerTags(parts.join(' '));
+    }
+    this.value = '';
+  };
+  document.getElementById('ceditLayerTags').onclick = function(e) {
+    if (e.target.classList.contains('tag-x')) {
+      var layer = e.target.dataset.layer;
+      var cur = ceditGetLayers();
+      var parts = cur.split(/\s+/).filter(function(p) { return p !== layer; });
+      ceditRenderLayerTags(parts.join(' '));
+    }
+  };
+  document.getElementById('ceditMiniKb').addEventListener('click', function(e) {
+    var group = e.target.closest('.key-group');
+    if (!group) return;
+    var ki = parseInt(group.dataset.key);
+    if (isNaN(ki)) return;
+    var idx = ceditSelectedPositions.indexOf(ki);
+    if (idx >= 0) ceditSelectedPositions.splice(idx, 1);
+    else ceditSelectedPositions.push(ki);
+    ceditRenderMiniKb();
+  });
+
+  // ---- Behavior editor popup wiring ----
+  document.getElementById('beditSaveBtn').onclick = function() {
+    if (behaviorEditorIndex < 0 || behaviorEditorIndex >= behaviors.length) return;
+    behaviors[behaviorEditorIndex].name = document.getElementById('beditName').value.trim() || behaviors[behaviorEditorIndex].name;
+    behaviors[behaviorEditorIndex].label = document.getElementById('beditLabel').value.trim();
+    behaviors[behaviorEditorIndex].macro = document.getElementById('beditMacro').value;
+    closeBehaviorEditor();
+    rgbRenderAll();
+  };
+  document.getElementById('beditCancelBtn').onclick = closeBehaviorEditor;
+  document.getElementById('behaviorEditorOverlay').onclick = function(e) {
+    if (e.target === this) closeBehaviorEditor();
+  };
+
   document.getElementById('showOrphans').onchange = function() { renderLayerList(); updateRgbOutput(); };
   syncColorInputs();
   initCollapsible();
@@ -5634,14 +6078,28 @@ document.addEventListener('DOMContentLoaded', function() {
   };
   document.getElementById('kmUseDefaultLayoutBtn').onclick = function() {
     loadLayout(DEFAULT_CORNE_LAYOUT);
+    // Update parsed #include paths to use corne dtsi name
+    if (keymapParsedIncludes) {
+      keymapParsedIncludes = keymapParsedIncludes.map(function(inc) {
+        return inc.replace(/lotus58-rgb\.dtsi/, 'corne-rgb.dtsi').replace(/lotus58\/corne-rgb\.dtsi/, 'corne-rgb.dtsi');
+      });
+    }
     renderKeyboardSvg('keyboardSvg');
     renderKeymapSensorList();
+    updateKeymapOutput();
     showStatus('kmLayoutStatus', 'Default Corne layout loaded (42 keys)');
   };
   document.getElementById('kmUseLotus58Btn').onclick = function() {
     loadLayout(DEFAULT_LOTUS58_LAYOUT);
+    // Update parsed #include paths to use lotus58 dtsi name
+    if (keymapParsedIncludes) {
+      keymapParsedIncludes = keymapParsedIncludes.map(function(inc) {
+        return inc.replace(/corne-rgb\.dtsi/, 'lotus58-rgb.dtsi');
+      });
+    }
     renderKeyboardSvg('keyboardSvg');
     renderKeymapSensorList();
+    updateKeymapOutput();
     showStatus('kmLayoutStatus', 'Lotus58 layout loaded (60 keys)');
   };
 
@@ -5881,7 +6339,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Keyboard SVG click → opens floating ValuePicker + binding editor
+  // Keyboard SVG click → opens binding editor popup
   document.getElementById('keyboardSvg').addEventListener('click', function(e) {
     var group = e.target.closest('.key-group');
     if (!group) return;
@@ -5889,106 +6347,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (isNaN(keyIdx)) return;
     if (keymapLayers.length === 0) return;
 
-    // Close any existing picker
-    if (vpState.open) closeValuePicker();
-
     selectedKeyIndex = keyIdx;
     renderKeyboardSvg('keyboardSvg');
-
-    // Also open the panel editor for detailed editing
     showBindingEditor(keyIdx);
-
-    // Determine what was clicked via element and current binding
-    var binding = keymapLayers[activeLayerIndex].bindings[keyIdx] || '';
-    var parts = binding.trim().split(/\s+/);
-    var behavior = parts[0] || '';
-    var clickedEl = e.target;
-
-    // Determine param type for popup
-    var paramType, currentVal;
-    if (clickedEl.classList.contains('key-label-top') || !behavior || behavior === '&trans' || behavior === '&none') {
-      // Clicked behavior label or empty key → show behavior picker
-      paramType = 'behavior';
-      currentVal = behavior;
-    } else {
-      // Clicked main label → show param picker
-      var behDef = ZMK_BEHAVIORS.find(function(b) { return b.name === behavior; });
-      if (behDef && behDef.params.length > 0) {
-        paramType = behDef.params[0];
-        currentVal = parts.slice(1).join(' ');
-      } else if (parts.length > 1) {
-        // Custom behavior with params: infer type from param count
-        // Hold-taps have 2 params: first is layer/modifier, second is keycode
-        // Tap-dances and others with 1 param: show keycode picker
-        var customBeh = keymapBehaviors.find(function(b) { return '&' + b.name === behavior; });
-        if (customBeh && customBeh.type === 'hold-tap' && parts.length >= 3) {
-          // Show keycode picker for the tap key (last param)
-          paramType = 'keycode';
-          currentVal = parts[parts.length - 1];
-        } else {
-          paramType = 'keycode';
-          currentVal = parts[parts.length - 1];
-        }
-      } else {
-        // No-param behavior → behavior picker
-        paramType = 'behavior';
-        currentVal = behavior;
-      }
-    }
-
-    // Get anchor rect from the SVG group
-    var rect = group.getBoundingClientRect();
-    openValuePicker(rect, paramType, currentVal, behavior, function(selected) {
-      pushUndo();
-      var currentParam = vpState.param;
-      if (currentParam === 'behavior') {
-        // Change behavior, reset params
-        var newBeh = selected.code;
-        var newBehDef = ZMK_BEHAVIORS.find(function(b) { return b.name === newBeh; });
-        var newBinding = newBeh;
-        if (newBehDef && newBehDef.cells > 0) {
-          if (newBehDef.params[0] === 'layer') newBinding += ' 0';
-          else if (newBehDef.params[0] === 'keycode') newBinding += ' A';
-          else if (newBehDef.params[0] === 'bt_action') newBinding += ' BT_CLR';
-          else if (newBehDef.params[0] === 'rgb_action') newBinding += ' RGB_TOG';
-          else if (newBehDef.params[0] === 'out_action') newBinding += ' OUT_TOG';
-          else if (newBehDef.params[0] === 'bl_action') newBinding += ' BL_TOG';
-          else if (newBehDef.params[0] === 'ep_action') newBinding += ' EP_TOG';
-          else if (newBehDef.params[0] === 'button') newBinding += ' LCLK';
-          else if (newBehDef.params[0] === 'direction') newBinding += ' MOVE_UP';
-          else if (newBehDef.params[0] === 'modifier') newBinding += ' LSHIFT';
-          if (newBehDef.cells >= 2 && newBehDef.params[1] === 'keycode') newBinding += ' A';
-        }
-        keymapLayers[activeLayerIndex].bindings[keyIdx] = newBinding;
-      } else {
-        // Determine which param index to update based on current param type
-        var curBinding = keymapLayers[activeLayerIndex].bindings[keyIdx] || '';
-        var curParts = curBinding.trim().split(/\s+/);
-        var curBehavior = curParts[0] || '';
-        var curBehDef = ZMK_BEHAVIORS.find(function(b) { return b.name === curBehavior; });
-        if (curBehDef && curBehDef.params) {
-          var pIdx = curBehDef.params.indexOf(currentParam);
-          if (pIdx >= 0) {
-            while (curParts.length < pIdx + 2) curParts.push('');
-            curParts[pIdx + 1] = selected.code;
-            keymapLayers[activeLayerIndex].bindings[keyIdx] = curParts.join(' ');
-          } else {
-            // Fallback: set first param
-            if (curParts.length < 2) curParts.push(selected.code);
-            else curParts[1] = selected.code;
-            keymapLayers[activeLayerIndex].bindings[keyIdx] = curParts.join(' ');
-          }
-        } else {
-          // Custom behavior: update last param (most common: tap key in hold-tap)
-          curParts[curParts.length - 1] = selected.code;
-          keymapLayers[activeLayerIndex].bindings[keyIdx] = curParts.join(' ');
-        }
-      }
-      closeValuePicker();
-      renderKeyboardSvg('keyboardSvg');
-      showBindingEditor(keyIdx);
-      updateKeymapOutput();
-    });
   });
 
   // Binding editor behavior dropdown change
@@ -6038,6 +6399,10 @@ document.addEventListener('DOMContentLoaded', function() {
       renderKeyboardSvg('keyboardSvg');
       updateKeymapOutput();
     }
+  };
+  // Close binding editor on backdrop click
+  document.getElementById('bindingEditor').onclick = function(e) {
+    if (e.target === this) cancelBindingEditor();
   };
 
   // --- Undo/Redo button clicks ---
@@ -6222,10 +6587,11 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('kmComboName').value = 'combo_' + keymapCombos.length;
     document.getElementById('kmComboBind').value = '&kp ESC';
     document.getElementById('kmComboTimeout').value = '50';
-    document.getElementById('kmComboLayers').value = '';
+    document.getElementById('kmComboLayerPicker').innerHTML = '<option value="">+ Add layer</option>' + kmComboLayerOptionsHTML();
+    kmComboRenderLayerTags('');
     document.getElementById('kmComboSlowRelease').checked = false;
     document.getElementById('kmComboRequirePriorIdle').value = '';
-    document.getElementById('kmComboEditor').style.display = '';
+    document.getElementById('kmComboOverlay').classList.add('visible');
     renderComboMiniKb();
   };
   document.getElementById('kmComboSaveBtn').onclick = function() {
@@ -6234,7 +6600,7 @@ document.addEventListener('DOMContentLoaded', function() {
       name: document.getElementById('kmComboName').value || 'combo_' + keymapCombos.length,
       binding: document.getElementById('kmComboBind').value,
       positions: comboSelectedPositions.slice().sort(function(a,b) { return a-b; }),
-      layers: document.getElementById('kmComboLayers').value,
+      layers: kmComboGetLayers(),
       timeout: parseInt(document.getElementById('kmComboTimeout').value) || 50,
       slowRelease: document.getElementById('kmComboSlowRelease').checked,
       requirePriorIdle: document.getElementById('kmComboRequirePriorIdle').value
@@ -6246,16 +6612,42 @@ document.addEventListener('DOMContentLoaded', function() {
       combo._fromEditor = true;
       keymapCombos.push(combo);
     }
-    document.getElementById('kmComboEditor').style.display = 'none';
+    document.getElementById('kmComboOverlay').classList.remove('visible');
     editingComboIndex = -1;
     renderKeymapComboList();
     updateKeymapOutput();
   };
 
-  // Cancel combo editing — hide editor and reset state
-  document.getElementById('kmComboCancelBtn').onclick = function() {
-    document.getElementById('kmComboEditor').style.display = 'none';
+  // Cancel combo editing — hide overlay and reset state
+  function closeComboOverlay() {
+    document.getElementById('kmComboOverlay').classList.remove('visible');
     editingComboIndex = -1;
+  }
+  document.getElementById('kmComboCancelBtn').onclick = closeComboOverlay;
+  document.getElementById('kmComboCancelBtn2').onclick = closeComboOverlay;
+  document.getElementById('kmComboOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeComboOverlay();
+  });
+
+  // Combo layer picker: add layer as tag chip
+  document.getElementById('kmComboLayerPicker').onchange = function() {
+    if (!this.value) return;
+    var cur = kmComboGetLayers();
+    var parts = cur ? cur.split(/\s+/) : [];
+    if (parts.indexOf(this.value) < 0) {
+      parts.push(this.value);
+      kmComboRenderLayerTags(parts.join(' '));
+    }
+    this.value = '';
+  };
+  // Combo layer tags: remove on × click
+  document.getElementById('kmComboLayerTags').onclick = function(e) {
+    if (e.target.classList.contains('tag-x')) {
+      var layer = e.target.dataset.layer;
+      var cur = kmComboGetLayers();
+      var parts = cur.split(/\s+/).filter(function(p) { return p !== layer; });
+      kmComboRenderLayerTags(parts.join(' '));
+    }
   };
 
   // Combo mini keyboard click
@@ -6285,12 +6677,13 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('kmComboName').value = c.name;
       document.getElementById('kmComboBind').value = c.binding;
       document.getElementById('kmComboTimeout').value = c.timeout;
-      document.getElementById('kmComboLayers').value = c.layers;
+      document.getElementById('kmComboLayerPicker').innerHTML = '<option value="">+ Add layer</option>' + kmComboLayerOptionsHTML();
+      kmComboRenderLayerTags(c.layers || '');
       document.getElementById('kmComboSlowRelease').checked = !!c.slowRelease;
       document.getElementById('kmComboRequirePriorIdle').value = c.requirePriorIdle || '';
       comboSelectedPositions = c.positions ? c.positions.slice() : [];
       renderComboMiniKb();
-      document.getElementById('kmComboEditor').style.display = '';
+      document.getElementById('kmComboOverlay').classList.add('visible');
     }
   });
 
@@ -6308,19 +6701,23 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('kmMacroParamType').value = '0';
     document.getElementById('kmMacroWaitMs').value = '';
     document.getElementById('kmMacroTapMs').value = '';
-    document.getElementById('kmMacroEditor').style.display = '';
+    document.getElementById('kmMacroOverlay').classList.add('visible');
     renderMacroSteps();
   };
-  document.getElementById('kmMacroCancelBtn').onclick = function() {
+  function closeMacroOverlay() {
     if (macroAddedViaButton && undoStack.length > 0) {
-      // Revert the add-macro action
       performUndo();
     }
     macroAddedViaButton = false;
-    document.getElementById('kmMacroEditor').style.display = 'none';
+    document.getElementById('kmMacroOverlay').classList.remove('visible');
     editingMacroIndex = -1;
     renderKeymapMacroList();
-  };
+  }
+  document.getElementById('kmMacroCancelBtn').onclick = closeMacroOverlay;
+  document.getElementById('kmMacroCancelBtn2').onclick = closeMacroOverlay;
+  document.getElementById('kmMacroOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeMacroOverlay();
+  });
   document.getElementById('kmMacroSaveBtn').onclick = function() {
     pushUndo();
     macroAddedViaButton = false;
@@ -6331,7 +6728,7 @@ document.addEventListener('DOMContentLoaded', function() {
       keymapMacros[editingMacroIndex].waitMs = document.getElementById('kmMacroWaitMs').value;
       keymapMacros[editingMacroIndex].tapMs = document.getElementById('kmMacroTapMs').value;
     }
-    document.getElementById('kmMacroEditor').style.display = 'none';
+    document.getElementById('kmMacroOverlay').classList.remove('visible');
     editingMacroIndex = -1;
     renderKeymapMacroList();
     populateBehaviorDropdown();
@@ -6479,7 +6876,7 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('kmMacroParamType').value = String(m.paramType || 0);
       document.getElementById('kmMacroWaitMs').value = m.waitMs || '';
       document.getElementById('kmMacroTapMs').value = m.tapMs || '';
-      document.getElementById('kmMacroEditor').style.display = '';
+      document.getElementById('kmMacroOverlay').classList.add('visible');
       renderMacroSteps();
     }
   });
@@ -6498,15 +6895,20 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('kmBehaviorType').value = 'hold-tap';
     document.getElementById('kmBehaviorLabel').value = '';
     showBehaviorConfig('hold-tap');
-    document.getElementById('kmBehaviorEditor').style.display = '';
+    document.getElementById('kmBehaviorOverlay').classList.add('visible');
   };
   document.getElementById('kmBehaviorType').onchange = function() {
     showBehaviorConfig(this.value);
   };
-  document.getElementById('kmBehaviorCancelBtn').onclick = function() {
-    document.getElementById('kmBehaviorEditor').style.display = 'none';
+  function closeBehaviorOverlay() {
+    document.getElementById('kmBehaviorOverlay').classList.remove('visible');
     editingBehaviorIndex = -1;
-  };
+  }
+  document.getElementById('kmBehaviorCancelBtn').onclick = closeBehaviorOverlay;
+  document.getElementById('kmBehaviorCancelBtn2').onclick = closeBehaviorOverlay;
+  document.getElementById('kmBehaviorOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeBehaviorOverlay();
+  });
   document.getElementById('kmBehaviorSaveBtn').onclick = function() {
     pushUndo();
     var type = document.getElementById('kmBehaviorType').value;
@@ -6582,7 +6984,7 @@ document.addEventListener('DOMContentLoaded', function() {
       beh._fromEditor = true;
       keymapBehaviors.push(beh);
     }
-    document.getElementById('kmBehaviorEditor').style.display = 'none';
+    document.getElementById('kmBehaviorOverlay').classList.remove('visible');
     editingBehaviorIndex = -1;
     renderKeymapBehaviorList();
     populateBehaviorDropdown();
@@ -6652,7 +7054,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('kmBehCwContinueList').value = b.config.continueList || '';
         document.getElementById('kmBehCwMods').value = b.config.mods || '';
       }
-      document.getElementById('kmBehaviorEditor').style.display = '';
+      document.getElementById('kmBehaviorOverlay').classList.add('visible');
     }
   });
 
@@ -6682,12 +7084,17 @@ document.addEventListener('DOMContentLoaded', function() {
     editingCondLayerIndex = -1;
     populateCondLayerSelects();
     document.getElementById('kmCondName').value = 'tri_layer';
-    document.getElementById('kmCondLayerEditor').style.display = '';
+    document.getElementById('kmCondLayerOverlay').classList.add('visible');
   };
-  document.getElementById('kmCondCancelBtn').onclick = function() {
-    document.getElementById('kmCondLayerEditor').style.display = 'none';
+  function closeCondLayerOverlay() {
+    document.getElementById('kmCondLayerOverlay').classList.remove('visible');
     editingCondLayerIndex = -1;
-  };
+  }
+  document.getElementById('kmCondCancelBtn').onclick = closeCondLayerOverlay;
+  document.getElementById('kmCondCancelBtn2').onclick = closeCondLayerOverlay;
+  document.getElementById('kmCondLayerOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeCondLayerOverlay();
+  });
   document.getElementById('kmCondSaveBtn').onclick = function() {
     pushUndo();
     var ifSel = document.getElementById('kmCondIfLayers');
@@ -6703,7 +7110,7 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
       keymapConditionalLayers.push(cond);
     }
-    document.getElementById('kmCondLayerEditor').style.display = 'none';
+    document.getElementById('kmCondLayerOverlay').classList.remove('visible');
     editingCondLayerIndex = -1;
     renderKeymapCondLayerList();
     updateKeymapOutput();
@@ -6721,15 +7128,64 @@ document.addEventListener('DOMContentLoaded', function() {
       var c = keymapConditionalLayers[ci];
       populateCondLayerSelects();
       document.getElementById('kmCondName').value = c.name;
-      // Set multi-select values
       var ifSel = document.getElementById('kmCondIfLayers');
       for (var oi = 0; oi < ifSel.options.length; oi++) {
         ifSel.options[oi].selected = c.ifLayers.indexOf(parseInt(ifSel.options[oi].value)) >= 0;
       }
       document.getElementById('kmCondThenLayer').value = c.thenLayer;
-      document.getElementById('kmCondLayerEditor').style.display = '';
+      document.getElementById('kmCondLayerOverlay').classList.add('visible');
     }
   });
+
+  // --- List search/filter for combos, macros, behaviors, conditional layers ---
+  function setupListSearch(searchId, clearId, listId) {
+    var searchInput = document.getElementById(searchId);
+    var clearBtn = document.getElementById(clearId);
+    if (!searchInput || !clearBtn) return;
+    searchInput.addEventListener('input', function() {
+      var q = this.value.toLowerCase().trim();
+      clearBtn.style.display = q ? '' : 'none';
+      var items = document.getElementById(listId).querySelectorAll('.item');
+      items.forEach(function(item) {
+        var text = item.textContent.toLowerCase();
+        item.style.display = (q && text.indexOf(q) < 0) ? 'none' : '';
+      });
+    });
+    clearBtn.addEventListener('click', function() {
+      searchInput.value = '';
+      clearBtn.style.display = 'none';
+      document.getElementById(listId).querySelectorAll('.item').forEach(function(item) {
+        item.style.display = '';
+      });
+    });
+  }
+  setupListSearch('comboListSearch', 'comboListSearchClear', 'kmComboList');
+  setupListSearch('macroListSearch', 'macroListSearchClear', 'kmMacroList');
+  setupListSearch('behaviorListSearch', 'behaviorListSearchClear', 'kmBehaviorList');
+  setupListSearch('condLayerListSearch', 'condLayerListSearchClear', 'kmCondLayerList');
+
+  // Macro step search inside popup — filters visible steps
+  (function() {
+    var stepSearch = document.getElementById('macroStepSearch');
+    var stepClear = document.getElementById('macroStepSearchClear');
+    if (!stepSearch || !stepClear) return;
+    stepSearch.addEventListener('input', function() {
+      var q = this.value.toLowerCase().trim();
+      stepClear.style.display = q ? '' : 'none';
+      var steps = document.getElementById('kmMacroSteps').querySelectorAll('.macro-step');
+      steps.forEach(function(step) {
+        var text = step.textContent.toLowerCase();
+        step.style.display = (q && text.indexOf(q) < 0) ? 'none' : '';
+      });
+    });
+    stepClear.addEventListener('click', function() {
+      stepSearch.value = '';
+      stepClear.style.display = 'none';
+      document.getElementById('kmMacroSteps').querySelectorAll('.macro-step').forEach(function(step) {
+        step.style.display = '';
+      });
+    });
+  })();
 
   // --- Sensor bindings modal editor ---
   function openSensorModal(sensorIdx, subIdx, isNew) {

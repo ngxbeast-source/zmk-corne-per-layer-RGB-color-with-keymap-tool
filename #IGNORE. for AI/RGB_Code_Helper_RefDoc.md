@@ -48,6 +48,9 @@
 # Line 790 — Section 27: Macro Param Controls (context-aware editing)
 # Line 830 — Section 28: Comment Preservation (.dtsi round-trip)
 # Line 865 — Section 29: Clear Layer Feature
+# Line 900 — Section 30: Popup Editor Overlays (Combo & Behavior)
+# Line 940 — Section 31: RGB Output Structure (/ { ... }; wrapper)
+# Line 975 — Section 32: Layout Switch #include Update
 
 # ============================================================
 # SECTION 1: WHAT THIS TOOL DOES (Overview)
@@ -118,10 +121,10 @@
 #
 #   layers        (line 982)  — List of layers with names, index numbers,
 #                               and HSB color values. Example entry:
-#                               { name: "LAYER_ABC", index: "0", h: "19",
+#                               { name: "L_ABC", index: "0", h: "19",
 #                                 s: "100", b: "17", label: "ABC" }
 #
-#   macros        (line 983)  — RGB macros (like MOMENTARY_RGB_MACRO).
+#   macros        (line 983)  — RGB macros (like MO_RGB, TO_RGB).
 #   behaviors     (line 984)  — RGB tab behavior list.
 #   combos        (line 985)  — RGB tab combo definitions.
 #   blinkMacros   (line 986)  — Blink macros (LED blink sequences).
@@ -255,8 +258,8 @@
 #     a simple `if (v)` check would wrongly treat 0 as empty.
 #
 #   baseKey(name) (line 1324):
-#     Strips "LAYER_" or "RGB_" prefix from a layer name and
-#     converts to uppercase. Example: "LAYER_ABC" → "ABC".
+#     Strips "L_" or "RGB_" prefix from a layer name and
+#     converts to uppercase. Example: "L_ABC" → "ABC".
 #     Used for matching layers between RGB and Keymap tabs.
 #
 #   esc(str) (line 1325):
@@ -316,6 +319,14 @@
 #   addLayer(), addMacro(), addBehavior(), addCombo(), addBlinkMacro():
 #     Functions that append new empty items to the data arrays.
 #
+#   autoPrefix(name, type):
+#     Returns the macro node name with an appropriate prefix based on type:
+#       TO_RGB → 'to_' + name   (e.g., to_game_led)
+#       TO_RGB_PRESS → 'top_' + name   (e.g., top_toglayers_leds)
+#       Others → name unchanged
+#     Called by addMacro() and the edit-save handler to match dtsi naming
+#     conventions.
+#
 # RGB COMBO LAYER PICKER:
 #   Both the header combo form and each inline combo row have an
 #   "Add layer" dropdown (<select>). Selecting a layer adds it as a
@@ -327,7 +338,7 @@
 #
 # RGB COMBO POSITION LIMIT:
 #   The mini-keyboard position picker for RGB combos enforces a maximum
-#   of 2 key presses. The COMBO() output formats positions as comma-
+#   of 2 key presses. The C() output formats positions as comma-
 #   separated values (e.g. "4, 20") via .replace(/\s+/g, ', ').
 
 # ============================================================
@@ -341,7 +352,7 @@
 # What it does:
 #   1. Reads the text from the import textarea.
 #   2. Uses regular expressions (regex) to find patterns in the text:
-#      - #define LAYER_xxx N       → creates a layer with index N
+#      - #define L_xxx N       → creates a layer with index N
 #      - #define RGB_xxx RGB_COLOR_HSB(h,s,b) → creates a color
 #      - ZMK_MACRO(...) blocks    → parses macros
 #      - BLINK_SEQ macros         → parses blink macros
@@ -352,17 +363,35 @@
 #
 # REGEX (Regular Expressions):
 #   These are patterns that find text. For example:
-#   /#define\s+(LAYER_\S+)\s+(\d+)/  finds lines like "#define LAYER_ABC 0"
+#   /#define\s+([A-Za-z0-9_]+)\s+(\d+)/ finds lines like "#define ABC 0"
 #   The \s+ means "one or more spaces", \S+ means "one or more non-spaces",
 #   and \d+ means "one or more digits". The parentheses capture the matched
 #   parts so you can use them (layer name and index number).
+#
+#   LAYER PARSING — Two-pass approach:
+#     Primary regex: /^#define\s+(L_[A-Za-z0-9_]+)\s+(\d+)$/gm
+#       Matches layers WITH L_ prefix (e.g., #define L_ABC 0).
+#       Color lookup tries: RGB_ + stripped name, stripped name, full name.
+#     Fallback regex: /^#define\s+([A-Za-z0-9_]+)\s+(\d+)$/gm
+#       Matches ANY #define number pattern (e.g., #define ABC 0).
+#       Color lookup tries: RGB_ + name, then name itself.
+#       This way, layer "ABC" correctly finds color "RGB_ABC".
+#
+#   MACRO PARSING — Supported types:
+#     MO_RGB(name, "label", layer, activeColor, releaseColor)
+#     TO_RGB(name, "label", layer, color)
+#     TO_RGB_PRESS(name, "label", layer, color)
+#     MO_BLINK(name, "label", layer, blinkColor, returnColor, wait)
+#   Regex: /(TO_RGB_PRESS|TO_RGB|MO_BLINK|MO_RGB)\(([^)]+)\)/g
+#   MO_BLINK is experimental — extracts blinkColor, returnColor, wait fields.
+#
 #   More on regex: see any JavaScript regex tutorial.
 #
 # HELPER TEMPLATE STRIPPING:
 #   Before running the macro/behavior/combo regexes, the parser creates
 #   a `codeNoHelpers` copy of the code with all multi-line #define
 #   blocks removed. Multi-line #defines are helper templates like
-#   `#define MOMENTARY_RGB_MACRO(params...) \` that span multiple lines
+#   `#define MO_RGB(params...) \` that span multiple lines
 #   using `\` continuation characters. Without stripping, the regex
 #   would match the template's parameter names (node_name, node_label,
 #   etc.) as if they were actual macro/behavior/combo instantiations.
@@ -418,17 +447,23 @@
 #      This ensures the output shows #define lines in sequential order.
 #
 #   3. WRITE LAYER DEFINES (lines 2193-2199):
-#      Outputs lines like: #define LAYER_ABC 0
+#      Outputs lines like: #define ABC 0
+#      Uses the layer's original parsed name directly (no prefix added).
+#      If a layer was parsed with L_ prefix, it keeps L_. If not, it
+#      outputs the bare name (e.g., ABC, NMRW, FKEYS).
 #
 #   4. WRITE COLOR DEFINES (lines 2201-2212):
 #      Outputs lines like: #define RGB_ABC RGB_COLOR_HSB(19,100,17)
 #      Only for layers that have all three H, S, B values set.
 #
 #   5. WRITE HELPER MACROS (lines ~2230-2270):
-#      Outputs BLINK_SEQ, MOMENTARY_RGB_MACRO, and ZMK_MACRO definitions.
+#      Outputs BLINK_SEQ, MO_RGB, TO_RGB, TO_RGB_PRESS, RGB_HT,
+#      MO_BLINK (conditional — only if MO_BLINK macros exist), and C
+#      helper definitions.
 #
 #   6. WRITE MACRO INVOCATIONS (lines ~2270-2290):
-#      Outputs macro entries using the template selected (MOMENTARY, etc).
+#      Outputs macro entries using the helper templates. MO_BLINK macros
+#      output as: MO_BLINK(name, "label", layer, blinkColor, returnColor, wait)
 #
 #   7. WRITE COMBOS (lines ~2290-2300):
 #      Outputs combo definitions using key positions and bindings.
@@ -753,7 +788,7 @@
 # Layer Index Matching:
 #   The keymap parser assigns indices 0, 1, 2, 3... to layers in
 #   the order they appear in the file. The sync function uses these
-#   indices so RGB layer "LAYER_ABC" at index 0 matches keymap
+#   indices so RGB layer "L_ABC" at index 0 matches keymap
 #   layer "abc_0" which is also parsed as index 0.
 #
 # After syncing, layers are sorted by index number so the RGB editor
@@ -864,7 +899,7 @@
 #   2. updateRgbOutput() — Ref. Line 2152 in code
 #      After merging duplicate layers, sorts the merged array
 #      by index before generating output. This makes the
-#      #define LAYER_xxx lines appear in sequential order.
+#      #define L_xxx lines appear in sequential order.
 #
 #   3. layerOptionsHTML() — Ref. Line 1531 in code
 #      When building dropdown menus, sorts layers by index
@@ -948,7 +983,7 @@
 #
 # MACRO LABELS:
 #   The second argument of macro calls (e.g., "GameLayer LED Macro" in
-#   TO_RGB_MACRO(game_led, "GameLayer LED Macro", ...)) is now stored
+#   TO_RGB(game_led, "GameLayer LED Macro", ...)) is now stored
 #   as macro.label and used in the output instead of defaulting to the
 #   node name. This preserves the user's descriptive labels.
 
@@ -972,3 +1007,171 @@
 #
 # Both options show a confirmation dialog before executing.
 # The action calls pushUndo() first so it can be undone with Ctrl+Z.
+
+# ============================================================
+# SECTION 30: POPUP EDITOR OVERLAYS (Combo & Behavior)
+# ============================================================
+# Ref. Lines ~2135-2195 (JS functions) and ~532-575 (HTML) in code
+#
+# COMBO EDITOR POPUP:
+#   triggerered by clicking "Edit" on a combo row in renderComboList().
+#   Opens #comboEditorOverlay with fields:
+#     - ceditName: combo node name
+#     - ceditBind: binding string (e.g., &kp ESC)
+#     - ceditLayerPicker: dropdown to add layer tags
+#     - ceditLayerTags: removable chip tags showing selected layers
+#     - ceditMiniKb: mini SVG keyboard for click-to-toggle positions
+#   Functions:
+#     openComboEditor(idx) — populates fields from combos[idx], renders tags and mini-kb
+#     closeComboEditor() — hides overlay, resets comboEditorIndex
+#     ceditRenderLayerTags(str) — builds tag HTML from space-separated layer string
+#     ceditGetLayers() — reads tags back into space-separated string
+#     ceditRenderMiniKb() — renders keyboard SVG in popup using ceditSelectedPositions[]
+#   Save writes all fields back to combos[comboEditorIndex] and calls rgbRenderAll().
+#
+# BEHAVIOR EDITOR POPUP:
+#   Triggered by clicking "Edit" on a behavior row in renderBehaviorList().
+#   Opens #behaviorEditorOverlay with fields:
+#     - beditName: behavior node name
+#     - beditLabel: display label
+#     - beditMacro: dropdown for macro reference (populated by macroRefOptionsHTML)
+#   Functions:
+#     openBehaviorEditor(idx) — populates fields from behaviors[idx]
+#     closeBehaviorEditor() — hides overlay
+#   Save writes fields back and calls rgbRenderAll().
+#
+# SHARED CSS: Both use .editor-overlay (fixed backdrop) and .editor-dialog
+#   (centered modal with theme variables). Animations: fadeIn on overlay,
+#   slideUp on dialog.
+
+# ============================================================
+# SECTION 31: RGB OUTPUT STRUCTURE (/ { ... }; wrapper)
+# ============================================================
+# Ref. Lines ~2475-2560 in updateRgbOutput() in code
+#
+# The RGB output is now wrapped in a root devicetree block:
+#
+#   / {
+#       macros {                    <-- non-MO_BLINK macro calls (MO_RGB, TO_RGB, etc.)
+#           ...
+#       };
+#       <native macro behaviors>   <-- blnk:, caps_blink etc. (from _rawText)
+#       <ZMK_MACRO blink macros>   <-- blink macros as ZMK_MACRO() calls
+#       <MO_BLINK standalone>      <-- MO_BLINK() helper calls
+#       behaviors {                 <-- RGB_HT() calls + native non-macro behaviors
+#           ...
+#       };
+#       combos {                   <-- C() calls with compatible = "zmk,combos"
+#           compatible = "zmk,combos";
+#           ...
+#       };
+#   };
+#
+# Native behaviors parsed from user .dtsi code are stored with _rawText
+# property containing their full original text. This allows verbatim
+# re-emission without needing to reconstruct the complex ZMK syntax.
+# Native behaviors with type 'macro-one-param' or 'macro-two-param' go
+# after macros{}; others (hold-tap, tap-dance, etc.) go inside behaviors{}.
+
+# ============================================================
+# SECTION 32: LAYOUT SWITCH #INCLUDE UPDATE
+# ============================================================
+# Ref. Lines ~5845-5870 in DOMContentLoaded in code
+#
+# When the user clicks "Use Corne" or "Use Lotus58" layout buttons,
+# the handlers now also update keymapParsedIncludes[] by regex-replacing
+# the dtsi filename (e.g., corne-rgb.dtsi <-> lotus58-rgb.dtsi).
+# Then updateKeymapOutput() is called to regenerate with correct path.
+
+# ============================================================
+# SECTION 33: KEYMAP EDITOR POPUP OVERLAYS
+# ============================================================
+# Ref. Lines ~825-1030 (HTML) and ~6530-7050 (JS handlers) in code
+#
+# All keymap tab editors (combo, macro, behavior, conditional layers)
+# now use popup overlay dialogs instead of inline collapsible panels.
+#
+# PATTERN:
+#   Each editor follows the same CSS/HTML pattern:
+#     .km-popup-overlay — fixed backdrop covering the viewport (z-index 300)
+#     .km-popup-dialog — centered modal card (themed, rounded, shadowed)
+#     .km-popup-header — title bar with section icon + close (×) button
+#     .km-popup-body — scrollable content area with form fields
+#     .km-popup-footer — action bar with Save + Cancel buttons
+#   CSS classes are shared across all 4 popups via the km-popup-* namespace.
+#   Animations: fadeIn (0.15s) on overlay, slideUp (0.2s) on dialog.
+#   Show/hide: classList.add/remove('visible') on the overlay element.
+#   Backdrop click: clicking the dark backdrop dismisses the popup.
+#
+# COMBO EDITOR POPUP (#kmComboOverlay):
+#   Fields: Name, Binding, Timeout (ms), Layers, Require Prior Idle (ms),
+#   Slow Release checkbox, combo mini-keyboard (click positions).
+#   Opened by: kmAddComboBtn click (new combo) or Edit button on combo list.
+#   Save: kmComboSaveBtn writes to keymapCombos[editingComboIndex].
+#   Close: kmComboCancelBtn, kmComboCancelBtn2, backdrop click → closeComboOverlay().
+#
+# MACRO EDITOR POPUP (#kmMacroOverlay):
+#   Fields: Name, Label, Params dropdown, Wait/Tap timing, step search,
+#   step list (editable), + Add Step, + String Sequence buttons.
+#   Width: 600px (wider to accommodate step list).
+#   Opened by: kmAddMacroBtn click (new macro) or Edit button on macro list.
+#   Save: kmMacroSaveBtn writes to keymapMacros[editingMacroIndex].
+#   Close: closeMacroOverlay() — also reverts add if macroAddedViaButton.
+#   Step search: macroStepSearch input filters visible .macro-step elements.
+#
+# BEHAVIOR EDITOR POPUP (#kmBehaviorOverlay):
+#   Fields: Name, Type dropdown (hold-tap, mod-morph, tap-dance, sticky-key,
+#   key-toggle, caps-word, macro, sensor-rotate), Label, dynamic config area.
+#   Width: 580px.
+#   The #kmBehaviorConfig div is dynamically populated by showBehaviorConfig(type)
+#   which renders different fields depending on the selected behavior type.
+#   Opened by: kmAddBehaviorBtn click (new) or Edit button on behavior list.
+#   Save: kmBehaviorSaveBtn reads type-specific config and writes to keymapBehaviors.
+#   Close: closeBehaviorOverlay().
+#
+# CONDITIONAL LAYER EDITOR POPUP (#kmCondLayerOverlay):
+#   Fields: Condition name, multi-select "When these layers are active",
+#   "Activate this layer" dropdown.
+#   Width: 440px (compact).
+#   Opened by: kmAddCondLayerBtn click (new) or Edit button on cond layer list.
+#   Save: kmCondSaveBtn reads selected layers and writes to keymapConditionalLayers.
+#   Close: closeCondLayerOverlay().
+#
+# LIST SEARCH/FILTER:
+#   Each section (combos, macros, behaviors, conditional layers) has a
+#   search input above the item list. Typing filters list items in real-time
+#   by matching against item text content (case-insensitive).
+#   Wired by reusable setupListSearch(searchId, clearId, listId) function.
+#   Search IDs: comboListSearch, macroListSearch, behaviorListSearch,
+#   condLayerListSearch. Clear buttons reset the filter.
+#
+# VALUE PICKER:
+#   The floating ValuePicker (#vpOverlay) no longer auto-opens on SVG key
+#   clicks. The binding editor popup handles all key editing. The VP system
+#   (openValuePicker, closeValuePicker, vpState) remains in code for potential
+#   reuse but has no active triggers.
+#
+# COMBO LAYER TAG PICKER (keymap tab):
+#   The combo editor's Layers field uses a <select> dropdown + removable tag
+#   chips, matching the RGB tab's combo editor pattern (ceditLayerPicker).
+#   Elements: kmComboLayerPicker (select), kmComboLayerTags (span.layer-tags).
+#   JS functions:
+#     - kmComboLayerOptionsHTML() — builds <option> list from keymapLayers[].
+#     - kmComboRenderLayerTags(layersStr) — renders layer indices as tag chips.
+#     - kmComboGetLayers() — reads tag text content back to space-separated string.
+#   Picker onchange adds layer (no duplicates), tag × click removes it.
+#   Reuses existing .layer-tags / .layer-tag / .tag-x CSS.
+#
+# BEHAVIOR BINDING DATALISTS:
+#   Behavior config binding fields use <datalist> suggestions for available
+#   behaviors and modifiers. Inputs remain type="text" for free-text entry.
+#   Static <datalist> elements: behBindingDL, behModsDL (inside #kmBehaviorOverlay).
+#   JS function: populateBehDataLists() — called from showBehaviorConfig().
+#     - behBindingDL: populated from ZMK_BEHAVIORS + keymapBehaviors + keymapMacros.
+#     - behModsDL: MOD_LSFT, MOD_RSFT, MOD_LCTL, MOD_RCTL, MOD_LALT, MOD_RALT,
+#       MOD_LGUI, MOD_RGUI.
+#   Fields with list="behBindingDL": kmBehHoldBinding, kmBehTapBinding,
+#     kmBehMmNormal, kmBehMmMorphed, kmBehSkBinding, kmBehSensorCW, kmBehSensorCCW.
+#   Fields with list="behModsDL": kmBehMmMods, kmBehCwMods.
+#   Fields kept as plain text (complex syntax): kmBehTdBindings, kmBehMacroBindings,
+#     kmBehCwContinueList.

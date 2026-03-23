@@ -71,6 +71,41 @@ Coverage note: this reflects everything I can reliably reconstruct from availabl
 
 ## 2026-03-22 (Session 3) - Devicetree Merge, Combo Layers Picker, Snapshot Fixes, Built-in Behaviors
 
+### Major additions — Helper Macro Renames (Code Size Optimization)
+- **`MOMENTARY_RGB_MACRO`** → **`MO_RGB`**: Renamed in dtsi helper definition, all macro call sites, and HTML tool (parser regex, output generation, UI type selects, type checks).
+- **`TO_RGB_MACRO`** → **`TO_RGB`**: Same scope of changes.
+- **`TO_RGB_PRESS_MACRO`** → **`TO_RGB_PRESS`**: Same scope of changes.
+- **`RGB_HOLD_TAP`** → **`RGB_HT`**: Renamed in dtsi helper definition, all behavior call sites, and HTML tool (parser regex, output line, helper template, skip-check comment, sync comment).
+- **`COMBO`** → **`C`**: Renamed in dtsi helper definition, all combo call sites, and HTML tool (parser regex, output line, helper template).
+- Applied consistently across corne-rgb.dtsi and RGB_Code_Helper.html (parser, output gen, helper templates, HTML selects, DOMContentLoaded handlers).
+
+### Helper Rename — Layer Prefix Shortening
+- **`LAYER_`** → **`L_`**: Shortened the layer `#define` prefix in generated output (e.g., `#define L_ABC 0` instead of `#define LAYER_ABC 0`). Updated parser regex, `baseKey()` helper, output generation, keymap sync matching, and input placeholder across RGB_Code_Helper.html. RefDoc updated.
+
+### Rename — hold_tap_ → RGB_ht_
+- **Behavior node prefix rename**: All `hold_tap_*` behavior references renamed to `RGB_ht_*` across corne.keymap (7 binding references: `&hold_tap_nmrw` → `&RGB_ht_nmrw`, etc.) and HTML tool (placeholder text, output comment).
+
+### Major additions — Auto-Prefix for Macro Node Names
+- **`autoPrefix(name, type)` function**: Automatically prepends `to_` for TO_RGB macros and `top_` for TO_RGB_PRESS macros when adding or saving macros. Matches the dtsi naming convention where toggled macros use these prefixes.
+- **Dynamic placeholder text**: Macro name placeholder updates based on selected type (`to_name`, `top_name`, `name_led`, `name_blink`).
+- Applied in both `addMacro()` and `meditSaveBtn.onclick` save handler.
+
+### Major additions — MO_BLINK Experimental Helper
+- **New `MO_BLINK` helper `#define`**: Wraps `macro_press &mo layer BLINK_SEQ(color, return, wait)` + `macro_pause_for_release` + `macro_release &mo layer` into a single-line helper call. Added to corne-rgb.dtsi and as `HELPER_MO_BLINK` JS constant in the HTML tool.
+- **`MO_BLINK ⚠` type option**: Added to both add form and edit overlay `<select>` dropdowns (marked experimental with ⚠).
+- **Blink-specific UI fields**: `macroBlinkColor`, `macroBlinkReturn`, `macroBlinkWait` in add form; `meditBlinkColor`, `meditBlinkReturn`, `meditBlinkWait` in edit overlay. Fields show/hide based on type selection.
+- **Parser**: Regex updated to match `MO_BLINK(...)` calls. Extracts `blinkColor`, `returnColor`, `wait` parameters.
+- **Output**: `HELPER_MO_BLINK` emitted conditionally when MO_BLINK macros exist. Macro lines output as `MO_BLINK(name, "label", layer, blinkColor, returnColor, wait)`.
+- **Render**: Shows `MO_BLINK ⚠` type label with blink-specific info (B: R: W:) in macro list.
+- **`f_blink` converted**: In corne-rgb.dtsi, raw `ZMK_MACRO(f_blink, ...)` replaced with `MO_BLINK(f_blink, "F KEYS BLINK", FKEYS, F_BLINK_ON, RGB_NMRW, 80)`.
+
+### Bug fixes — Layer Color Parsing and L_ Prefix Output
+- **Colors not parsed in fallback path**: When layers lack `L_` prefix (e.g., `#define ABC 0`), the fallback layer parser's color lookup only checked `colorValueMap[m[1]]` (e.g., `colorValueMap["ABC"]`). Since colors are stored as `colorValueMap["RGB_ABC"]`, the lookup failed and no colors were matched. Fixed by adding `colorValueMap['RGB_' + m[1]]` fallback, matching the primary parser's behavior.
+- **`L_` prefix incorrectly forced in output**: The layer output code (`var name = l.name.startsWith('L_') ? l.name : 'L_' + l.bk`) forced an `L_` prefix on layer names that didn't have one, producing `#define L_ABC 0` instead of `#define ABC 0`. Fixed to use `l.name` directly, preserving the original layer name as parsed.
+
+### Bug fixes — Combo Double-Comma Output
+- **Combo positions had double commas in output**: When parsing `C(name, bind, 4, 3, LAYERS)`, positions were stored as `"4, 3"` (with comma). The output then ran `pos.replace(/\s+/g, ', ')` which replaced the space after the comma, producing `"4,, 3"`. Fixed by storing positions space-separated (`"4 3"`) during parsing, so the output replace correctly produces `"4, 3"`.
+
 ### Major additions — Built-in Behaviors (Toggleable Presets)
 - **New "Built-in Behaviors" section** in the Keymap Editor tab with checkbox toggles for 7 preset ZMK behaviors:
   - `&hm` — Homerow Mod (tap-preferred hold-tap with global-quick-tap, 200ms tapping term, 180ms quick-tap)
@@ -193,9 +228,97 @@ Coverage note: this reflects everything I can reliably reconstruct from availabl
 - Largest gains came from parser/output fidelity, behavior coverage, and undo/redo resilience.
 - Recent cycle focused heavily on documentation plus post-documentation stabilization.
 
+## 2026-03-22 (Session 3) - Keymap Editor Popup Overhaul & ValuePicker Removal
+
+### Bug fix — `activeKmLayers` undefined
+- **`updateKeymapOutput()` was completely broken**: Previous session's "keymap output gap" fix used a non-existent variable `activeKmLayers` (line ~5107) instead of `keymapLayers`. This threw a ReferenceError every time the function ran, preventing all keymap output updates. Fixed by changing to `keymapLayers.length - 1`.
+
+### Major additions — Binding Editor Popup
+- **Converted binding editor to popup overlay**: Replaced the old inline `.binding-editor` panel with a fixed-position overlay popup.
+- **CSS**: New `.binding-editor-overlay` (fixed, z-index 300) + `.be-dialog` (520px, max-height 85vh, flex column with header/body/footer).
+- **HTML**: Restructured `#bindingEditor` into 3 zones: header (title + key badge + &none/&trans quick buttons), scrollable body (behavior dropdown, param rows, modifiers, keycode search + category grids), footer (Apply + Cancel).
+- **Backdrop click to close**: Clicking the dark backdrop behind the popup dismisses it.
+- **Animations**: fadeIn (0.15s) + slideUp (0.2s), matching other overlays in the app.
+
+### Major changes — ValuePicker Removed from SVG Click
+- **Removed `openValuePicker()` call from keyboard SVG click handler**: The floating ValuePicker dropdown (Type to search... popup) no longer auto-opens when clicking a key on the SVG keyboard. The binding editor popup now handles all key editing.
+- **ValuePicker system preserved**: The `openValuePicker()`/`closeValuePicker()` functions and `vpState` remain in the code for potential future use; only the SVG click trigger was removed.
+- **SVG click simplified**: Handler now only sets `selectedKeyIndex`, re-renders the SVG, and opens `showBindingEditor(keyIdx)`.
+
+### Major additions — Keymap Editor Popup Overlays
+- **Combo editor popup** (`#kmComboOverlay`): Replaced inline `#kmComboEditor` (`display:none` panel) with a fixed overlay popup. Contains: Name, Binding, Timeout, Layers, Require Prior Idle, Slow Release, combo mini-keyboard. Header has title + close button, footer has Save + Cancel.
+- **Macro editor popup** (`#kmMacroOverlay`): Replaced inline `#kmMacroEditor` with a wider (600px) overlay popup. Contains: Name, Label, Params, Wait/Tap timing, step search, step list, + Add Step / + String Sequence buttons. Header has title + close button, footer has Save + Cancel.
+- **Behavior editor popup** (`#kmBehaviorOverlay`): Replaced inline `#kmBehaviorEditor` with a 580px overlay popup. Contains: Name, Type dropdown, Label, dynamic `#kmBehaviorConfig` area. Header has title + close button, footer has Save + Cancel.
+- **Conditional layer editor popup** (`#kmCondLayerOverlay`): Replaced inline `#kmCondLayerEditor` with a 440px overlay popup. Contains: Condition name, multi-select "When these layers are active", "Activate this layer" dropdown. Header has title + close button, footer has Save + Cancel.
+- **Shared CSS**: New `.km-popup-overlay` / `.km-popup-dialog` / `.km-popup-header` / `.km-popup-body` / `.km-popup-footer` classes using the same fadeIn + slideUp animation pattern.
+- **Backdrop click to close**: All 4 popup overlays dismiss when clicking the dark backdrop.
+- **Reset function updated**: `fullRender()` reset code now closes all overlay popups via `classList.remove('visible')` instead of the old `style.display = 'none'`.
+
+### Major additions — List Search/Filter
+- **Search inputs added to all 4 list sections**: Combos, Macros, Behaviors, and Conditional Layers each have a "Filter..." search input above their item list.
+- **Real-time filtering**: Typing in the search input hides non-matching items in the list. Clear button resets the filter.
+- **Macro step search**: Inside the macro editor popup, a "Search steps..." input filters visible macro steps.
+- **Shared search CSS**: `.section-body .km-search-wrap` styles mirror the existing `.kc-search-wrap` pattern from the binding editor.
+- **Reusable `setupListSearch()` function**: Wires input/clear events for any search + list pair.
+
 ### Minor themes across updates
 - Frequent small correctness passes (typos, wiring, indexing, formatting consistency).
 - Readability and UX polish layered on top of parser and model improvements.
+
+## 2026-03-22 (Session 3, Continued) - Popup Editors, Output Restructure, UI Modernization
+
+### Bug fixes — Blink Fields Visibility
+- **Missing `.hidden` CSS class**: The blink-specific fields (Blink Color, Return Color, Wait) in the macro add form used `class="hidden"` to hide, but no generic `.hidden` CSS rule existed — only scoped `.release-color-group.hidden` and `.keycode-btn.hidden`. Added `.hidden { display: none !important; }` to the global CSS, fixing blink fields showing for non-blink macro types.
+
+### Bug fixes — Native Behaviors Lost in RGB Output
+- **Parser skipping macro-one-param/two-param types**: The native behavior parser had a `continue` statement that skipped `zmk,behavior-macro-one-param` and `zmk,behavior-macro-two-param` types, preventing user behaviors like `blnk:`, `caps_blink`, `num_blink` from being stored. Removed the `continue`; these types are now parsed as `'macro-one-param'`/`'macro-two-param'`.
+- **`_rawText` property**: Each parsed native behavior now stores its full matched text as `_rawText`, enabling faithful re-emission in the RGB output without re-serialization.
+- **Output emission**: Native macro behaviors (macro-one-param) are emitted after the `macros {}` block. Native non-macro behaviors (hold-tap, tap-dance, etc.) are emitted inside a `behaviors {}` block. Both use `_rawText` for verbatim output.
+
+### Bug fixes — Missing Closing `};` in RGB Output
+- **Complete output restructure**: RGB output now properly wraps all content in a root `/ { ... };` block. Sections include: `macros {}` (non-MO_BLINK macros), native macro behaviors, blink macros (ZMK_MACRO), standalone MO_BLINK calls, `behaviors {}` (RGB_HT + native behaviors), and `combos { compatible = "zmk,combos"; ... }`. All properly indented (4-space root, 8-space section inner).
+
+### Bug fixes — Keymap Output Bottom Gap
+- **Conditional newline**: Changed unconditional `\n\n` after every layer's closing `};` to only add the extra blank line between layers, not after the last one. Eliminates the gap before the closing `};`.
+
+### Bug fixes — #include Path Not Updating on Layout Switch
+- **Layout switch handlers**: Both the "Use Corne" and "Use Lotus58" layout buttons now update `keymapParsedIncludes` by regex-replacing the dtsi filename, and call `updateKeymapOutput()` to regenerate output with the correct `#include` path.
+
+### Major additions — Combo Editor Popup
+- **New `#comboEditorOverlay`**: Full popup editor for combos, matching the macro editor pattern. Fields: Name, Binding, Layer picker (dropdown + removable tag chips), Positions (mini keyboard SVG inside the popup with click-to-toggle). No 2-position limit in the popup editor (unlike the inline add form).
+- **`renderComboList()` redesign**: Replaced inline input fields with read-only display showing name, binding, positions, and layer tags. Each combo row has an Edit button that opens the popup, and a Delete button.
+- **JS functions**: `openComboEditor(idx)`, `closeComboEditor()`, `ceditRenderLayerTags()`, `ceditGetLayers()`, `ceditRenderMiniKb()`. Save handler writes all fields back to the combo object.
+- **Global state**: `comboEditorIndex`, `ceditSelectedPositions[]`.
+
+### Major additions — Behavior Editor Popup
+- **New `#behaviorEditorOverlay`**: Popup editor for behaviors with fields: Name, Label, Macro Ref (dropdown). Follows same `.editor-overlay`/`.editor-dialog` pattern.
+- **`renderBehaviorList()` redesign**: Replaced inline fields with read-only display (name, label, macro ref arrow). Edit/Delete buttons per row.
+- **JS functions**: `openBehaviorEditor(idx)`, `closeBehaviorEditor()`. Save handler updates behavior fields.
+
+### UI Modernization
+- **Shared overlay CSS**: New `.editor-overlay` and `.editor-dialog` classes used by all three popup editors (macro, combo, behavior). Theme-aware using CSS variables.
+- **Overlay animations**: `fadeIn` (0.15s) on backdrop, `slideUp` (0.2s) on dialog.
+- **Section hover effects**: Box-shadow enhancement on hover, background highlight on section heads.
+- **Item hover effects**: Accent border color and subtle box-shadow on hover.
+- **Button improvements**: `transform: scale(0.97)` on `:active`, box-shadow on hover, 5px border-radius.
+- **Input focus glow**: Box-shadow ring on focus for better visibility.
+- **New CSS classes**: `.btn-edit`, `.item-detail`, `.item-detail.muted`, `.item-tags`.
+
+## 2026-03-22 (Session 3, Continued) - Combo Layer Picker & Behavior Binding Dropdowns
+
+### Major additions — Combo Layer Tag Picker
+- **Layer picker in keymap combo editor**: Replaced the plain text `kmComboLayers` input with a `<select>` dropdown + removable tag chips, matching the RGB tab's combo editor pattern.
+- **New JS functions**: `kmComboLayerOptionsHTML()`, `kmComboRenderLayerTags(layersStr)`, `kmComboGetLayers()` — mirrors `ceditRenderLayerTags` / `ceditGetLayers` from the RGB combo editor.
+- **Event wiring**: `kmComboLayerPicker` onchange adds layers as tag chips (no duplicates); tag × click removes the layer.
+- **Reuses existing CSS**: `.layer-tags`, `.layer-tag`, `.layer-tag .tag-x` classes already defined.
+
+### Major additions — Behavior Editor Binding Dropdowns
+- **Datalist suggestions for binding fields**: All behavior config binding inputs now have `list="behBindingDL"` providing a dropdown of all available behaviors (ZMK_BEHAVIORS + custom keymapBehaviors + keymapMacros).
+- **Datalist suggestions for modifier fields**: Mod-morph `Mods` and Caps-word `Mods` inputs now have `list="behModsDL"` providing MOD_LSFT, MOD_RSFT, MOD_LCTL, MOD_RCTL, MOD_LALT, MOD_RALT, MOD_LGUI, MOD_RGUI suggestions.
+- **Affected fields**: Hold-tap (Hold/Tap Binding), Mod-morph (Normal, Morphed, Mods), Sticky-key (Binding), Sensor-rotate (CW/CCW Binding), Caps-word (Mods).
+- **Free text preserved**: Datalist approach keeps inputs as `<input type="text">` with dropdown suggestions, allowing custom values for advanced ZMK configurations.
+- **New JS function**: `populateBehDataLists()` — called from `showBehaviorConfig()` to refresh datalist options whenever the behavior config panel renders.
+- **Static `<datalist>` elements**: `behBindingDL` and `behModsDL` added inside the behavior overlay body.
 
 ## Source Basis (for this changelog)
 - Git history sample in this repo (latest 40 entries queried).
