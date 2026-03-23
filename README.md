@@ -104,7 +104,7 @@ I used Copilot to help modularize and refine the macros and combos. The modular 
 <br>**___Should NOTE that this has only been cofigured for Lotus58 and Corne Keymaps, it says you can add a .json but I never tried.___**
 ![editor](ZMKPer-LayerColor_RGB_Tool_with_keymap_editor1.png)
 ![editor4](ZMKPer-LayerColor_RGB_Tool_with_keymap_editor4.png)
-
+---
 ![editor2](ZMKPer-LayerColor_RGB_Tool_with_keymap_editor2.png)
 ![editor3](ZMKPer-LayerColor_RGB_Tool_with_keymap_editor3.png)
 
