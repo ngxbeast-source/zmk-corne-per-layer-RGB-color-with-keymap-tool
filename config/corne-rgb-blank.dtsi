@@ -4,18 +4,26 @@
  * Copy this file and fill in your own layers, colors, macros, and behaviors.
  * All sections are commented for easy customization.
  * You can remove any/all comments if you wish, to save space on your firmware.
+ * The comments ( // or /*...*/ ) are just meant to be a guideline for "newbies", they aren't needed.
+ * WHEN YOU SEE 
+                /* -------------------REMOVE & BUILD HERE------------------- */
+ * DELETE THE LINE AND START YOUR BUILD IN THE SAME LINE. THIS PUTS YOUR CODE "IN" THE DEVICETREE.
  */
 
 /* ---- STEP 1: DEFINE LAYERS ---- */
 // Example: #define LAYER_BASE 0
 // #define LAYER_FN 1
 // #define LAYER_ADJUST 2
+                /* -------------------REMOVE & DEFINE HERE------------------- */
+
 
 /* ---- STEP 1a: DEFINE COLORS ---- */
 // Example: #define RGB_BASE   RGB_COLOR_HSB(0,0,20)   // Dim White
 // #define RGB_FN     RGB_COLOR_HSB(200,100,60) // Cyan
+                /* -------------------REMOVE & DEFINE HERE------------------- */
 
-            /* -------------------BUILD END; CONTINUES AT LINE 124------------------- */
+
+            /* -------------------BUILD END; CONTINUES AT LINE 132------------------- */
 
 /* ---- (OPTIONAL) BLINK HELPERS ---- */
 // "flashes" LEDs a chosen color twice
@@ -121,7 +129,8 @@
 / {
     /* ---- STEP 2+3: MACROS (define your macros for each layer/behavior) ---- */
     macros {
-    // (UNCOMMENT_AND_START_BUILDING_HERE)
+                /* -------------------REMOVE & BUILD HERE------------------- */
+
     };
     /* ---- (OPTIONAL) BLINK/STATUS MACROS ---- 
      * Define blink/caps/num macros here if needed 
@@ -145,9 +154,13 @@
 
 
 
+
+
     /* ---- STEP 4: BEHAVIORS - HOLD-TAP ---- */
 /* Build behaviors for momentary layers here, using the macros you built above */
     behaviors {
+                /* -------------------REMOVE & BUILD HERE------------------- */
+
         // Example:
         // RGB_HOLD_TAP(hold_tap_fn, "HOLD_TAP_FN", fn_led)
     };
@@ -155,21 +168,22 @@
     /* ---- STEP 5: COMBOS - ACCESSING/LEAVING OUR ToggleLayer  ---- */
     combos {
         compatible = "zmk,combos";
+                /* -------------------REMOVE & BUILD HERE------------------- */
         // Example:
         // COMBO(my_combo, &kp ESC, 0, 1, LAYER_BASE)
     };
 
     /* ---- (OPTIONAL) Tap dance ---- */
     /* Define tap dance behaviors here if needed
-        UNCOMMENT /*...*/ (lines 151 & 157) TO USE */
+        UNCOMMENT /*...*/ (lines 166 & 171) TO USE */
         //TAP DANCE FOR SHIFT CAPS AND NUMLOCK; DIFFENET COLOR BLINK FOR WHEN EACH IS TOGGLED.
 /*        td_numcaps: td_numcapsBLINK {
         compatible = "zmk,behavior-tap-dance";
         #binding-cells = <0>;
         tapping-term-ms = <300>;
         bindings = <&kp LSFT>, <&c_blink>, <&n_blink>;
-    };
-*/
+    }; */
+
 };
-                /* -------------------BUILD END------------------- */
+                /* -------------------.DTSI BUILD END------------------- */
 
