@@ -2023,7 +2023,7 @@ function parseUserCode() {
     behaviors.push({ name: bargs[0], label: (bargs[1] || '').replace(/"/g, ''), macro: bargs[2] || '' });
   }
 
-  var comboRe = /C\(([^)]+)\)/g;
+  var comboRe = /CMB\(([^)]+)\)/g;
   while ((m = comboRe.exec(codeNoHelpers))) {
     var cargs = m[1].split(',').map(function(x) { return x.trim(); });
     var pos, layersStr;
@@ -2562,7 +2562,7 @@ var HELPER_HOLD_TAP =
   '        };\n';
 
 var HELPER_COMBO =
-  '#define C(name, bind, p1, p2, ...) \\\n' +
+  '#define CMB(name, bind, p1, p2, ...) \\\n' +
   '    name { bindings = <bind>; key-positions = <p1 p2>; layers = <__VA_ARGS__>; timeout-ms = <50>; }\n';
 
 // EXPERIMENTAL: Momentary-layer + blink sequence helper
@@ -2764,7 +2764,7 @@ function updateRgbOutput() {
     out += '        compatible = "zmk,combos";\n';
     combos.forEach(function(c) {
       if (c.comment) out += '        ' + c.comment.replace(/\n/g, '\n        ') + '\n';
-      out += '        C(' + c.name + ', ' + c.bind + ', ' + c.pos.replace(/\s+/g, ', ') + ', ' + c.layers + ');\n';
+      out += '        CMB(' + c.name + ', ' + c.bind + ', ' + c.pos.replace(/\s+/g, ', ') + ', ' + c.layers + ');\n';
     });
     out += '    };\n';
   }

@@ -104,7 +104,7 @@
                        <&macro_release &mo layer>; \
         )
 /* ---- (optional) COMBO HELPER ---- */
-#define C(name, bind, p1, p2, ...) \
+#define CMB(name, bind, p1, p2, ...) \
     name { bindings = <bind>; key-positions = <p1 p2>; layers = <__VA_ARGS__>; timeout-ms = <50>; }
  /{
     /* ---- STEP 2+3: MACROS (build macros for all needed behaviors/layers) ---- */
@@ -196,24 +196,24 @@
     /* ---- (OPTIONAL) STEP 5: COMBOS ---- */
     combos {
         compatible = "zmk,combos";
-        C(left_bkt,   &kp LEFT_BRACKET,   4,  3,  ABC);
-        C(right_bkt,  &kp RBKT,           7,  8,  ABC);
-        C(left_par,   &kp LEFT_PARENTHESIS,15,16, ABC);
-        C(right_par,  &kp RIGHT_PARENTHESIS,19,20, ABC);
-        C(left_brace, &kp LEFT_BRACE,     27,28, ABC);
-        C(right_brace,&kp RIGHT_BRACE,    32,31, ABC);
-        C(bac,        &kp BACKSLASH,      5, 6, ABC);
-        C(pipe,       &kp PIPE,           17,18, ABC);
+        CMB(left_bkt,   &kp LEFT_BRACKET,   4,  3,  ABC);
+        CMB(right_bkt,  &kp RBKT,           7,  8,  ABC);
+        CMB(left_par,   &kp LEFT_PARENTHESIS,15,16, ABC);
+        CMB(right_par,  &kp RIGHT_PARENTHESIS,19,20, ABC);
+        CMB(left_brace, &kp LEFT_BRACE,     27,28, ABC);
+        CMB(right_brace,&kp RIGHT_BRACE,    32,31, ABC);
+        CMB(bac,        &kp BACKSLASH,      5, 6, ABC);
+        CMB(pipe,       &kp PIPE,           17,18, ABC);
 
             // Gateways + "Back-Pathing"
-        C(toggleLayer, &top_toglayers_leds,  38,39, ABC TGLLR_1 TGLLR_2);
-        C(game_toggle, &top_gtgl_ledgtgl_led,        38,39, GAME GAME2);
+        CMB(toggleLayer, &top_toglayers_leds,  38,39, ABC TGLLR_1 TGLLR_2);
+        CMB(game_toggle, &top_gtgl_ledgtgl_led,        38,39, GAME GAME2);
             // Sub-Layers to Sub/Base
-        C(gameLayer_2_BaseLayer, &to_default_led, 0,11, GAME);
-        C(gameLayer,  &to_game_led, 0,11, ABC TGL GAME2);
+        CMB(gameLayer_2_BaseLayer, &to_default_led, 0,11, GAME);
+        CMB(gameLayer,  &to_game_led, 0,11, ABC TGL GAME2);
             // "Exit" Combos; Return to Sub/Base
-        C(toggleLayer_2_BaseLayer, &to_default_led, 39,38, TGL);
-        C(game_toggle_2_game, &to_game_led, 38,39, GAMETGL);
+        CMB(toggleLayer_2_BaseLayer, &to_default_led, 39,38, TGL);
+        CMB(game_toggle_2_game, &to_game_led, 38,39, GAMETGL);
     };
     /* BLINK Tap dance */
     td_numcaps: td_numcapsBLINK {
