@@ -163,7 +163,7 @@
     /* ---- (OPTIONAL) Tap dance ---- */
     /* Define tap dance behaviors here if needed
         UNCOMMENT /*...*/ (lines 167 & 172) TO USE */
-        //TAP DANCE FOR SHIFT CAPS AND NUMLOCK; DIFFENET COLOR BLINK FOR WHEN EACH IS TOGGLED.
+        //TAP DANCE FOR SHIFT CAPS AND NUMLOCK; DIFFERENT COLOR BLINK FOR WHEN EACH IS TOGGLED.
 /*        td_numcaps: td_numcapsBLINK {
         compatible = "zmk,behavior-tap-dance";
         #binding-cells = <0>;
