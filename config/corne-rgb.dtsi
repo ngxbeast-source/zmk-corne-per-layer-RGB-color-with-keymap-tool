@@ -107,7 +107,7 @@
 #define KP_BLINK(node_name, node_label, key, blink_color, return_color, wait) \
          ZMK_MACRO(node_name, \
             label = node_label; \
-            bindings = <&macro_tap &kp key>; \ 
+            bindings = <&macro_tap &kp key>, \ 
             <BLINK_SEQ(blink_color, return_color, wait)>; \
         )
 /* ---- COMBO HELPER ---- */
