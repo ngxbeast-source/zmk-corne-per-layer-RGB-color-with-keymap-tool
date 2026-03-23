@@ -34,7 +34,7 @@
 #define RGB_GAME2_SUBLR1 RGB_COLOR_HSB(67,55,20)   /* SUB-LAYOUT */
 
 /* ---- (OPTIONAL) BLINK HELPERS ---- */
-#define BLINK_ON     RGB_COLOR_HSB(39,100,75)    /* Blink On - Bright Yellow (change to whatever you want, multiple colors can be made like shown below)/
+#define BLINK_ON     RGB_COLOR_HSB(39,100,75)    /* Blink On - Bright Yellow (change to whatever you want, multiple colors can be made like shown below) */
 #define N_BLINK_ON   RGB_COLOR_HSB(0,100,60)     /* Num On - Bright Red */
 #define C_BLINK_ON   RGB_COLOR_HSB(200,100,60)   /* Caps On - Cyan */
 
