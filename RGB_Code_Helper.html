@@ -1644,7 +1644,7 @@ function rgbToHsb(r, g, b) {
   return { h: Math.round(h), s: Math.round(s * 100), b: Math.round(v * 100) };
 }
 function hasHsbVal(v) { return v !== '' && v !== undefined && v !== null; }
-function baseKey(name) { return name.replace(/^L_/i, '').replace(/^RGB_/i, '').toUpperCase(); }
+function baseKey(name) { return name.replace(/^LAYER_/i, '').replace(/^L_/i, '').replace(/^RGB_/i, '').toUpperCase(); }
 function esc(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // ================================================================
@@ -2019,8 +2019,9 @@ function parseUserCode() {
   if (!foundLayer) {
     layerRe = /^#define\s+([A-Za-z0-9_]+)\s+(\d+)\s*$/gm;
     while ((m = layerRe.exec(code))) {
-      var cv2 = colorValueMap['RGB_' + m[1]] || colorValueMap[m[1]];
-      var cl2 = colorLabelMap['RGB_' + m[1]] || colorLabelMap[m[1]] || '';
+      var stripped2 = m[1].replace(/^LAYER_/i, '').replace(/^L_/i, '');
+      var cv2 = colorValueMap['RGB_' + m[1]] || colorValueMap[m[1]] || colorValueMap['RGB_' + stripped2] || colorValueMap[stripped2];
+      var cl2 = colorLabelMap['RGB_' + m[1]] || colorLabelMap[m[1]] || colorLabelMap['RGB_' + stripped2] || colorLabelMap[stripped2] || '';
       layers.push({ name: m[1], index: m[2], h: cv2 ? String(cv2.h) : '', s: cv2 ? String(cv2.s) : '', b: cv2 ? String(cv2.b) : '', label: cl2 });
     }
   }
@@ -2647,7 +2648,7 @@ function addBlinkMacro() {
 
 function updateColorMapFromLayer(i) {
   var l = layers[i];
-  var ck = l.name.replace(/^L_/, '');
+  var ck = l.name.replace(/^LAYER_/i, '').replace(/^L_/, '');
   if (hasHsbVal(l.h) && hasHsbVal(l.s) && hasHsbVal(l.b)) {
     colorValueMap['RGB_' + ck] = { h: parseInt(l.h) || 0, s: parseInt(l.s) || 0, b: parseInt(l.b) || 0 };
     colorLabelMap['RGB_' + ck] = l.label || '';
