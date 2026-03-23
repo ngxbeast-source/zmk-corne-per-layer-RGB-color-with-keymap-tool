@@ -197,6 +197,13 @@
             global-quick-tap;
             quick-tap-ms = <400>;
         };
+        /* BLINK Tap dance */
+        td_numcaps: td_numcapsBLINK {
+            compatible = "zmk,behavior-tap-dance";
+            #binding-cells = <0>;
+            tapping-term-ms = <300>;
+            bindings = <&kp LSFT>, <&c_blink>, <&n_blink>;
+        };
     };
     /* ---- (OPTIONAL) STEP 5: COMBOS ---- */
     combos {
@@ -220,11 +227,5 @@
         CMB(toggleLayer_2_BaseLayer, &to_default_led, 39,38, TGL);
         CMB(game_toggle_2_game, &to_game_led, 38,39, GAMETGL);
     };
-    /* BLINK Tap dance */
-    td_numcaps: td_numcapsBLINK {
-        compatible = "zmk,behavior-tap-dance";
-        #binding-cells = <0>;
-        tapping-term-ms = <300>;
-        bindings = <&kp LSFT>, <&c_blink>, <&n_blink>;
-    };
+
  };

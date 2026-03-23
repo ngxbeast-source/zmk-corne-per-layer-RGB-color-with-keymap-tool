@@ -160,6 +160,16 @@
     /* ---- STEP 4: BEHAVIORS - HOLD-TAP ---- */
 /* Build behaviors for momentary layers here, using the macros you built above */
     behaviors {
+    /* ---- (OPTIONAL) Tap dance ---- */
+    /* Define tap dance behaviors here if needed
+        UNCOMMENT /*...*/ (lines 167 & 172) TO USE */
+        //TAP DANCE FOR SHIFT CAPS AND NUMLOCK; DIFFENET COLOR BLINK FOR WHEN EACH IS TOGGLED.
+/*        td_numcaps: td_numcapsBLINK {
+        compatible = "zmk,behavior-tap-dance";
+        #binding-cells = <0>;
+        tapping-term-ms = <300>;
+        bindings = <&kp LSFT>, <&c_blink>, <&n_blink>;
+    }; */
         // Example:
         // RGB_HOLD_TAP(hold_tap_fn, "HOLD_TAP_FN", fn_led)
                 /* -------------------REMOVE & BUILD HERE------------------- */
@@ -173,17 +183,6 @@
         // COMBO(my_combo, &kp ESC, 0, 1, LAYER_BASE)
                 /* -------------------REMOVE & BUILD HERE------------------- */
     };
-
-    /* ---- (OPTIONAL) Tap dance ---- */
-    /* Define tap dance behaviors here if needed
-        UNCOMMENT /*...*/ (lines 181 & 186) TO USE */
-        //TAP DANCE FOR SHIFT CAPS AND NUMLOCK; DIFFENET COLOR BLINK FOR WHEN EACH IS TOGGLED.
-/*        td_numcaps: td_numcapsBLINK {
-        compatible = "zmk,behavior-tap-dance";
-        #binding-cells = <0>;
-        tapping-term-ms = <300>;
-        bindings = <&kp LSFT>, <&c_blink>, <&n_blink>;
-    }; */
 
 };
                 /* -------------------.DTSI BUILD END------------------- */
