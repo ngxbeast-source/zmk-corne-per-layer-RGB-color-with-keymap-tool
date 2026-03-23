@@ -476,6 +476,7 @@
               <select id="macroType"><option value="TO_RGB">TO_RGB</option><option value="MO_RGB">MO_RGB</option><option value="TO_RGB_PRESS">TO_RGB_PRESS</option></select>
             </div>
             <div class="input-group"><label>Name</label><input type="text" id="macroName" placeholder="to_name" style="width:110px;"></div>
+            <div class="input-group"><label>Label</label><input type="text" id="macroLabel" placeholder="optional label" style="width:110px;"></div>
             <div class="input-group"><label>Layer</label><select id="macroLayer"></select></div>
             <div class="input-group"><label>Color</label><select id="macroColor"></select></div>
             <div class="input-group release-color-group" id="releaseColorGroup"><label>Release</label><select id="macroReleaseColor"></select></div>
@@ -536,6 +537,7 @@
               <select id="blinkType"><option value="KP_BLINK">KP_BLINK</option><option value="MO_BLINK">MO_BLINK &#9888;</option></select>
             </div>
             <div class="input-group"><label>Name</label><input type="text" id="blinkName" placeholder="blink_macro" style="width:110px;"></div>
+            <div class="input-group"><label>Label</label><input type="text" id="blinkLabel" placeholder="optional label" style="width:110px;"></div>
             <div class="input-group" id="blinkKeyGroup"><label>Key</label><input type="text" id="blinkKey" placeholder="CAPS" style="width:80px;"></div>
             <div class="input-group" id="blinkLayerGroup" style="display:none;"><label>Layer</label><select id="blinkLayer"></select></div>
             <div class="input-group"><label>Color</label><select id="blinkColor"></select></div>
@@ -554,6 +556,7 @@
           <h3>Edit Macro</h3>
           <div class="medit-fields">
             <div class="input-group"><label>Name</label><input type="text" id="meditName" style="width:160px;"></div>
+            <div class="input-group"><label>Label</label><input type="text" id="meditLabel" placeholder="optional label" style="width:160px;"></div>
             <div class="input-group"><label>Type</label>
               <select id="meditType">
                 <option value="TO_RGB">TO_RGB</option>
@@ -2355,8 +2358,10 @@ function renderMacroList() {
     div.className = 'item';
     var typeLabel = m.type === 'TO_RGB' ? 'TO_RGB' : m.type === 'MO_RGB' ? 'MO_RGB' : 'TO_PRESS';
     var infoStr = 'L:' + esc(m.layer) + ' C:' + esc(m.color) + (m.releaseColor ? ' R:' + esc(m.releaseColor) : '');
+    var labelStr = m.label ? '<span style="color:#9cc;font-size:0.82em;margin:0 4px;" title="Label">&quot;' + esc(m.label) + '&quot;</span>' : '';
     div.innerHTML =
       '<b>' + esc(m.name) + '</b>' +
+      labelStr +
       '<span style="color:#888;font-size:0.85em;margin:0 6px;">' + typeLabel + '</span>' +
       '<span style="color:#aaa;font-size:0.85em;">' + infoStr + '</span>' +
       '<button class="btn-sm" data-edit-macro="' + i + '" style="margin-left:auto;padding:2px 8px;background:#3a3a5a;color:#e0e0e0;border:1px solid #555;border-radius:4px;cursor:pointer;">&#9998; Edit</button>' +
@@ -2376,6 +2381,7 @@ function openMacroEditor(idx) {
   var m = macros[idx];
   var overlay = document.getElementById('macroEditorOverlay');
   document.getElementById('meditName').value = m.name;
+  document.getElementById('meditLabel').value = m.label || '';
   document.getElementById('meditType').value = m.type;
   document.getElementById('meditLayer').innerHTML = layerOptionsHTML(m.layer);
   document.getElementById('meditColor').innerHTML = colorOptionsHTML(m.color);
@@ -2521,6 +2527,7 @@ function renderBlinkMacroList() {
     }
     div.innerHTML =
       '<b>' + esc(bm.name) + '</b>' +
+      '<div class="input-group"><label>Label</label><input type="text" value="' + esc(bm.label || '') + '" data-field="label" data-i="' + i + '" placeholder="label" style="width:110px"></div>' +
       secondField +
       '<div class="input-group"><label>Color</label><select data-field="color" data-i="' + i + '">' + colorOptionsHTML(bm.color) + '</select><span class="color-preview" style="background:' + colorHex + '" title="' + esc(bm.color) + '"></span></div>' +
       '<div class="input-group"><label>Ret</label><select data-field="returnColor" data-i="' + i + '">' + colorOptionsHTML(bm.returnColor) + '</select><span class="color-preview" style="background:' + retHex + '" title="' + esc(bm.returnColor) + '"></span></div>' +
@@ -2600,7 +2607,7 @@ function addMacro() {
   var type = document.getElementById('macroType').value;
   var rawName = document.getElementById('macroName').value.trim() || 'new_macro';
   var name = autoPrefix(rawName, type);
-  var obj = { name: name, type: type, layer: document.getElementById('macroLayer').value, color: document.getElementById('macroColor').value, releaseColor: type === 'MO_RGB' ? document.getElementById('macroReleaseColor').value : '', label: '' };
+  var obj = { name: name, type: type, layer: document.getElementById('macroLayer').value, color: document.getElementById('macroColor').value, releaseColor: type === 'MO_RGB' ? document.getElementById('macroReleaseColor').value : '', label: document.getElementById('macroLabel').value.trim() };
   macros.push(obj);
   rgbRenderAll();
 }
@@ -2626,7 +2633,7 @@ function addCombo() {
 function addBlinkMacro() {
   pushRgbUndo();
   var btype = document.getElementById('blinkType').value;
-  var obj = { name: document.getElementById('blinkName').value.trim() || 'new_blink', color: document.getElementById('blinkColor').value, returnColor: document.getElementById('blinkReturnColor').value, wait: document.getElementById('blinkWait').value || '80', label: '', comment: '', _helper: btype };
+  var obj = { name: document.getElementById('blinkName').value.trim() || 'new_blink', color: document.getElementById('blinkColor').value, returnColor: document.getElementById('blinkReturnColor').value, wait: document.getElementById('blinkWait').value || '80', label: document.getElementById('blinkLabel').value.trim(), comment: '', _helper: btype };
   if (btype === 'MO_BLINK') {
     obj.key = '';
     obj.layer = document.getElementById('blinkLayer').value;
@@ -6139,6 +6146,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var newType = document.getElementById('meditType').value;
     var rawName = document.getElementById('meditName').value.trim() || macros[macroEditorIndex].name;
     macros[macroEditorIndex].name = autoPrefix(rawName, newType);
+    macros[macroEditorIndex].label = document.getElementById('meditLabel').value.trim();
     macros[macroEditorIndex].type = newType;
     macros[macroEditorIndex].layer = document.getElementById('meditLayer').value;
     macros[macroEditorIndex].color = document.getElementById('meditColor').value;
