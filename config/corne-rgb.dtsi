@@ -155,8 +155,9 @@
             BLINK_SEQ(BLINK_ON, RGB_XTRA, 80)
         >;
     };
-    KP_BLINK(c_blink, "CAPS LOCK + BLINK", CAPS, N_BLINK_ON, RGB_ABC, 80)
-    KP_BLINK(n_blink, "NUM LOCK + BLINK", KP_NUMLOCK, C_BLINK_ON, RGB_ABC, 80) 
+        KP_BLINK(c_blink, "CAPS LOCK + BLINK", CAPS, C_BLINK_ON, RGB_ABC, 80)
+        KP_BLINK(n_blink, "NUM LOCK + BLINK", KP_NUMLOCK, N_BLINK_ON, RGB_ABC, 80)
+    };
 
     ZMK_MACRO(caps_blink,
         label = "CAPS TOGGLE + BLINK";
