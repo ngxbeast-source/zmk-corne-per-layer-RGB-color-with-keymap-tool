@@ -5,8 +5,11 @@
  * All sections are commented for easy customization.
  * You can remove any/all comments if you wish, to save space on your firmware.
  * The comments ( // or /*...*/ ) are just meant to be a guideline for "newbies", they aren't needed.
- * WHEN YOU SEE 
+ * WHEN YOU SEE "UNCOMMENT //, OR /*...*/ TO USE", DELETE THE SYMBOLS IN THE GIVEN Lines
+ * WHEN YOU SEE: 
+
                 /* -------------------REMOVE & BUILD HERE------------------- */
+
  * DELETE THE LINE AND START YOUR BUILD IN THE SAME LINE. THIS PUTS YOUR CODE "IN" THE DEVICETREE.
  */
 
@@ -23,11 +26,12 @@
                 /* -------------------REMOVE & DEFINE HERE------------------- */
 
 
-            /* -------------------BUILD END; CONTINUES AT LINE 132------------------- */
+            /* -------------------BUILD END; CONTINUES AT LINE 135------------------- */
 
 /* ---- (OPTIONAL) BLINK HELPERS ---- */
 // "flashes" LEDs a chosen color twice
-// UNCOMMENT /*...*/(Lines 24 & 37) FROM "#define BLINK_ON" DOWN; TO USE.
+// UNCOMMENT /*...*/ (Lines 36 & 66) TO USE.
+
 // Multiple Color definitions can be made as needed. Names are arbitary as long as the name relates to the the color make it whatever you want. 
 /* #define BLINK_ON     RGB_COLOR_HSB(39,100,75) // BLINK Color
  #define BLINK_OFF    RGB_COLOR_HSB(273,67,23) // Return Color
@@ -42,7 +46,7 @@
      &macro_wait_time WAIT \
      &macro_tap &rgb_ug RGB_TOG \
      &macro_wait_time WAIT \
-     &macro_tap &rgb_ug OFF */
+     &macro_tap &rgb_ug OFF 
 
 /* EXPERIMENTAL: Momentary + Blink helper (use with RGB_HT) */
 #define MO_BLINK(node_name, node_label, layer, blink_color, return_color, wait) \
@@ -59,11 +63,11 @@
             label = node_label; \
             bindings = <&macro_tap &kp key>, \ 
             <BLINK_SEQ(blink_color, return_color, wait)>; \
-        )
+        ) */
 
 /* USE THE HELPERS FOR REFERENCE TO BUILD YOUR MACROS AND/OR BEHAVIORS. NOTHING HAS TO BE CHANGED HERE */
-// #define MOMENTARY_RGB_MACRO(node_name, node_label, layer, active_color, release_color)
 /* ---- MACRO HELPERS ---- */
+
 #define MOMENTARY_RGB_MACRO(node_name, node_label, layer, active_color, release_color) \
         ZMK_MACRO(node_name, \
             bindings = \
