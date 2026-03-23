@@ -207,7 +207,7 @@
 
             // Gateways + "Back-Pathing"
         CMB(toggleLayer, &top_toglayers_leds,  38,39, ABC TGLLR_1 TGLLR_2);
-        CMB(game_toggle, &top_gtgl_ledgtgl_led,        38,39, GAME GAME2);
+        CMB(game_toggle, &top_gtgl_led,        38,39, GAME GAME2);
             // Sub-Layers to Sub/Base
         CMB(gameLayer_2_BaseLayer, &to_default_led, 0,11, GAME);
         CMB(gameLayer,  &to_game_led, 0,11, ABC TGL GAME2);
