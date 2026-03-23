@@ -2007,11 +2007,11 @@ function parseUserCode() {
     colorLabelMap[m[1]] = (m[5] || m[6] || '').trim();
   }
 
-  var layerRe = /^#define\s+(L_[A-Za-z0-9_]+)\s+(\d+)\s*$/gm;
+  var layerRe = /^#define\s+((?:LAYER_|L_)[A-Za-z0-9_]+)\s+(\d+)\s*$/gm;
   var foundLayer = false;
   while ((m = layerRe.exec(code))) {
     foundLayer = true;
-    var stripped = m[1].replace(/^L_/, '');
+    var stripped = m[1].replace(/^LAYER_/i, '').replace(/^L_/, '');
     var cv = colorValueMap['RGB_' + stripped] || colorValueMap[stripped] || colorValueMap[m[1]];
     var cl = colorLabelMap['RGB_' + stripped] || colorLabelMap[stripped] || colorLabelMap[m[1]] || '';
     layers.push({ name: m[1], index: m[2], h: cv ? String(cv.h) : '', s: cv ? String(cv.s) : '', b: cv ? String(cv.b) : '', label: cl });
