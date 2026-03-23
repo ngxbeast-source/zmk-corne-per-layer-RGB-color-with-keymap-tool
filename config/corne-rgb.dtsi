@@ -160,7 +160,7 @@
         KP_BLINK(n_blink, "NUM LOCK + BLINK", KP_NUMLOCK, N_BLINK_ON, RGB_ABC, 80)
 
          /* This goes to the "F Keys Layer" (that we layered "on top" of our NumberRowLayer). 
-             Used w/ RGB_HT(), w/ this "new" "color". CAN BE STANDALONE, OR USED WITH RGB_HT TO BIND WITH ANOTHER &kP */ 
+            CAN BE STANDALONE, OR USED WITH RGB_HT TO BIND WITH ANOTHER &kP */ 
         MO_BLINK(f_blink_sa, "F KEYS BLINK; STANDALONE", FKEYS, F_BLINK_ON, RGB_NMRW, 80)
 
 
