@@ -512,7 +512,7 @@
         <div class="section-body" id="comboBody">
           <div class="input-row">
             <div class="input-group"><label>Name</label><input type="text" id="comboName" placeholder="combo_name" style="width:110px;"></div>
-            <div class="input-group"><label>Bind</label><input type="text" id="comboBind" placeholder="&amp;kp ESC" style="width:120px;"></div>
+            <div class="input-group"><label>Bind</label><select id="comboBind" style="width:140px;"></select></div>
             <div class="input-group"><label>Pos</label><input type="text" id="comboPos" placeholder="0 1" style="width:60px;" readonly title="Click to select on keyboard"></div>
             <div class="input-group"><label>Layers</label><select id="comboLayerPicker" style="width:120px;cursor:pointer;" title="Pick a layer to add"><option value="">+ Add layer</option></select><span id="comboLayerTags" class="layer-tags"></span><input type="hidden" id="comboLayersInput"></div>
             <button id="addComboBtn">+ Add</button>
@@ -582,7 +582,7 @@
         <h3>&#128279; Edit Combo</h3>
         <div class="medit-fields">
           <div class="input-group"><label>Name</label><input type="text" id="ceditName" style="width:180px;"></div>
-          <div class="input-group"><label>Binding</label><input type="text" id="ceditBind" style="width:220px;"></div>
+          <div class="input-group"><label>Binding</label><select id="ceditBind" style="width:220px;"></select></div>
           <div class="input-group"><label>Layers</label>
             <select id="ceditLayerPicker" style="width:140px;cursor:pointer;" title="Pick a layer"><option value="">+ Add layer</option></select>
             <span id="ceditLayerTags" class="layer-tags"></span>
@@ -1557,7 +1557,7 @@ var MOUSE_SCROLLS = ['SCRL_UP','SCRL_DOWN','SCRL_LEFT','SCRL_RIGHT'];
 var BUILTIN_BEHAVIORS = [
   {
     id: 'hm', name: 'hm', label: 'Homerow Mods', type: 'hold-tap',
-    desc: 'Tap-preferred hold-tap with quick-tap &amp; global-quick-tap. Binds &amp;kp on hold &amp; tap.',
+    desc: 'Universal homerow mod pulled from PandaKB firmware. Tap-preferred hold-tap with quick-tap &amp; global-quick-tap.',
     config: { tappingTerm: '200', flavor: 'tap-preferred', holdBinding: '&kp', tapBinding: '&kp',
               quickTap: '180', requirePriorIdle: '', holdTriggerPositions: '',
               retroTap: false, holdWhileUndecided: false, holdWhileUndecidedLinger: false,
@@ -1596,11 +1596,6 @@ var BUILTIN_BEHAVIORS = [
               retroTap: false, holdWhileUndecided: false, holdWhileUndecidedLinger: false,
               holdTriggerOnRelease: false, globalQuickTap: false },
     define: '#define MO_TOG(layer) &mo_tog layer layer'
-  },
-  {
-    id: 'td_example', name: 'td0', label: 'Tap-Dance Example', type: 'tap-dance',
-    desc: 'Tap 1&times;/2&times;/3&times; for different keycodes. Edit bindings after enabling.',
-    config: { tappingTerm: '200', bindings: '<&kp LSFT>, <&kp CAPS>' }
   }
 ];
 
@@ -1899,6 +1894,27 @@ function macroRefOptionsHTML(selected) {
   blinkMacros.forEach(function(bm) {
     var sel = bm.name === selected ? ' selected' : '';
     opts.push('<option value="' + esc(bm.name) + '"' + sel + '>' + esc(bm.name) + '</option>');
+  });
+  if (selected && !opts.some(function(o) { return o.indexOf('selected') > -1; })) {
+    opts.unshift('<option value="' + esc(selected) + '" selected>' + esc(selected) + '</option>');
+  }
+  return opts.join('');
+}
+
+function comboBindOptionsHTML(selected) {
+  var opts = [];
+  macros.forEach(function(m) {
+    var sel = m.name === selected ? ' selected' : '';
+    opts.push('<option value="' + esc(m.name) + '"' + sel + '>' + esc(m.name) + '</option>');
+  });
+  blinkMacros.forEach(function(bm) {
+    var sel = bm.name === selected ? ' selected' : '';
+    opts.push('<option value="' + esc(bm.name) + '"' + sel + '>' + esc(bm.name) + '</option>');
+  });
+  behaviors.forEach(function(b) {
+    var val = '&' + b.name;
+    var sel = val === selected ? ' selected' : '';
+    opts.push('<option value="' + esc(val) + '"' + sel + '>' + esc(val) + '</option>');
   });
   if (selected && !opts.some(function(o) { return o.indexOf('selected') > -1; })) {
     opts.unshift('<option value="' + esc(selected) + '" selected>' + esc(selected) + '</option>');
@@ -2405,7 +2421,7 @@ function openComboEditor(idx) {
   comboEditorIndex = idx;
   var c = combos[idx];
   document.getElementById('ceditName').value = c.name;
-  document.getElementById('ceditBind').value = c.bind;
+  document.getElementById('ceditBind').innerHTML = comboBindOptionsHTML(c.bind);
   // Layer picker
   document.getElementById('ceditLayerPicker').innerHTML = '<option value="">+ Add layer</option>' + layerOptionsHTML('');
   // Layer tags
@@ -2565,6 +2581,9 @@ function updateHeaderDropdowns() {
   document.getElementById('blinkReturnColor').innerHTML = colorOpts;
   document.getElementById('blinkLayer').innerHTML = layerOptionsHTML('');
   document.getElementById('behaviorMacro').innerHTML = macroRefOptionsHTML('');
+  // Populate combo bind dropdown with macros/behaviors from RGB tab
+  var cbSel = document.getElementById('comboBind');
+  if (cbSel) cbSel.innerHTML = comboBindOptionsHTML('');
   // Populate combo layer picker dropdown
   var clp = document.getElementById('comboLayerPicker');
   if (clp) clp.innerHTML = '<option value="">+ Add layer</option>' + layerOptionsHTML('');
@@ -2724,8 +2743,8 @@ var HELPER_HOLD_TAP =
   '        };\n';
 
 var HELPER_COMBO =
-  '#define CMB(name, bind, p1, p2, ...) \\\n' +
-  '    name { bindings = <bind>; key-positions = <p1 p2>; layers = <__VA_ARGS__>; timeout-ms = <50>; }\n';
+  '#define CMB(name, bind, keypos, ...) \\\n' +
+  '    name { bindings = <bind>; key-positions = <keypos>; layers = <__VA_ARGS__>; timeout-ms = <50>; }\n';
 
 // EXPERIMENTAL: Momentary-layer + blink sequence helper
 var HELPER_MO_BLINK =
@@ -2946,7 +2965,7 @@ function updateRgbOutput() {
     out += '        compatible = "zmk,combos";\n';
     combos.forEach(function(c) {
       if (c.comment) out += '        ' + c.comment.replace(/\n/g, '\n        ') + '\n';
-      out += '        CMB(' + c.name + ', ' + c.bind + ', ' + c.pos.replace(/\s+/g, ', ') + ', ' + c.layers + ');\n';
+      out += '        CMB(' + c.name + ', ' + c.bind + ', ' + c.pos.trim() + ', ' + c.layers + ');\n';
     });
     out += '    };\n';
   }
@@ -5623,7 +5642,8 @@ function syncCrossTabData() {
     var dispBase = kl.displayName ? kl.displayName.toUpperCase().replace(/[^A-Z0-9]/g, '_') : '';
     if (existingBaseKeys[klBase] || existingBaseKeys[klBaseStripped] || (dispBase && existingBaseKeys[dispBase])) return;
     // Push as a real layer entry so user can assign RGB color
-    var layerName = 'L_' + (dispBase || klBaseStripped || klBase);
+    // Use the keymap display name directly (no L_ prefix) so RGB defines match user intent
+    var layerName = (dispBase || klBaseStripped || klBase);
     layers.push({
       name: layerName,
       index: idxStr,

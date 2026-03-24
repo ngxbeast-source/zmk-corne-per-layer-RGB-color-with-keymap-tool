@@ -5,12 +5,14 @@
  * All sections are commented for easy customization.
  * You can remove any/all comments if you wish, to save space on your firmware.
  * The comments ( // or /*...*/ ) are just meant to be a guideline for "newbies", they aren't needed.
- * WHEN YOU SEE "UNCOMMENT //, OR /*...*/ TO USE", DELETE THE SYMBOLS IN THE GIVEN Lines
+ * WHEN YOU SEE "UNCOMMENT //, OR /*...*/ TO USE", ONLY DELETE THE SYMBOLS /, /**/ IN THE GIVEN Lines
  * WHEN YOU SEE: 
 
                 /* -------------------REMOVE & BUILD/DEFINE HERE------------------- */
 
- * DELETE THE LINE AND START YOUR BUILD IN THE SAME LINE. THIS PUTS YOUR CODE "IN" THE DEVICETREE.
+ * DELETE THE WHOLE LINE AND START YOUR BUILD IN THE SAME LINE. THIS PUTS YOUR CODE "IN" THE DEVICETREE.
+ * DONT! DELETE };, {, >;, ) SYMBOLS!
+ * REFER TO THE ORIGINAL .dtsi FOR REFERENCE
  */
 
 /* ---- STEP 1: DEFINE LAYERS ---- */
@@ -26,11 +28,11 @@
                 /* -------------------REMOVE & DEFINE HERE------------------- */
 
 
-            /* -------------------BUILD END; CONTINUES AT LINE 156------------------- */
-
+            /* -------------------DEFINE ENDS; BUILD CONTINUES AT LINE 129------------------- */
+/* USE THE HELPERS FOR REFERENCE TO BUILD YOUR MACROS AND/OR BEHAVIORS. NOTHING HAS TO BE CHANGED HERE */
 /* ---- (OPTIONAL) BLINK HELPERS ---- */
-// "flashes" LEDs a chosen color twice
-// UNCOMMENT /*...*/ (Lines 36 & 66) TO USE.
+// "flashes" LEDs a chosen color twice, blink speed can be adjusted with the "wait" modifier.
+// UNCOMMENT /*...*/ (Lines 38 & 68) TO USE. "BLINK" macros won't work without this.  
 
 // Multiple Color definitions can be made as needed. Names are arbitary as long as the name relates to the the color make it whatever you want. 
 /* #define BLINK_ON     RGB_COLOR_HSB(39,100,75) // BLINK Color
@@ -65,9 +67,7 @@
             <BLINK_SEQ(blink_color, return_color, wait)>; \
         ) */
 
-/* USE THE HELPERS FOR REFERENCE TO BUILD YOUR MACROS AND/OR BEHAVIORS. NOTHING HAS TO BE CHANGED HERE */
 /* ---- MACRO HELPERS ---- */
-
 #define MOMENTARY_RGB_MACRO(node_name, node_label, layer, active_color, release_color) \
         ZMK_MACRO(node_name, \
             bindings = \
@@ -112,6 +112,8 @@
             #binding-cells = <2>; \
             tapping-term-ms = <200>; \
             flavor = "tap-preferred"; \
+            quick-tap-ms = <180>; \
+            global-quick-tap; \
         };
 
 /* ---- COMBO HELPER ---- */
@@ -130,14 +132,12 @@
 
 
 
-/ {
     /* ---- STEP 2+3: MACROS (define your macros for each layer/behavior) ---- */
+/ {
     macros {
     /* ---- (OPTIONAL) BLINK/STATUS MACROS ---- 
-     * Define blink/caps/num macros here if needed 
-     * UNCOMMENT /*...*/ (lines 139 & 154) IF YOU WANT TO USE. */
-/*    
-// "Unviversal BLINK" can be bound to any key in ZMK.Studio (EXPERIMENTAL)
+     * UNCOMMENT /*...*/ (lines 140 & 155) IF YOU WANT TO USE. */
+/*  // "Unviversal BLINK" can be bound to any key in ZMK.Studio (EXPERIMENTAL, assigned key will "blink")
     blnk: blnk {
         compatible = "zmk,behavior-macro-one-param";
         label = "Makes Chosen Keypress 'blink'";
@@ -150,6 +150,7 @@
             BLINK_SEQ(BLINK_ON, BLINK_OFF, 80)
         >;
     }; 
+    // For Our "Tap-Dance"
     KP_BLINK(c_blink, "CAPS LOCK + BLINK", CAPS, C_BLINK_ON, RGB_ABC, 80)
     KP_BLINK(n_blink, "NUM LOCK + BLINK", KP_NUMLOCK, N_BLINK_ON, RGB_ABC, 80) */
 
@@ -162,7 +163,7 @@
     behaviors {
     /* ---- (OPTIONAL) Tap dance ---- */
     /* Define tap dance behaviors here if needed
-        UNCOMMENT /*...*/ (lines 167 & 172) TO USE */
+        UNCOMMENT /*...*/ (lines 168 & 173) TO USE */
         //TAP DANCE FOR SHIFT CAPS AND NUMLOCK; DIFFERENT COLOR BLINK FOR WHEN EACH IS TOGGLED.
 /*        td_numcaps: td_numcapsBLINK {
         compatible = "zmk,behavior-tap-dance";
