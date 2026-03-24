@@ -358,3 +358,54 @@ Coverage note: this reflects everything I can reliably reconstruct from availabl
 - **Macro editor cleanup**: Removed all MO_BLINK branching from `addMacro()`, `renderMacroList()`, `openMacroEditor()`, `macroType.onchange`, `meditType.onchange`, `meditSaveBtn.onclick`, and `updateHeaderDropdowns()`.
 - **`addBlinkMacro()` updated**: Now reads `blinkType` dropdown; for MO_BLINK, stores `layer` from `blinkLayer` select; for KP_BLINK, stores `key` from `blinkKey` input. Both tagged with `_helper` field.
 - **`updateHeaderDropdowns()` updated**: Populates `blinkLayer` dropdown, toggles Key/Layer fields and experimental note based on `blinkType` selection.
+
+## 2026-03-24 (Session 5) - Binding Editor Overhaul, Positional Hold Picker, Binding Select Dropdowns
+
+### Major additions — Binding Editor Reformat
+- **Keycode grid layout**: Changed from CSS grid (`grid-template-columns: repeat(auto-fill, minmax(52px, 1fr))`) to flexbox (`display: flex; flex-wrap: wrap; gap: 4px;`) with `white-space: nowrap` on buttons. Eliminates keycode label truncation.
+- **Dialog widened**: Binding editor dialog width increased from 520px to 640px.
+- **Keycode descriptions**: Added `KC_DESCRIPTIONS` map inside `populateKeycodeGrids()` with human-readable descriptions for 100+ keycodes. All keycode buttons get `title` attributes from this map for tooltip descriptions on hover.
+
+### Major additions — String Sequence Custom Modal
+- **Replaced browser `prompt()`**: The "+ String Sequence" button in the macro editor now opens a custom in-app modal (`#stringSeqOverlay`) with a `<textarea>`, live `#stringSeqPreview` showing the generated `&kp` steps, and Add/Cancel buttons.
+- **HTML**: New overlay markup after macro overlay (~line 922).
+- **JS handlers**: `kmAddStringSeqBtn` opens overlay; Add button converts text to tap/press/release steps and appends to macro.
+
+### Major additions — Custom Mod-Tap & Layer-Tap (Built-in Behaviors)
+- **`cmt` (Custom Mod-Tap)**: New BUILTIN_BEHAVIORS preset — hold-preferred hold-tap with 200ms tapping term. Named `cmt` to avoid overwriting built-in `&mt`.
+- **`clt` (Custom Layer-Tap)**: New BUILTIN_BEHAVIORS preset — hold-preferred hold-tap with 200ms tapping term. Named `clt` to avoid overwriting built-in `&lt`.
+- Both pulled from official ZMK hold-tap documentation.
+
+### Major additions — Positional Hold Mini Keyboard Picker
+- **Visual position picker**: Replaced text input for hold-tap `hold-trigger-key-positions` with SVG mini keyboard (same style as combo position picker).
+- **New global**: `behPositionalSelectedPositions[]` (~line 4248).
+- **New function**: `renderBehPositionalMiniKb()` — renders SVG keyboard in `#behPositionalMiniKb`, syncs hidden `#kmBehHoldTriggerPositions` input.
+- **Click handler**: Event delegation on `#kmBehaviorConfig` for `.key-rect` clicks inside `#behPositionalMiniKb`.
+- **Edit flow**: Existing positions parsed into array before `showBehaviorConfig()` call, then rendered.
+
+### Major additions — Binding Select Dropdowns (All Keymap Binding Fields)
+- **Converted to dropdowns**: Replaced ALL binding text inputs in behavior editor and combo editor with `<select>` dropdowns + "Raw Code" text input fallback.
+- **New helper functions** (~line 4785):
+  - `behBindingOptionsHTML(selected, optType)` — generates grouped `<option>` elements for `'binding'` or `'mods'` selects
+  - `bindingSelectHTML(id, selected, optType, width)` — returns `<select>` + raw `<input>` wrapper HTML
+  - `getBehBindingValue(id)` — reads effective value (select value or raw input text)
+  - `setBehBindingValue(id, val)` — sets select or falls back to raw mode
+- **Select groups**: Complete Bindings (zero-param: `&trans`, `&none`, etc.), Layer Actions (`&mo 0`, `&tog 1`, etc. with layer names), Behaviors needing params (`&kp`, `&mt`, etc.), Custom Behaviors, Macros, Raw Code.
+- **Smart auto-switch**: Selecting a behavior needing parameters (e.g., `&kp`) auto-switches to raw mode with prefix pre-filled and focused.
+- **Fields converted**: `kmBehHoldBinding`, `kmBehTapBinding`, `kmBehMmNormal`, `kmBehMmMorphed`, `kmBehMmMods` (mods type), `kmBehSkBinding`, `kmBehSensorCW`, `kmBehSensorCCW`, `kmBehCwMods` (mods type), `kmComboBind`.
+- **Combo overlay**: `kmComboBind` changed from static `<input>` to a `<span id="kmComboBindWrap">` container, dynamically populated via `bindingSelectHTML()` when combo add/edit occurs.
+- **Save handlers**: Updated to use `getBehBindingValue()` instead of `document.getElementById().value`.
+- **Edit handlers**: Updated to use `setBehBindingValue()` for pre-populating values when editing existing behaviors/combos.
+- **CSS**: New `.beh-binding-wrap`, `.beh-binding-select`, `.beh-binding-raw` classes (~line 274).
+- **Change handler**: Delegated `change` event on `document` (~line 6335) for all `.beh-binding-select` elements.
+- **Fields kept as text inputs**: `kmBehTdBindings` (tap-dance — complex multi-binding syntax), `kmBehMacroBindings` (macro — multi-step syntax), `kmBehCwContinueList` (caps-word continue list — space-separated keycodes).
+- **Datalists now unused**: `behBindingDL` and `behModsDL` datalists + `populateBehDataLists()` function remain in code but no inputs reference them (all converted to `<select>`).
+
+### Minor changes
+- **L_ prefix removal**: `syncCrossTabData()` no longer prepends "L_" when syncing keymap layers into RGB tab.
+- **HELPER_COMBO variable positions**: Updated to use `<keypos>` + `__VA_ARGS__` instead of hardcoded p1, p2.
+- **&td0 removed** from BUILTIN_BEHAVIORS array.
+- **&hm description updated**: "Universal homerow mod pulled from PandaKB firmware."
+- **Macro RAW binding fix**: Step type change to 'custom' now passes empty `raw` string.
+- **Auto-detect layout**: After `parseKeymap()`, auto-loads Lotus58 if ≥58 keys, Corne if ≤42 keys.
+- **Behavior descriptions**: Added `desc` field to all `ZMK_BEHAVIORS` entries; shown in binding editor dropdown and `#beDescRow`.

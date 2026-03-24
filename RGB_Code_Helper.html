@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZMK RGB &amp; Keymap Editor v11</title>
+  <title>ZMK RGB &amp; Keymap Editor v12</title>
   <style>
     /* ====== THEME VARIABLES ====== */
     :root {
@@ -251,7 +251,7 @@
     /* Binding editor overlay */
     .binding-editor-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.45); z-index: 300; display: none; align-items: center; justify-content: center; animation: fadeIn 0.15s ease; }
     .binding-editor-overlay.visible { display: flex; }
-    .be-dialog { background: var(--card); border: 1px solid var(--border); border-radius: 10px; width: 520px; max-width: 95vw; max-height: 85vh; color: var(--text); box-shadow: 0 12px 40px rgba(0,0,0,0.35); animation: slideUp 0.2s ease; display: flex; flex-direction: column; overflow: hidden; }
+    .be-dialog { background: var(--card); border: 1px solid var(--border); border-radius: 10px; width: 640px; max-width: 95vw; max-height: 85vh; color: var(--text); box-shadow: 0 12px 40px rgba(0,0,0,0.35); animation: slideUp 0.2s ease; display: flex; flex-direction: column; overflow: hidden; }
     .be-header { padding: 0.7em 1.2em; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.6em; }
     .be-header h3 { margin: 0; font-size: 1em; color: var(--accent2); font-weight: 600; }
     .be-header .be-key-badge { background: var(--item-bg); border: 1px solid var(--border); border-radius: 4px; padding: 0.1em 0.5em; font-size: 0.8em; color: var(--muted); }
@@ -261,14 +261,21 @@
     .be-row label { min-width: 70px; font-weight: 600; font-size: 0.85em; }
     .be-row select, .be-row input { min-width: 120px; }
     .be-kc-scroll { max-height: 320px; overflow-y: auto; margin-top: 0.3em; padding-right: 4px; }
-    .keycode-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 3px; max-height: 180px; overflow-y: auto; padding: 0.3em; border: 1px solid var(--border); border-radius: 5px; background: var(--item-bg); margin-top: 0.3em; }
-    .keycode-btn { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 0.25em 0.15em; font-size: 0.72em; cursor: pointer; text-align: center; color: var(--text); transition: all 0.1s; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; min-width: 0; }
+    .keycode-grid { display: flex; flex-wrap: wrap; gap: 3px; max-height: 200px; overflow-y: auto; padding: 0.3em; border: 1px solid var(--border); border-radius: 5px; background: var(--item-bg); margin-top: 0.3em; }
+    .keycode-btn { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 0.25em 0.4em; font-size: 0.72em; cursor: pointer; text-align: center; color: var(--text); transition: all 0.1s; white-space: nowrap; }
     .keycode-btn:hover { background: var(--key-hover); border-color: var(--accent); transform: scale(1.04); }
     .keycode-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
     .keycode-category { margin-top: 0.3em; }
     .keycode-category summary { font-size: 0.82em; font-weight: 600; color: var(--accent2); cursor: pointer; margin-bottom: 0.15em; padding: 0.2em 0; }
     .be-actions { padding: 0.6em 1.2em; border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: center; }
     .be-actions .be-spacer { flex: 1; }
+
+    /* Binding select (dropdown + raw-code fallback) */
+    .beh-binding-wrap { display: inline-flex; flex-direction: column; gap: 0.2em; }
+    .beh-binding-wrap select { font-size: 0.88em; padding: 0.3em 0.4em; border: 1px solid var(--border); border-radius: 4px; background: var(--item-bg); color: var(--text); }
+    .beh-binding-wrap select:focus { border-color: var(--accent); outline: none; background: var(--card); }
+    .beh-binding-wrap .beh-binding-raw { font-size: 0.88em; padding: 0.3em 0.5em; border: 1px solid var(--border); border-radius: 4px; background: var(--item-bg); color: var(--text); margin-top: 0.15em; }
+    .beh-binding-wrap .beh-binding-raw:focus { border-color: var(--accent); outline: none; background: var(--card); }
 
     /* Combo editor */
     .combo-mini-kb { max-width: 500px; margin: 0.4em 0; }
@@ -404,7 +411,7 @@
 
   <!-- ====== TOPBAR ====== -->
   <div class="topbar">
-    <h1>ZMK Per-Layer Color and Keymap Editor <small>v11</small></h1>
+    <h1>ZMK Per-Layer Color and Keymap Editor <small>v12</small></h1>
     <div class="tab-bar">
       <button class="tab-btn active" data-tab="tabRgb">RGB Generator</button>
       <button class="tab-btn" data-tab="tabKeymap">Keymap Editor</button>
@@ -704,6 +711,7 @@
               <label>Behavior</label>
               <select id="beBehavior" style="width:200px;"></select>
             </div>
+            <div id="beDescRow" style="padding:0 0.5em;font-size:0.78em;color:var(--muted);"></div>
             <div class="be-row" id="beParam1Row">
               <label id="beParam1Label">Param 1</label>
               <div id="beParam1Container"></div>
@@ -835,7 +843,7 @@
           <div class="km-popup-body">
             <div class="input-row">
               <div class="input-group"><label>Name</label><input type="text" id="kmComboName" style="width:140px;"></div>
-              <div class="input-group"><label>Binding</label><input type="text" id="kmComboBind" placeholder="&amp;kp ESC" style="width:160px;"></div>
+              <div class="input-group"><label>Binding</label><span id="kmComboBindWrap"></span></div>
             </div>
             <div class="input-row">
               <div class="input-group"><label>Timeout (ms)</label><input type="number" id="kmComboTimeout" value="50" min="0" style="width:70px;"></div>
@@ -915,6 +923,25 @@
           <div class="km-popup-footer">
             <button id="kmMacroSaveBtn">&#10003; Save</button>
             <button id="kmMacroCancelBtn2" style="background:var(--muted);">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- String Sequence Modal -->
+      <div class="km-popup-overlay" id="stringSeqOverlay">
+        <div class="km-popup-dialog" style="width:460px;">
+          <div class="km-popup-header">
+            <h3>&#9997; String Sequence</h3>
+            <button class="km-popup-close" id="stringSeqCloseBtn">&times;</button>
+          </div>
+          <div class="km-popup-body">
+            <p style="font-size:0.82em;color:var(--muted);margin:0 0 0.5em;">Type the text you want the macro to produce. Each character becomes a <code>&amp;kp</code> step.</p>
+            <textarea id="stringSeqInput" rows="4" style="width:100%;resize:vertical;font-family:inherit;font-size:0.92em;padding:0.5em;border:1px solid var(--border);border-radius:5px;background:var(--item-bg);color:var(--text);" placeholder="Hello World 123!"></textarea>
+            <div id="stringSeqPreview" style="font-size:0.75em;color:var(--muted);margin-top:0.3em;max-height:60px;overflow-y:auto;"></div>
+          </div>
+          <div class="km-popup-footer">
+            <button id="stringSeqAddBtn">&#10003; Add Steps</button>
+            <button id="stringSeqCancelBtn" style="background:var(--muted);">Cancel</button>
           </div>
         </div>
       </div>
@@ -1504,39 +1531,39 @@ var ZMK_KEYCODES = {
 
 var ZMK_BEHAVIORS = [
   // Key press behaviors
-  { name: '&kp', label: 'Key Press', params: ['keycode'], cells: 1 },
-  { name: '&mt', label: 'Mod-Tap', params: ['modifier', 'keycode'], cells: 2 },
-  { name: '&kt', label: 'Key Toggle', params: ['keycode'], cells: 1 },
-  { name: '&sk', label: 'Sticky Key', params: ['keycode'], cells: 1 },
-  { name: '&gresc', label: 'Grave Escape', params: [], cells: 0 },
-  { name: '&caps_word', label: 'Caps Word', params: [], cells: 0 },
-  { name: '&key_repeat', label: 'Key Repeat', params: [], cells: 0 },
+  { name: '&kp', label: 'Key Press', desc: 'Send a keycode when pressed', params: ['keycode'], cells: 1 },
+  { name: '&mt', label: 'Mod-Tap', desc: 'Hold for modifier, tap for keycode', params: ['modifier', 'keycode'], cells: 2 },
+  { name: '&kt', label: 'Key Toggle', desc: 'Toggle a key on/off with each press', params: ['keycode'], cells: 1 },
+  { name: '&sk', label: 'Sticky Key', desc: 'Activates modifier for the next keypress only', params: ['keycode'], cells: 1 },
+  { name: '&gresc', label: 'Grave Escape', desc: 'Escape normally, grave (`) with shift/GUI', params: [], cells: 0 },
+  { name: '&caps_word', label: 'Caps Word', desc: 'Capitalizes letters until a non-alpha key is pressed', params: [], cells: 0 },
+  { name: '&key_repeat', label: 'Key Repeat', desc: 'Repeats the last pressed key', params: [], cells: 0 },
   // Layer navigation
-  { name: '&mo', label: 'Momentary Layer', params: ['layer'], cells: 1 },
-  { name: '&lt', label: 'Layer-Tap', params: ['layer', 'keycode'], cells: 2 },
-  { name: '&to', label: 'To Layer', params: ['layer'], cells: 1 },
-  { name: '&tog', label: 'Toggle Layer', params: ['layer'], cells: 1 },
-  { name: '&sl', label: 'Sticky Layer', params: ['layer'], cells: 1 },
+  { name: '&mo', label: 'Momentary Layer', desc: 'Activates layer while held', params: ['layer'], cells: 1 },
+  { name: '&lt', label: 'Layer-Tap', desc: 'Hold for layer, tap for keycode', params: ['layer', 'keycode'], cells: 2 },
+  { name: '&to', label: 'To Layer', desc: 'Switches to a layer permanently', params: ['layer'], cells: 1 },
+  { name: '&tog', label: 'Toggle Layer', desc: 'Toggles a layer on/off', params: ['layer'], cells: 1 },
+  { name: '&sl', label: 'Sticky Layer', desc: 'Activates layer for the next keypress only', params: ['layer'], cells: 1 },
   // Mouse emulation
-  { name: '&mkp', label: 'Mouse Button Press', params: ['button'], cells: 1 },
-  { name: '&mmv', label: 'Mouse Move', params: ['direction'], cells: 1 },
-  { name: '&msc', label: 'Mouse Scroll', params: ['direction'], cells: 1 },
+  { name: '&mkp', label: 'Mouse Button Press', desc: 'Sends a mouse button click', params: ['button'], cells: 1 },
+  { name: '&mmv', label: 'Mouse Move', desc: 'Moves the mouse cursor in a direction', params: ['direction'], cells: 1 },
+  { name: '&msc', label: 'Mouse Scroll', desc: 'Scrolls in a direction', params: ['direction'], cells: 1 },
   // Output & connectivity
-  { name: '&bt', label: 'Bluetooth', params: ['bt_action'], cells: 1 },
-  { name: '&out', label: 'Output Selection', params: ['out_action'], cells: 1 },
+  { name: '&bt', label: 'Bluetooth', desc: 'Bluetooth profile management (clear, select, next, prev)', params: ['bt_action'], cells: 1 },
+  { name: '&out', label: 'Output Selection', desc: 'Switch between USB and BLE output', params: ['out_action'], cells: 1 },
   // Lighting
-  { name: '&rgb_ug', label: 'RGB Underglow', params: ['rgb_action'], cells: 1 },
-  { name: '&bl', label: 'Backlight', params: ['bl_action'], cells: 1 },
+  { name: '&rgb_ug', label: 'RGB Underglow', desc: 'Control RGB underglow (toggle, color, brightness, effects)', params: ['rgb_action'], cells: 1 },
+  { name: '&bl', label: 'Backlight', desc: 'Control backlight (toggle, brightness, cycle)', params: ['bl_action'], cells: 1 },
   // Power & system
-  { name: '&ext_power', label: 'External Power', params: ['ep_action'], cells: 1 },
-  { name: '&soft_off', label: 'Soft Off', params: [], cells: 0 },
+  { name: '&ext_power', label: 'External Power', desc: 'Control external power output (toggle, on, off)', params: ['ep_action'], cells: 1 },
+  { name: '&soft_off', label: 'Soft Off', desc: 'Puts the keyboard into deep sleep', params: [], cells: 0 },
   // Reset
-  { name: '&sys_reset', label: 'System Reset', params: [], cells: 0 },
-  { name: '&bootloader', label: 'Bootloader', params: [], cells: 0 },
+  { name: '&sys_reset', label: 'System Reset', desc: 'Resets the keyboard MCU', params: [], cells: 0 },
+  { name: '&bootloader', label: 'Bootloader', desc: 'Resets into bootloader mode for flashing', params: [], cells: 0 },
   // Misc
-  { name: '&trans', label: 'Transparent', params: [], cells: 0 },
-  { name: '&none', label: 'None Binding', params: [], cells: 0 },
-  { name: '&studio_unlock', label: 'Studio Unlock', params: [], cells: 0 }
+  { name: '&trans', label: 'Transparent', desc: 'Falls through to the next lower active layer', params: [], cells: 0 },
+  { name: '&none', label: 'None Binding', desc: 'Explicitly does nothing; blocks lower layers', params: [], cells: 0 },
+  { name: '&studio_unlock', label: 'Studio Unlock', desc: 'Unlocks ZMK Studio for live configuration', params: [], cells: 0 }
 ];
 
 var BT_ACTIONS = ['BT_CLR','BT_CLR_ALL','BT_SEL 0','BT_SEL 1','BT_SEL 2','BT_SEL 3','BT_SEL 4','BT_NXT','BT_PRV','BT_DISC 0','BT_DISC 1','BT_DISC 2','BT_DISC 3','BT_DISC 4'];
@@ -1557,7 +1584,7 @@ var MOUSE_SCROLLS = ['SCRL_UP','SCRL_DOWN','SCRL_LEFT','SCRL_RIGHT'];
 var BUILTIN_BEHAVIORS = [
   {
     id: 'hm', name: 'hm', label: 'Homerow Mods', type: 'hold-tap',
-    desc: 'Universal homerow mod pulled from PandaKB firmware. Tap-preferred hold-tap with quick-tap &amp; global-quick-tap.',
+    desc: 'Universal homerow mod pulled from PandaKB firmware.',
     config: { tappingTerm: '200', flavor: 'tap-preferred', holdBinding: '&kp', tapBinding: '&kp',
               quickTap: '180', requirePriorIdle: '', holdTriggerPositions: '',
               retroTap: false, holdWhileUndecided: false, holdWhileUndecidedLinger: false,
@@ -1565,7 +1592,7 @@ var BUILTIN_BEHAVIORS = [
   },
   {
     id: 'hml', name: 'hml', label: 'Timeless HRM Left', type: 'hold-tap',
-    desc: 'Balanced homerow mod (left hand). Positional hold-tap targets right-side keys.',
+    desc: 'Balanced homerow mod (left hand). Targets right-side keys.',
     config: { tappingTerm: '280', flavor: 'balanced', holdBinding: '&kp', tapBinding: '&kp',
               quickTap: '175', requirePriorIdle: '150', holdTriggerPositions: '',
               retroTap: false, holdWhileUndecided: false, holdWhileUndecidedLinger: false,
@@ -1573,7 +1600,7 @@ var BUILTIN_BEHAVIORS = [
   },
   {
     id: 'hmr', name: 'hmr', label: 'Timeless HRM Right', type: 'hold-tap',
-    desc: 'Balanced homerow mod (right hand). Positional hold-tap targets left-side keys.',
+    desc: 'Balanced homerow mod (right hand). Targets left-side keys.',
     config: { tappingTerm: '280', flavor: 'balanced', holdBinding: '&kp', tapBinding: '&kp',
               quickTap: '175', requirePriorIdle: '150', holdTriggerPositions: '',
               retroTap: false, holdWhileUndecided: false, holdWhileUndecidedLinger: false,
@@ -1581,7 +1608,7 @@ var BUILTIN_BEHAVIORS = [
   },
   {
     id: 'as', name: 'as', label: 'Autoshift', type: 'hold-tap',
-    desc: 'Hold = Shifted key, Tap = Normal key. Use with AS(keycode) macro.',
+    desc: 'AutoShift; Hold = Shifted key, Tap = Normal key. Use with AS(keycode) macro.',
     config: { tappingTerm: '135', flavor: 'tap-preferred', holdBinding: '&kp', tapBinding: '&kp',
               quickTap: '0', requirePriorIdle: '', holdTriggerPositions: '',
               retroTap: false, holdWhileUndecided: false, holdWhileUndecidedLinger: false,
@@ -1596,6 +1623,22 @@ var BUILTIN_BEHAVIORS = [
               retroTap: false, holdWhileUndecided: false, holdWhileUndecidedLinger: false,
               holdTriggerOnRelease: false, globalQuickTap: false },
     define: '#define MO_TOG(layer) &mo_tog layer layer'
+  },
+  {
+    id: 'cmt', name: 'cmt', label: 'Custom Mod-Tap', type: 'hold-tap',
+    desc: 'Configurable mod-tap. Hold = modifier, Tap = keycode. Default ZMK hold-preferred flavor.',
+    config: { tappingTerm: '200', flavor: 'hold-preferred', holdBinding: '&kp', tapBinding: '&kp',
+              quickTap: '', requirePriorIdle: '', holdTriggerPositions: '',
+              retroTap: false, holdWhileUndecided: false, holdWhileUndecidedLinger: false,
+              holdTriggerOnRelease: false, globalQuickTap: false }
+  },
+  {
+    id: 'clt', name: 'clt', label: 'Custom Layer-Tap', type: 'hold-tap',
+    desc: 'Configurable layer-tap. Hold = momentary layer, Tap = keycode. Default ZMK tap-preferred flavor.',
+    config: { tappingTerm: '200', flavor: 'tap-preferred', holdBinding: '&mo', tapBinding: '&kp',
+              quickTap: '', requirePriorIdle: '', holdTriggerPositions: '',
+              retroTap: false, holdWhileUndecided: false, holdWhileUndecidedLinger: false,
+              holdTriggerOnRelease: false, globalQuickTap: false }
   }
 ];
 
@@ -2740,6 +2783,8 @@ var HELPER_HOLD_TAP =
   '            #binding-cells = <2>; \\\n' +
   '            tapping-term-ms = <200>; \\\n' +
   '            flavor = "tap-preferred"; \\\n' +
+  '            quick-tap-ms = <180>; \\\n' +
+  '            global-quick-tap; \\\n' +
   '        };\n';
 
 var HELPER_COMBO =
@@ -3841,12 +3886,78 @@ function populateKeycodeGrids() {
     fkeys: 'kcFkeys', numpad: 'kcNumpad', media: 'kcMedia', applications: 'kcApps',
     misc: 'kcMisc', international: 'kcInternational', language: 'kcLanguage', power: 'kcPower'
   };
+  var kcDescs = {
+    // Numbers
+    N0:'0',N1:'1',N2:'2',N3:'3',N4:'4',N5:'5',N6:'6',N7:'7',N8:'8',N9:'9',
+    NUMBER_0:'0 (alias)',NUMBER_1:'1 (alias)',NUMBER_2:'2 (alias)',NUMBER_3:'3 (alias)',NUMBER_4:'4 (alias)',
+    NUMBER_5:'5 (alias)',NUMBER_6:'6 (alias)',NUMBER_7:'7 (alias)',NUMBER_8:'8 (alias)',NUMBER_9:'9 (alias)',
+    // Modifiers
+    LSHIFT:'Left Shift',LSHFT:'Left Shift',LEFT_SHIFT:'Left Shift',RSHIFT:'Right Shift',RSHFT:'Right Shift',RIGHT_SHIFT:'Right Shift',
+    LCTRL:'Left Control',LEFT_CONTROL:'Left Control',RCTRL:'Right Control',RIGHT_CONTROL:'Right Control',
+    LALT:'Left Alt',LEFT_ALT:'Left Alt',RALT:'Right Alt',RIGHT_ALT:'Right Alt',
+    LGUI:'Left GUI (Win/Cmd)',LWIN:'Left Windows',LCMD:'Left Command',LMETA:'Left Meta',LEFT_GUI:'Left GUI',
+    RGUI:'Right GUI (Win/Cmd)',RWIN:'Right Windows',RCMD:'Right Command',RMETA:'Right Meta',RIGHT_GUI:'Right GUI',
+    // Navigation
+    UP:'Arrow Up',DOWN:'Arrow Down',LEFT:'Arrow Left',RIGHT:'Arrow Right',
+    HOME:'Home',END:'End',PG_UP:'Page Up',PAGE_UP:'Page Up',PG_DN:'Page Down',PAGE_DOWN:'Page Down',
+    // Control
+    ESC:'Escape',ESCAPE:'Escape',ENTER:'Enter',RET:'Return',RETURN:'Return',SPACE:'Spacebar',TAB:'Tab',
+    BSPC:'Backspace',BACKSPACE:'Backspace',DEL:'Delete',DELETE:'Delete',INS:'Insert',INSERT:'Insert',
+    // Locks
+    CAPS:'Caps Lock',CLCK:'Caps Lock',CAPSLOCK:'Caps Lock',SLCK:'Scroll Lock',SCROLLLOCK:'Scroll Lock',
+    LNLCK:'Num Lock',KP_NLCK:'Num Lock',KP_NUM:'Num Lock',KP_NUMLOCK:'Num Lock',
+    // Symbols
+    MINUS:'- Hyphen',EQUAL:'= Equals',LBKT:'[ Left Bracket',LBRC:'[ Left Bracket',LEFT_BRACKET:'[ Left Bracket',
+    RBKT:'] Right Bracket',RBRC:'] Right Bracket',RIGHT_BRACKET:'] Right Bracket',
+    BSLH:'\\ Backslash',BACKSLASH:'\\ Backslash',GRAVE:'` Grave Accent',
+    SQT:"' Single Quote",APOS:"' Apostrophe",APOSTROPHE:"' Apostrophe",
+    SEMI:'; Semicolon',COMMA:', Comma',DOT:'. Period',FSLH:'/ Forward Slash',SLASH:'/ Slash',
+    NON_US_HASH:'# Non-US Hash',NUHS:'# Non-US Hash',NON_US_BSLH:'\\ Non-US Backslash',NUBS:'\\ Non-US Backslash',
+    TILDE:'~ Tilde',EXCL:'! Exclamation',EXCLAMATION:'! Exclamation',AT:'@ At Sign',
+    HASH:'# Hash',POUND:'# Pound',DLLR:'$ Dollar',DOLLAR:'$ Dollar',PRCNT:'% Percent',PERCENT:'% Percent',
+    CARET:'^ Caret',AMPS:'& Ampersand',AMPERSAND:'& Ampersand',ASTRK:'* Asterisk',ASTERISK:'* Asterisk',STAR:'* Star',
+    LPAR:'( Left Paren',RPAR:') Right Paren',LEFT_PARENTHESIS:'( Left Paren',RIGHT_PARENTHESIS:') Right Paren',
+    UNDER:'_ Underscore',UNDERSCORE:'_ Underscore',PLUS:'+ Plus',PIPE:'| Pipe',PIPE2:'| Pipe2',
+    COLON:': Colon',DQT:'" Double Quote',DOUBLE_QUOTES:'" Double Quote',
+    LT:'< Less Than',LESS_THAN:'< Less Than',GT:'> Greater Than',GREATER_THAN:'> Greater Than',
+    QMARK:'? Question Mark',QUESTION:'? Question',
+    // Numpad
+    KP_N0:'Numpad 0',KP_N1:'Numpad 1',KP_N2:'Numpad 2',KP_N3:'Numpad 3',KP_N4:'Numpad 4',
+    KP_N5:'Numpad 5',KP_N6:'Numpad 6',KP_N7:'Numpad 7',KP_N8:'Numpad 8',KP_N9:'Numpad 9',
+    KP_PLUS:'Numpad +',KP_MINUS:'Numpad -',KP_SUBTRACT:'Numpad -',KP_MULTIPLY:'Numpad *',KP_ASTERISK:'Numpad *',
+    KP_DIVIDE:'Numpad /',KP_SLASH:'Numpad /',KP_DOT:'Numpad .',KP_ENTER:'Numpad Enter',KP_EQUAL:'Numpad =',
+    KP_COMMA:'Numpad ,',KP_LPAR:'Numpad (',KP_RPAR:'Numpad )',KP_CLEAR:'Numpad Clear',
+    // Media
+    C_VOL_UP:'Volume Up',C_VOLUME_UP:'Volume Up',C_VOL_DN:'Volume Down',C_VOLUME_DOWN:'Volume Down',C_MUTE:'Mute',
+    C_PLAY_PAUSE:'Play/Pause',C_PP:'Play/Pause',C_NEXT:'Next Track',C_PREV:'Previous Track',C_STOP:'Stop',
+    C_PLAY:'Play',C_PAUSE:'Pause',C_RECORD:'Record',C_REC:'Record',C_REWIND:'Rewind',C_RW:'Rewind',
+    C_FAST_FORWARD:'Fast Forward',C_FF:'Fast Forward',C_EJECT:'Eject',
+    C_BRI_UP:'Brightness Up',C_BRI_INC:'Brightness Up',C_BRI_DN:'Brightness Down',C_BRI_DEC:'Brightness Down',
+    C_BRI_MIN:'Brightness Min',C_BRI_MAX:'Brightness Max',C_BRI_AUTO:'Brightness Auto',
+    // Editing
+    C_AC_CUT:'Cut',K_CUT:'Cut',C_AC_COPY:'Copy',K_COPY:'Copy',C_AC_PASTE:'Paste',K_PASTE:'Paste',
+    C_AC_UNDO:'Undo',K_UNDO:'Undo',C_AC_REDO:'Redo',K_REDO:'Redo',K_AGAIN:'Again',
+    C_AC_SELECT_ALL:'Select All',C_AC_FIND:'Find',
+    // Applications
+    C_AC_SEARCH:'Search',C_AL_CALCULATOR:'Calculator',C_AL_CALC:'Calculator',C_AC_BOOKMARKS:'Bookmarks',
+    C_AL_MY_COMPUTER:'My Computer',C_AL_FILES:'File Manager',C_AL_TEXT_EDITOR:'Text Editor',C_AL_EMAIL:'Email Client',
+    GLOBE:'Globe / Fn',C_AC_HOME:'Browser Home',C_AC_BACK:'Browser Back',C_AC_FORWARD:'Browser Forward',
+    C_AC_REFRESH:'Refresh',C_AC_CLOSE:'Close',C_AC_EXIT:'Exit',
+    C_AC_SCROLL_UP:'Scroll Up',C_AC_SCROLL_DOWN:'Scroll Down',
+    C_AC_ZOOM_IN:'Zoom In',C_AC_ZOOM_OUT:'Zoom Out',
+    // Misc
+    PSCRN:'Print Screen',PRINTSCREEN:'Print Screen',PAUSE_BREAK:'Pause/Break',
+    K_APP:'Application Key',K_CMENU:'Context Menu',K_CANCEL:'Cancel',K_POWER:'Power',K_SLEEP:'Sleep',
+    // Power
+    C_PWR:'Power',C_POWER:'Power',K_PWR:'Power',C_SLEEP:'Sleep',C_AL_LOCK:'Lock Screen',C_MENU:'Menu'
+  };
   Object.keys(ZMK_KEYCODES).forEach(function(cat) {
     var gridId = gridMap[cat];
     var grid = document.getElementById(gridId);
     if (!grid) return;
     grid.innerHTML = ZMK_KEYCODES[cat].map(function(kc) {
-      return '<button class="keycode-btn" data-kc="' + kc + '">' + kc + '</button>';
+      var tip = kcDescs[kc] ? ' title="' + esc(kcDescs[kc]) + '"' : '';
+      return '<button class="keycode-btn" data-kc="' + kc + '"' + tip + '>' + kc + '</button>';
     }).join('');
   });
 }
@@ -3858,7 +3969,8 @@ function populateBehaviorDropdown() {
   var sel = document.getElementById('beBehavior');
   var html = '';
   ZMK_BEHAVIORS.forEach(function(b) {
-    html += '<option value="' + esc(b.name) + '">' + esc(b.name) + ' - ' + esc(b.label) + '</option>';
+    var descText = b.desc ? ' \u2014 ' + b.desc : '';
+    html += '<option value="' + esc(b.name) + '">' + esc(b.name) + ' - ' + esc(b.label) + esc(descText) + '</option>';
   });
   // Add custom behaviors from keymap
   keymapBehaviors.forEach(function(cb) {
@@ -3943,6 +4055,10 @@ function updateBindingEditorFields(behavior, params) {
 
   var behDef = ZMK_BEHAVIORS.find(function(b) { return b.name === behavior; });
   var cells = behDef ? behDef.cells : Math.max(params.length, 0);
+
+  // Show behavior description
+  var descRow = document.getElementById('beDescRow');
+  if (descRow) descRow.textContent = behDef && behDef.desc ? behDef.desc : '';
 
   p1Row.style.display = cells >= 1 ? '' : 'none';
   p2Row.style.display = cells >= 2 ? '' : 'none';
@@ -4135,6 +4251,16 @@ function renderComboMiniKb() {
   renderKeyboardSvg('comboMiniSvg', { scale: 36, keySize: 33, comboMode: true, comboPositions: comboSelectedPositions });
 }
 
+var behPositionalSelectedPositions = [];
+function renderBehPositionalMiniKb() {
+  var container = document.getElementById('behPositionalMiniKb');
+  if (!container || !keyboardLayout) return;
+  container.innerHTML = '<svg class="keyboard-svg combo-mini-kb-svg" id="behPosMiniSvg"></svg>';
+  renderKeyboardSvg('behPosMiniSvg', { scale: 36, keySize: 33, comboMode: true, comboPositions: behPositionalSelectedPositions });
+  var posInput = document.getElementById('kmBehHoldTriggerPositions');
+  if (posInput) posInput.value = behPositionalSelectedPositions.slice().sort(function(a,b){return a-b;}).join(' ');
+}
+
 function renderRgbComboMiniKb() {
   var container = document.getElementById('rgbComboMiniKb');
   if (!keyboardLayout) { container.innerHTML = ''; return; }
@@ -4273,7 +4399,8 @@ function renderMacroSteps() {
   // IMPORTANT: use esc() on the full '&name' reference so HTML entity escaping is consistent
   var behaviorOptions = '';
   ZMK_BEHAVIORS.forEach(function(b) {
-    behaviorOptions += '<option value="' + esc(b.name) + '">' + esc(b.name) + ' | ' + esc(b.label) + '</option>';
+    var descBit = b.desc ? ' \u2014 ' + b.desc : '';
+    behaviorOptions += '<option value="' + esc(b.name) + '">' + esc(b.name) + ' | ' + esc(b.label) + esc(descBit) + '</option>';
   });
   keymapBehaviors.forEach(function(cb) {
     var ref = '&' + cb.name;
@@ -4653,6 +4780,134 @@ function kmComboGetLayers() {
   return parts.join(' ');
 }
 
+// --- Binding select helper (dropdown + raw-code fallback) ---
+// Generates <option> elements for a binding select. optType: 'binding' or 'mods'.
+function behBindingOptionsHTML(selected, optType) {
+  selected = (selected || '').trim();
+  if (optType === 'mods') {
+    var mods = ['MOD_LSFT','MOD_RSFT','MOD_LCTL','MOD_RCTL','MOD_LALT','MOD_RALT','MOD_LGUI','MOD_RGUI'];
+    var html = '';
+    var matched = !selected;
+    if (!selected) html += '<option value="" selected disabled>\u2014 Select modifier \u2014</option>';
+    mods.forEach(function(m) {
+      var sel = '';
+      if (m === selected) { sel = ' selected'; matched = true; }
+      html += '<option value="' + esc(m) + '"' + sel + '>' + esc(m) + '</option>';
+    });
+    html += '<option value="__RAW__"' + (!matched && selected ? ' selected' : '') + '>\u270f Raw Code</option>';
+    return html;
+  }
+  // optType === 'binding'
+  var html = '';
+  var matched = !selected; // empty counts as matched (placeholder selected)
+  if (!selected) html += '<option value="" selected disabled>\u2014 Select binding \u2014</option>';
+  // -- Complete bindings (zero-param behaviors) --
+  var cg = '';
+  ZMK_BEHAVIORS.forEach(function(b) {
+    if (b.cells === 0) {
+      var sel = '';
+      if (b.name === selected) { sel = ' selected'; matched = true; }
+      cg += '<option value="' + esc(b.name) + '"' + sel + '>' + esc(b.name) + ' \u2014 ' + esc(b.label) + '</option>';
+    }
+  });
+  if (cg) html += '<optgroup label="Complete Bindings">' + cg + '</optgroup>';
+  // -- Layer actions with layer numbers --
+  var lg = '';
+  var layerBehs = [
+    { prefix: '&mo', label: 'Momentary' },
+    { prefix: '&to', label: 'To Layer' },
+    { prefix: '&tog', label: 'Toggle' },
+    { prefix: '&sl', label: 'Sticky Layer' }
+  ];
+  layerBehs.forEach(function(lb) {
+    keymapLayers.forEach(function(l, i) {
+      var val = lb.prefix + ' ' + i;
+      var sel = '';
+      if (val === selected) { sel = ' selected'; matched = true; }
+      lg += '<option value="' + esc(val) + '"' + sel + '>' + esc(val) + ' \u2014 ' + lb.label + ' (' + esc(l.name) + ')</option>';
+    });
+  });
+  if (lg) html += '<optgroup label="Layer Actions">' + lg + '</optgroup>';
+  // -- Behaviors that need parameters --
+  var pg = '';
+  var skipPrefixes = ['&mo','&to','&tog','&sl'];
+  ZMK_BEHAVIORS.forEach(function(b) {
+    if (b.cells > 0 && skipPrefixes.indexOf(b.name) === -1) {
+      var sel = '';
+      if (b.name === selected) { sel = ' selected'; matched = true; }
+      pg += '<option value="' + esc(b.name) + '"' + sel + '>' + esc(b.name) + ' \u2014 ' + esc(b.label) + ' (+ params)</option>';
+    }
+  });
+  if (pg) html += '<optgroup label="Behaviors (add params)">' + pg + '</optgroup>';
+  // -- Custom behaviors --
+  var cbg = '';
+  keymapBehaviors.forEach(function(cb) {
+    var val = '&' + cb.name;
+    var sel = '';
+    if (val === selected) { sel = ' selected'; matched = true; }
+    var tag = cb._builtin ? '(built-in)' : '(custom)';
+    cbg += '<option value="' + esc(val) + '"' + sel + '>' + esc(val) + ' ' + tag + '</option>';
+  });
+  if (cbg) html += '<optgroup label="Custom Behaviors">' + cbg + '</optgroup>';
+  // -- Macros --
+  var mg = '';
+  var addedM = {};
+  keymapMacros.forEach(function(m) {
+    var ref = '&' + m.name;
+    if (!addedM[ref]) {
+      addedM[ref] = true;
+      var sel = '';
+      if (ref === selected) { sel = ' selected'; matched = true; }
+      mg += '<option value="' + esc(ref) + '"' + sel + '>' + esc(ref) + ' (macro)</option>';
+    }
+  });
+  if (mg) html += '<optgroup label="Macros">' + mg + '</optgroup>';
+  // -- Raw Code --
+  html += '<option value="__RAW__"' + (!matched && selected ? ' selected' : '') + '>\u270f Raw Code</option>';
+  return html;
+}
+
+// Returns HTML for a binding <select> wrapped with a raw-code <input> fallback.
+function bindingSelectHTML(id, selected, optType, width) {
+  var w = width || '160px';
+  selected = (selected || '').trim();
+  var opts = behBindingOptionsHTML(selected, optType);
+  var isRaw = opts.indexOf('value="__RAW__" selected') > -1;
+  return '<span class="beh-binding-wrap">' +
+    '<select id="' + id + '" class="beh-binding-select" style="width:' + w + ';">' + opts + '</select>' +
+    '<input type="text" id="' + id + '_raw" class="beh-binding-raw" placeholder="e.g. &amp;kp A" style="width:' + w + ';' + (isRaw ? '' : 'display:none;') + '"' + (isRaw ? ' value="' + esc(selected) + '"' : '') + '>' +
+    '</span>';
+}
+
+// Read the effective value from a binding select (or its raw fallback).
+function getBehBindingValue(id) {
+  var sel = document.getElementById(id);
+  if (!sel) return '';
+  if (sel.value === '__RAW__') {
+    var raw = document.getElementById(id + '_raw');
+    return raw ? raw.value.trim() : '';
+  }
+  return sel.value;
+}
+
+// Set a binding select to a value, falling back to raw if no option matches.
+function setBehBindingValue(id, val) {
+  var sel = document.getElementById(id);
+  if (!sel) return;
+  val = (val || '').trim();
+  var found = false;
+  for (var i = 0; i < sel.options.length; i++) {
+    if (sel.options[i].value === val) { sel.value = val; found = true; break; }
+  }
+  var raw = document.getElementById(id + '_raw');
+  if (!found) {
+    sel.value = '__RAW__';
+    if (raw) { raw.value = val; raw.style.display = ''; }
+  } else {
+    if (raw) { raw.style.display = 'none'; raw.value = ''; }
+  }
+}
+
 // --- Behavior binding / modifier datalist helpers ---
 function populateBehDataLists() {
   var html = '';
@@ -4684,11 +4939,13 @@ function showBehaviorConfig(type) {
     container.innerHTML =
       '<div class="input-row"><div class="input-group"><label>Tapping Term</label><input type="number" id="kmBehTappingTerm" value="200" min="0" style="width:70px;"> ms</div></div>' +
       '<div class="input-row"><div class="input-group"><label>Flavor</label><select id="kmBehFlavor"><option value="tap-preferred">tap-preferred</option><option value="hold-preferred">hold-preferred</option><option value="balanced">balanced</option></select></div></div>' +
-      '<div class="input-row"><div class="input-group"><label>Hold Binding</label><input type="text" id="kmBehHoldBinding" list="behBindingDL" placeholder="&mo 1" style="width:160px;"></div></div>' +
-      '<div class="input-row"><div class="input-group"><label>Tap Binding</label><input type="text" id="kmBehTapBinding" list="behBindingDL" placeholder="&kp" style="width:160px;"></div></div>' +
+      '<div class="input-row"><div class="input-group"><label>Hold Binding</label>' + bindingSelectHTML('kmBehHoldBinding', '', 'binding', '180px') + '</div></div>' +
+      '<div class="input-row"><div class="input-group"><label>Tap Binding</label>' + bindingSelectHTML('kmBehTapBinding', '', 'binding', '180px') + '</div></div>' +
       '<div class="input-row"><div class="input-group"><label>Quick Tap (ms)</label><input type="number" id="kmBehQuickTap" value="" min="0" placeholder="none" style="width:70px;"></div>' +
       '<div class="input-group"><label>Require Prior Idle (ms)</label><input type="number" id="kmBehRequirePriorIdle" value="" min="0" placeholder="none" style="width:70px;"></div></div>' +
-      '<div class="input-row"><div class="input-group"><label>Positional Hold (key positions)</label><input type="text" id="kmBehHoldTriggerPositions" placeholder="0 1 2 3 (blank=off)" style="width:180px;"></div></div>' +
+      '<div class="input-row"><div class="input-group"><label>Positional Hold (key positions)</label><input type="hidden" id="kmBehHoldTriggerPositions"></div></div>' +
+      '<p style="font-size:0.78em;color:var(--muted);margin:0.1em 0 0.2em;">Click keys to toggle positional hold-trigger positions (blank = off):</p>' +
+      '<div class="combo-mini-kb" id="behPositionalMiniKb"></div>' +
       '<div class="input-row" style="gap:1em;flex-wrap:wrap;">' +
       '<label style="display:flex;align-items:center;gap:0.3em;cursor:pointer;"><input type="checkbox" id="kmBehRetroTap"> Retro-Tap</label>' +
       '<label style="display:flex;align-items:center;gap:0.3em;cursor:pointer;"><input type="checkbox" id="kmBehHoldWhileUndecided"> Hold While Undecided</label>' +
@@ -4702,13 +4959,13 @@ function showBehaviorConfig(type) {
       '<div class="input-row"><div class="input-group"><label>Bindings</label><input type="text" id="kmBehTdBindings" placeholder="<&kp A>, <&kp B>, <&kp C>" style="width:300px;"></div></div>';
   } else if (type === 'mod-morph') {
     container.innerHTML =
-      '<div class="input-row"><div class="input-group"><label>Normal</label><input type="text" id="kmBehMmNormal" list="behBindingDL" placeholder="&kp A" style="width:160px;"></div></div>' +
-      '<div class="input-row"><div class="input-group"><label>Morphed</label><input type="text" id="kmBehMmMorphed" list="behBindingDL" placeholder="&kp B" style="width:160px;"></div></div>' +
-      '<div class="input-row"><div class="input-group"><label>Mods</label><input type="text" id="kmBehMmMods" list="behModsDL" placeholder="MOD_LSFT" style="width:160px;"></div></div>';
+      '<div class="input-row"><div class="input-group"><label>Normal</label>' + bindingSelectHTML('kmBehMmNormal', '', 'binding', '180px') + '</div></div>' +
+      '<div class="input-row"><div class="input-group"><label>Morphed</label>' + bindingSelectHTML('kmBehMmMorphed', '', 'binding', '180px') + '</div></div>' +
+      '<div class="input-row"><div class="input-group"><label>Mods</label>' + bindingSelectHTML('kmBehMmMods', '', 'mods', '160px') + '</div></div>';
   } else if (type === 'sticky-key') {
     container.innerHTML =
       '<div class="input-row"><div class="input-group"><label>Release After (ms)</label><input type="number" id="kmBehSkRelease" value="1000" min="0" style="width:80px;"></div></div>' +
-      '<div class="input-row"><div class="input-group"><label>Binding</label><input type="text" id="kmBehSkBinding" list="behBindingDL" placeholder="&kp" style="width:160px;"></div></div>' +
+      '<div class="input-row"><div class="input-group"><label>Binding</label>' + bindingSelectHTML('kmBehSkBinding', '', 'binding', '180px') + '</div></div>' +
       '<div class="input-row" style="gap:1em;flex-wrap:wrap;">' +
       '<label style="display:flex;align-items:center;gap:0.3em;cursor:pointer;"><input type="checkbox" id="kmBehSkQuickRelease"> Quick Release</label>' +
       '<label style="display:flex;align-items:center;gap:0.3em;cursor:pointer;"><input type="checkbox" id="kmBehSkLazy"> Lazy</label>' +
@@ -4723,8 +4980,8 @@ function showBehaviorConfig(type) {
       '<div class="input-row"><div class="input-group"><label>Bindings</label><input type="text" id="kmBehMacroBindings" placeholder="&macro_tap &kp A &kp B" style="width:300px;"></div></div>';
   } else if (type === 'sensor-rotate') {
     container.innerHTML =
-      '<div class="input-row"><div class="input-group"><label>CW Binding</label><input type="text" id="kmBehSensorCW" list="behBindingDL" placeholder="&kp C_VOL_UP" style="width:160px;"></div></div>' +
-      '<div class="input-row"><div class="input-group"><label>CCW Binding</label><input type="text" id="kmBehSensorCCW" list="behBindingDL" placeholder="&kp C_VOL_DN" style="width:160px;"></div></div>' +
+      '<div class="input-row"><div class="input-group"><label>CW Binding</label>' + bindingSelectHTML('kmBehSensorCW', '', 'binding', '180px') + '</div></div>' +
+      '<div class="input-row"><div class="input-group"><label>CCW Binding</label>' + bindingSelectHTML('kmBehSensorCCW', '', 'binding', '180px') + '</div></div>' +
       '<div class="input-row"><div class="input-group"><label>Tap (ms)</label><input type="number" id="kmBehSensorTap" value="" min="0" placeholder="default" style="width:70px;"></div></div>';
   } else if (type === 'key-toggle') {
     container.innerHTML =
@@ -4741,11 +4998,12 @@ function showBehaviorConfig(type) {
     container.innerHTML =
       '<p style="font-size:0.82em;color:var(--muted);margin:0 0 0.3em;">Caps Word capitalizes letters until a break key is pressed. Customize which keys continue the caps-word effect and which modifiers to apply.</p>' +
       '<div class="input-row"><div class="input-group"><label>Continue List</label><input type="text" id="kmBehCwContinueList" placeholder="UNDERSCORE MINUS BSPC" style="width:280px;"></div></div>' +
-      '<div class="input-row"><div class="input-group"><label>Mods</label><input type="text" id="kmBehCwMods" list="behModsDL" placeholder="MOD_LSFT" style="width:160px;"></div></div>';
+      '<div class="input-row"><div class="input-group"><label>Mods</label>' + bindingSelectHTML('kmBehCwMods', '', 'mods', '160px') + '</div></div>';
   } else {
     container.innerHTML = '';
   }
   populateBehDataLists();
+  if (type === 'hold-tap') renderBehPositionalMiniKb();
 }
 
 // ================================================================
@@ -5118,7 +5376,7 @@ function updateKeymapOutput() {
       out += '#include "' + dtsiName + '"\n';
     }
   } else {
-    out += '/*\n * Generated by RGB Keymap Editor v11\n */\n\n';
+    out += '/*\n * Generated by RGB Keymap Editor v12\n */\n\n';
     out += '#include <behaviors.dtsi>\n';
     out += '#include <dt-bindings/zmk/bt.h>\n';
     out += '#include <dt-bindings/zmk/keys.h>\n';
@@ -6074,6 +6332,31 @@ document.addEventListener('DOMContentLoaded', function() {
   // --- Dark mode ---
   document.getElementById('darkToggle').onclick = toggleDarkMode;
 
+  // --- Binding select change handler (shared for all beh-binding-select) ---
+  document.addEventListener('change', function(e) {
+    if (!e.target.classList.contains('beh-binding-select')) return;
+    var rawInput = document.getElementById(e.target.id + '_raw');
+    if (!rawInput) return;
+    if (e.target.value === '__RAW__') {
+      rawInput.style.display = '';
+      rawInput.focus();
+    } else {
+      // If the selected behavior needs params (cells > 0 and not a layer action with number),
+      // auto-switch to raw mode with the prefix pre-filled
+      var val = e.target.value;
+      var needsParams = ZMK_BEHAVIORS.some(function(b) { return b.name === val && b.cells > 0; });
+      if (needsParams) {
+        rawInput.value = val + ' ';
+        e.target.value = '__RAW__';
+        rawInput.style.display = '';
+        rawInput.focus();
+      } else {
+        rawInput.style.display = 'none';
+        rawInput.value = '';
+      }
+    }
+  });
+
   // --- RGB Generator wiring (Tab 1) ---
   document.getElementById('parseBtn').onclick = parseUserCode;
   document.getElementById('rgbClearSyncBtn').onclick = function() {
@@ -6306,6 +6589,15 @@ document.addEventListener('DOMContentLoaded', function() {
     var text = document.getElementById('kmKeymapPaste').value;
     if (!text.trim()) { alert('Paste a .keymap file first'); return; }
     parseKeymap(text);
+    // Auto-detect layout based on key count
+    if (keymapLayers.length > 0) {
+      var bindCount = keymapLayers[0].bindings.length;
+      if (bindCount >= 58 && currentLayoutId !== 'lotus58') {
+        loadLayout(DEFAULT_LOTUS58_LAYOUT);
+      } else if (bindCount <= 42 && currentLayoutId !== 'corne') {
+        loadLayout(DEFAULT_CORNE_LAYOUT);
+      }
+    }
     activeLayerIndex = 0;
     selectedKeyIndex = -1;
     document.getElementById('bindingEditor').classList.remove('visible');
@@ -6751,7 +7043,7 @@ document.addEventListener('DOMContentLoaded', function() {
     editingComboIndex = -1;
     comboSelectedPositions = [];
     document.getElementById('kmComboName').value = 'combo_' + keymapCombos.length;
-    document.getElementById('kmComboBind').value = '&kp ESC';
+    document.getElementById('kmComboBindWrap').innerHTML = bindingSelectHTML('kmComboBind', '&kp ESC', 'binding', '180px');
     document.getElementById('kmComboTimeout').value = '50';
     document.getElementById('kmComboLayerPicker').innerHTML = '<option value="">+ Add layer</option>' + kmComboLayerOptionsHTML();
     kmComboRenderLayerTags('');
@@ -6764,7 +7056,7 @@ document.addEventListener('DOMContentLoaded', function() {
     pushUndo();
     var combo = {
       name: document.getElementById('kmComboName').value || 'combo_' + keymapCombos.length,
-      binding: document.getElementById('kmComboBind').value,
+      binding: getBehBindingValue('kmComboBind'),
       positions: comboSelectedPositions.slice().sort(function(a,b) { return a-b; }),
       layers: kmComboGetLayers(),
       timeout: parseInt(document.getElementById('kmComboTimeout').value) || 50,
@@ -6841,7 +7133,7 @@ document.addEventListener('DOMContentLoaded', function() {
       editingComboIndex = ci;
       var c = keymapCombos[ci];
       document.getElementById('kmComboName').value = c.name;
-      document.getElementById('kmComboBind').value = c.binding;
+      document.getElementById('kmComboBindWrap').innerHTML = bindingSelectHTML('kmComboBind', c.binding, 'binding', '180px');
       document.getElementById('kmComboTimeout').value = c.timeout;
       document.getElementById('kmComboLayerPicker').innerHTML = '<option value="">+ Add layer</option>' + kmComboLayerOptionsHTML();
       kmComboRenderLayerTags(c.layers || '');
@@ -6908,22 +7200,47 @@ document.addEventListener('DOMContentLoaded', function() {
   };
   document.getElementById('kmMacroAddString').onclick = function() {
     if (editingMacroIndex < 0) return;
-    var str = prompt('Enter text string to type (letters, numbers, spaces):');
+    document.getElementById('stringSeqInput').value = '';
+    document.getElementById('stringSeqPreview').textContent = '';
+    document.getElementById('stringSeqOverlay').classList.add('visible');
+  };
+  document.getElementById('stringSeqInput').addEventListener('input', function() {
+    var str = this.value;
+    if (!str) { document.getElementById('stringSeqPreview').textContent = ''; return; }
+    var preview = [];
+    for (var ci = 0; ci < str.length && ci < 60; ci++) {
+      var kc = charToZmkKeycode(str[ci]);
+      if (kc) preview.push('&kp ' + kc);
+    }
+    if (str.length > 60) preview.push('... +' + (str.length - 60) + ' more');
+    document.getElementById('stringSeqPreview').textContent = preview.join(', ');
+  });
+  document.getElementById('stringSeqAddBtn').onclick = function() {
+    if (editingMacroIndex < 0) return;
+    var str = document.getElementById('stringSeqInput').value;
     if (!str) return;
     var macro = keymapMacros[editingMacroIndex];
-    // Add &macro_tap if not already present as last control
     var lastStep = macro.steps.length > 0 ? macro.steps[macro.steps.length - 1] : '';
     if (lastStep !== '&macro_tap') {
       macro.steps.push('&macro_tap');
     }
-    // Convert each character to &kp KEYCODE
     for (var ci = 0; ci < str.length; ci++) {
       var ch = str[ci];
       var kc = charToZmkKeycode(ch);
       if (kc) macro.steps.push('&kp ' + kc);
     }
+    document.getElementById('stringSeqOverlay').classList.remove('visible');
     renderMacroSteps();
   };
+  document.getElementById('stringSeqCancelBtn').onclick = function() {
+    document.getElementById('stringSeqOverlay').classList.remove('visible');
+  };
+  document.getElementById('stringSeqCloseBtn').onclick = function() {
+    document.getElementById('stringSeqOverlay').classList.remove('visible');
+  };
+  document.getElementById('stringSeqOverlay').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('visible');
+  });
 
   // Macro step container events (delegated)
   document.getElementById('kmMacroSteps').addEventListener('click', function(e) {
@@ -6963,8 +7280,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (e.target.dataset.stepType !== undefined && editingMacroIndex >= 0) {
       var stepIdx = parseInt(e.target.dataset.stepType);
       var newType = e.target.value;
-      // Convert type to default step string
-      var newStep = macroStepToString(newType, { behavior: '&kp', params: 'A', time: '100', raw: keymapMacros[editingMacroIndex].steps[stepIdx] });
+      // Convert type to default step string (raw starts empty so classifyMacroStep won't reclassify it as binding)
+      var newStep = macroStepToString(newType, { behavior: '&kp', params: 'A', time: '100', raw: '' });
       keymapMacros[editingMacroIndex].steps[stepIdx] = newStep;
       renderMacroSteps();
     }
@@ -7057,6 +7374,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // --- Behavior editor ---
   document.getElementById('kmAddBehaviorBtn').onclick = function() {
     editingBehaviorIndex = -1;
+    behPositionalSelectedPositions = [];
     document.getElementById('kmBehaviorName').value = 'new_behavior';
     document.getElementById('kmBehaviorType').value = 'hold-tap';
     document.getElementById('kmBehaviorLabel').value = '';
@@ -7066,6 +7384,19 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('kmBehaviorType').onchange = function() {
     showBehaviorConfig(this.value);
   };
+  // Positional hold mini keyboard click handler (delegated on config container)
+  document.getElementById('kmBehaviorConfig').addEventListener('click', function(e) {
+    var group = e.target.closest('.key-group');
+    if (!group) return;
+    var mkb = e.target.closest('#behPositionalMiniKb');
+    if (!mkb) return;
+    var ki = parseInt(group.dataset.key);
+    if (isNaN(ki)) return;
+    var idx = behPositionalSelectedPositions.indexOf(ki);
+    if (idx >= 0) behPositionalSelectedPositions.splice(idx, 1);
+    else behPositionalSelectedPositions.push(ki);
+    renderBehPositionalMiniKb();
+  });
   function closeBehaviorOverlay() {
     document.getElementById('kmBehaviorOverlay').classList.remove('visible');
     editingBehaviorIndex = -1;
@@ -7083,8 +7414,8 @@ document.addEventListener('DOMContentLoaded', function() {
       config = {
         tappingTerm: document.getElementById('kmBehTappingTerm').value || '200',
         flavor: document.getElementById('kmBehFlavor').value,
-        holdBinding: document.getElementById('kmBehHoldBinding').value,
-        tapBinding: document.getElementById('kmBehTapBinding').value,
+        holdBinding: getBehBindingValue('kmBehHoldBinding'),
+        tapBinding: getBehBindingValue('kmBehTapBinding'),
         quickTap: document.getElementById('kmBehQuickTap').value || '',
         requirePriorIdle: document.getElementById('kmBehRequirePriorIdle').value || '',
         holdTriggerPositions: document.getElementById('kmBehHoldTriggerPositions').value || '',
@@ -7101,14 +7432,14 @@ document.addEventListener('DOMContentLoaded', function() {
       };
     } else if (type === 'mod-morph') {
       config = {
-        normalBinding: document.getElementById('kmBehMmNormal').value,
-        morphedBinding: document.getElementById('kmBehMmMorphed').value,
-        mods: document.getElementById('kmBehMmMods').value
+        normalBinding: getBehBindingValue('kmBehMmNormal'),
+        morphedBinding: getBehBindingValue('kmBehMmMorphed'),
+        mods: getBehBindingValue('kmBehMmMods')
       };
     } else if (type === 'sticky-key') {
       config = {
         releaseAfter: document.getElementById('kmBehSkRelease').value || '1000',
-        binding: document.getElementById('kmBehSkBinding').value,
+        binding: getBehBindingValue('kmBehSkBinding'),
         quickRelease: document.getElementById('kmBehSkQuickRelease').checked,
         lazy: document.getElementById('kmBehSkLazy').checked,
         ignoreMods: document.getElementById('kmBehSkIgnoreMods').checked
@@ -7122,8 +7453,8 @@ document.addEventListener('DOMContentLoaded', function() {
       };
     } else if (type === 'sensor-rotate') {
       config = {
-        sensorCW: document.getElementById('kmBehSensorCW').value,
-        sensorCCW: document.getElementById('kmBehSensorCCW').value,
+        sensorCW: getBehBindingValue('kmBehSensorCW'),
+        sensorCCW: getBehBindingValue('kmBehSensorCCW'),
         sensorTap: document.getElementById('kmBehSensorTap').value
       };
     } else if (type === 'key-toggle') {
@@ -7134,7 +7465,7 @@ document.addEventListener('DOMContentLoaded', function() {
     } else if (type === 'caps-word') {
       config = {
         continueList: document.getElementById('kmBehCwContinueList').value || '',
-        mods: document.getElementById('kmBehCwMods').value || ''
+        mods: getBehBindingValue('kmBehCwMods') || ''
       };
     }
     var beh = {
@@ -7172,16 +7503,18 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('kmBehaviorName').value = b.name;
       document.getElementById('kmBehaviorType').value = b.type;
       document.getElementById('kmBehaviorLabel').value = b.label || '';
+      // Parse positional hold positions into array before rendering config
+      var posStr = (b.config && b.config.holdTriggerPositions) || '';
+      behPositionalSelectedPositions = posStr.trim() ? posStr.trim().split(/[\s,]+/).map(Number).filter(function(n) { return !isNaN(n); }) : [];
       showBehaviorConfig(b.type);
       // Fill config fields
       if (b.type === 'hold-tap') {
         document.getElementById('kmBehTappingTerm').value = b.config.tappingTerm || '200';
         document.getElementById('kmBehFlavor').value = b.config.flavor || 'tap-preferred';
-        document.getElementById('kmBehHoldBinding').value = b.config.holdBinding || '';
-        document.getElementById('kmBehTapBinding').value = b.config.tapBinding || '';
+        setBehBindingValue('kmBehHoldBinding', b.config.holdBinding || '');
+        setBehBindingValue('kmBehTapBinding', b.config.tapBinding || '');
         document.getElementById('kmBehQuickTap').value = b.config.quickTap || '';
         document.getElementById('kmBehRequirePriorIdle').value = b.config.requirePriorIdle || '';
-        document.getElementById('kmBehHoldTriggerPositions').value = b.config.holdTriggerPositions || '';
         document.getElementById('kmBehRetroTap').checked = !!b.config.retroTap;
         document.getElementById('kmBehHoldWhileUndecided').checked = !!b.config.holdWhileUndecided;
         document.getElementById('kmBehHoldWhileUndecidedLinger').checked = !!b.config.holdWhileUndecidedLinger;
@@ -7191,12 +7524,12 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('kmBehTappingTerm').value = b.config.tappingTerm || '200';
         document.getElementById('kmBehTdBindings').value = b.config.bindings || '';
       } else if (b.type === 'mod-morph') {
-        document.getElementById('kmBehMmNormal').value = b.config.normalBinding || '';
-        document.getElementById('kmBehMmMorphed').value = b.config.morphedBinding || '';
-        document.getElementById('kmBehMmMods').value = b.config.mods || '';
+        setBehBindingValue('kmBehMmNormal', b.config.normalBinding || '');
+        setBehBindingValue('kmBehMmMorphed', b.config.morphedBinding || '');
+        setBehBindingValue('kmBehMmMods', b.config.mods || '');
       } else if (b.type === 'sticky-key') {
         document.getElementById('kmBehSkRelease').value = b.config.releaseAfter || '1000';
-        document.getElementById('kmBehSkBinding').value = b.config.binding || '';
+        setBehBindingValue('kmBehSkBinding', b.config.binding || '');
         document.getElementById('kmBehSkQuickRelease').checked = !!b.config.quickRelease;
         document.getElementById('kmBehSkLazy').checked = !!b.config.lazy;
         document.getElementById('kmBehSkIgnoreMods').checked = !!b.config.ignoreMods;
@@ -7206,8 +7539,8 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('kmBehMacroTap').value = b.config.macroTap || '';
         document.getElementById('kmBehMacroBindings').value = b.config.macroBindings || '';
       } else if (b.type === 'sensor-rotate') {
-        document.getElementById('kmBehSensorCW').value = b.config.sensorCW || '';
-        document.getElementById('kmBehSensorCCW').value = b.config.sensorCCW || '';
+        setBehBindingValue('kmBehSensorCW', b.config.sensorCW || '');
+        setBehBindingValue('kmBehSensorCCW', b.config.sensorCCW || '');
         document.getElementById('kmBehSensorTap').value = b.config.sensorTap || '';
       } else if (b.type === 'key-toggle') {
         var ktHasMode = !!b.config.toggleMode;
@@ -7218,7 +7551,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (ktHasMode) { var ktVal = document.getElementById('kmBehKtToggleModeVal'); if (ktVal) ktVal.value = b.config.toggleMode; }
       } else if (b.type === 'caps-word') {
         document.getElementById('kmBehCwContinueList').value = b.config.continueList || '';
-        document.getElementById('kmBehCwMods').value = b.config.mods || '';
+        setBehBindingValue('kmBehCwMods', b.config.mods || '');
       }
       document.getElementById('kmBehaviorOverlay').classList.add('visible');
     }

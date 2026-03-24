@@ -35,15 +35,36 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 - Layer RGB activation uses hold-taps and combo patterns to avoid running macros on simple taps.
 - A CapsLock blink indicator has been implemented (logic can be improved); can extend to NumLock or other indicators.
 - The `config/corne-rgb.dtsi` file should in theory work in any other keyboard since it doesn't affect the key map. We can isolate the RGB functions into one file for easier editing while only worrying about the layers in the .keymap file. (ty AI)
-- **NEW** Tap Dance Blink, CapsLock, And NumLock have been integrated. When you "activate" NumLock/CapsLock using the tap-dance function the keyboard will now "flash" an appropriate color to indicate the press. 
+- Tap Dance Blink, CapsLock, And NumLock have been integrated. When you "activate" NumLock/CapsLock using the tap-dance function the keyboard will now "flash" an appropriate color to indicate the press. 
+---
+**NEW**
+
+- There has been a tool made by AI to help aid the per-layer color assignment, it's in `.html` format; There's also a keymap editor integrated into the tool. So you can edit your new binds into your keymap.
+    - [AI update](#ai-update)
+  - Tool was designed entirely by AI, using the layout of my original `.dtsi` to outline the generator's frame work.
+  - No `.dtsi` file needed since we are making it.
+  - Support ONLY? for Cornes and Lotus58s, other keyboard support is supposedly "functioning" but I never tested it. There were issues when the AI made the lotus58 layout so I wouldn't be surprised if there were issues with other boards. USE OTHER LAYOUTS W/ CAUTION!
+    - Keymap can be parsed standalone.  Whatever layers that were parsed FROM the keymap tab WILL sync into the RGB tab, for easy color editing.
+  - You could in theory use `"any"-rgb.dtsi` with your inserted keymap, and it should work since we are pulling the layers by "layer index"; and not by name, "layer 0" will ALWAYS = 0, just configure the new binds to your keymap.
+    - I recommend you just make your own `.dtsi` then adjust colors as needed to avoid any node confusion, and maybe you learn something new along the way.
+  - Bugs may be present in the editor, be sure to "report" anything you may find.
+  - IF SOMETHING DOESN'T FEEL CLEAR ALWAYS REFER TO THE ORIGNIAL `.dtsi` IN THE REPO FOR GUIDANCE. I SOMETIMES FEEL I DON'T EXPLAIN "FUNCTIONS" CLEARLY BUT THE "IDEA" IS EXERCISED IN CODE. WHO KNOWS, MAYBE YOU LEARN SOMETHING BETTER THAN I CAN.
 
 ---
 
+  
+
 ## Files of Interest
 
-- `config/corne.keymap` — main keymap (focused on layer bindings).
-- `config/corne-rgb.dtsi` — RGB macros and combos (per-layer color definitions and modular macros).
-  - Include it in your `.keymap` with: `#include "corne-rgb.dtsi"` (adjust filename as needed).
+  
+
+-  `config/corne.keymap` — main keymap (focused on layer bindings).
+
+-  `config/corne-rgb.dtsi` — RGB macros and combos (per-layer color definitions and modular macros).
+
+- Include it in your `.keymap` with: `#include "corne-rgb.dtsi"` (adjust filename as needed).
+
+-  `NGX_CORNE/RGB_Code_Helper.html` This is our "new", AI constructed RGB tool. Helps streamline the per-layer color assignment.
 
 ---
 
@@ -246,8 +267,8 @@ I used Copilot to help modularize and refine the macros and combos. The modular 
 
 ~~- Improve the CapsLock blink logic and add a similar blink/indicator for NumLock and other toggles.~~
 ~~- Optional: document exact combo key positions for common Corne layouts (for clarity).~~
-- I will probably clean up the code more since it's boasting a whooping 700kb of memory.
-- I think I'm "done", most of the "framework" is now there, all that's left is to implement the new structured code onto any new layers.
+~~- I will probably clean up the code more since it's boasting a whooping 700kb of memory.~~ It's as clean as it's getting
+~~- I think I'm "done", most of the "framework" is now there, all that's left is to implement the new structured code onto any new layers.~~
 - If anyone can think of something I'm open to suggestions but I "think" I maximized the capabilities of the basic 3.0 ZMK RGB functions.  
 
 ---
