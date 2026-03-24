@@ -469,6 +469,7 @@
           <textarea id="userCodePaste" rows="6" placeholder="Paste your .dtsi code here (layers, colors, macros, behaviors, combos, blink macros)..."></textarea>
           <div style="margin-top:0.4em;display:flex;align-items:center;gap:0.5em;">
             <button id="parseBtn">Parse &amp; Reflect</button>
+            <button id="rgbSyncNamesBtn" title="Overwrite Keymap tab layer names with RGB layer names (by index)" style="background:#2a4a5a;color:#cde;border:1px solid #5a8a9a;font-size:0.85em;padding:0.25em 0.7em;border-radius:4px;cursor:pointer;">Sync Names → Keymap</button>
             <button id="rgbClearSyncBtn" title="Remove data synced from Keymap tab" style="background:#6a3030;color:#eee;border:1px solid #944;font-size:0.85em;padding:0.25em 0.7em;border-radius:4px;cursor:pointer;">Clear Keymap Data</button>
             <span id="userCodeStatus" class="status-msg" style="display:none;"></span>
             <button class="btn-sm" id="rgbUndoBtn" title="Undo (Ctrl+Z)" disabled style="margin-left:auto;background:var(--item-bg);color:var(--text);border:1px solid var(--border);">&#x21B6; Undo</button>
@@ -695,6 +696,7 @@
           <textarea id="kmKeymapPaste" rows="6" placeholder="Paste your .keymap file content here..."></textarea>
           <div style="margin-top:0.4em;display:flex;align-items:center;gap:0.5em;">
             <button id="kmParseBtn">Parse Keymap</button>
+            <button id="kmSyncNamesBtn" title="Overwrite RGB tab layer names with Keymap layer names (by index)" style="background:#2a4a5a;color:#cde;border:1px solid #5a8a9a;font-size:0.85em;padding:0.25em 0.7em;border-radius:4px;cursor:pointer;">Sync Names → RGB</button>
             <button id="kmClearSyncBtn" title="Remove data synced from RGB tab" style="background:#6a3030;color:#eee;border:1px solid #944;font-size:0.85em;padding:0.25em 0.7em;border-radius:4px;cursor:pointer;">Clear RGB Data</button>
             <span id="kmParseStatus" class="status-msg" style="display:none;"></span>
           </div>
@@ -2379,50 +2381,8 @@ function parseUserCode() {
     return ai - bi;
   });
 
-  // Sync RGB layer names → keymap layers (by matching index)
-  // Only fires when keymap layers already exist (deliberate user action)
-  var nameSyncCount = 0;
-  var newLayerCount = 0;
-  if (keymapLayers.length > 0 || layers.some(function(l) { return l.index !== '' && l.index !== undefined; })) {
-    var keyCount = keyboardLayout ? keyboardLayout.length : 42;
-    layers.forEach(function(rgbL) {
-      if (rgbL.index === '' || rgbL.index === undefined) return;
-      var idx = parseInt(rgbL.index);
-      if (idx < 0 || isNaN(idx)) return;
-      var rgbBase = baseKey(rgbL.name);
-      if (!rgbBase) return;
-      if (idx < keymapLayers.length) {
-        // Overwrite existing keymap layer's names with RGB layer name
-        if (keymapLayers[idx].status !== 'reserved') {
-          keymapLayers[idx].displayName = rgbBase;
-          keymapLayers[idx].name = rgbBase.toLowerCase() + '_' + idx;
-          nameSyncCount++;
-        }
-      } else {
-        // Create new keymap layers up to this index (orphan RGB layers)
-        while (keymapLayers.length <= idx) {
-          var gapIdx = keymapLayers.length;
-          var gapRgb = null;
-          for (var gi = 0; gi < layers.length; gi++) {
-            if (layers[gi].index === String(gapIdx)) { gapRgb = layers[gi]; break; }
-          }
-          var gapBase = gapRgb ? baseKey(gapRgb.name) : ('LAYER_' + gapIdx);
-          keymapLayers.push({
-            name: gapBase.toLowerCase() + '_' + gapIdx,
-            displayName: gapBase,
-            bindings: new Array(keyCount).fill('&trans'),
-            status: 'active'
-          });
-          newLayerCount++;
-        }
-      }
-    });
-  }
-
   var status = document.getElementById('userCodeStatus');
   var msg = 'Parsed: ' + layers.length + ' layers, ' + macros.length + ' macros, ' + behaviors.length + ' behaviors, ' + dtsiNativeBehaviors.length + ' native behaviors, ' + combos.length + ' combos, ' + blinkMacros.length + ' blink macros.';
-  if (nameSyncCount > 0) msg += ' Synced ' + nameSyncCount + ' layer name(s) → Keymap.';
-  if (newLayerCount > 0) msg += ' Created ' + newLayerCount + ' new keymap layer(s).';
   status.textContent = msg;
   status.style.display = 'inline';
   setTimeout(function() { status.style.display = 'none'; }, 6000);
@@ -6611,6 +6571,51 @@ document.addEventListener('DOMContentLoaded', function() {
     rgbRenderAll();
     showStatus('userCodeStatus', 'Cleared synced keymap data');
   };
+  document.getElementById('rgbSyncNamesBtn').onclick = function() {
+    if (layers.length === 0) { showStatus('userCodeStatus', 'No RGB layers to sync from'); return; }
+    if (keymapLayers.length === 0) { showStatus('userCodeStatus', 'No keymap layers to sync to'); return; }
+    var nameSyncCount = 0;
+    var newLayerCount = 0;
+    var keyCount = keyboardLayout ? keyboardLayout.length : 42;
+    layers.forEach(function(rgbL) {
+      if (rgbL.index === '' || rgbL.index === undefined) return;
+      var idx = parseInt(rgbL.index);
+      if (idx < 0 || isNaN(idx)) return;
+      var rgbBase = baseKey(rgbL.name);
+      if (!rgbBase) return;
+      if (idx < keymapLayers.length) {
+        if (keymapLayers[idx].status !== 'reserved') {
+          keymapLayers[idx].displayName = rgbBase;
+          keymapLayers[idx].name = rgbBase.toLowerCase() + '_' + idx;
+          nameSyncCount++;
+        }
+      } else {
+        while (keymapLayers.length <= idx) {
+          var gapIdx = keymapLayers.length;
+          var gapRgb = null;
+          for (var gi = 0; gi < layers.length; gi++) {
+            if (layers[gi].index === String(gapIdx)) { gapRgb = layers[gi]; break; }
+          }
+          var gapBase = gapRgb ? baseKey(gapRgb.name) : ('LAYER_' + gapIdx);
+          keymapLayers.push({
+            name: gapBase.toLowerCase() + '_' + gapIdx,
+            displayName: gapBase,
+            bindings: new Array(keyCount).fill('&trans'),
+            status: 'active'
+          });
+          newLayerCount++;
+        }
+      }
+    });
+    if (nameSyncCount > 0 || newLayerCount > 0) {
+      renderLayerTabs();
+      renderKeyboardSvg('keyboardSvg');
+      updateKeymapOutput();
+    }
+    var msg = 'Synced ' + nameSyncCount + ' layer name(s) → Keymap.';
+    if (newLayerCount > 0) msg += ' Created ' + newLayerCount + ' new keymap layer(s).';
+    showStatus('userCodeStatus', msg);
+  };
   document.getElementById('addLayerBtn').onclick = addLayer;
   document.getElementById('addMacroBtn').onclick = addMacro;
   document.getElementById('addBehaviorBtn').onclick = addBehavior;
@@ -6832,32 +6837,6 @@ document.addEventListener('DOMContentLoaded', function() {
     var text = document.getElementById('kmKeymapPaste').value;
     if (!text.trim()) { alert('Paste a .keymap file first'); return; }
     parseKeymap(text);
-    // Sync keymap layer names → RGB layers (by matching index)
-    // Only fires when RGB layers already exist (deliberate user action)
-    var _kmNameSynced = 0;
-    if (layers.length > 0) {
-      keymapLayers.forEach(function(kl, idx) {
-        if (kl.status === 'reserved') return;
-        var idxStr = String(idx);
-        for (var ri = 0; ri < layers.length; ri++) {
-          if (layers[ri].index === idxStr) {
-            // Derive new base name from keymap layer
-            var newBase = kl.displayName
-              ? kl.displayName.toUpperCase().replace(/[^A-Z0-9_]/g, '_')
-              : baseKey(kl.name);
-            if (!newBase) break;
-            // Preserve the existing prefix convention (L_, LAYER_, or none)
-            var old = layers[ri].name;
-            if (/^L_/i.test(old))      layers[ri].name = 'L_' + newBase;
-            else if (/^LAYER_/i.test(old)) layers[ri].name = 'LAYER_' + newBase;
-            else                           layers[ri].name = newBase;
-            _kmNameSynced++;
-            break;
-          }
-        }
-      });
-      if (_kmNameSynced > 0) rgbRenderAll();
-    }
     // Auto-detect layout based on key count
     if (keymapLayers.length > 0) {
       var bindCount = keymapLayers[0].bindings.length;
@@ -6880,7 +6859,7 @@ document.addEventListener('DOMContentLoaded', function() {
     renderKeymapCondLayerList();
     renderKeymapSensorList();
     updateKeymapOutput();
-    showStatus('kmParseStatus', 'Parsed: ' + keymapLayers.length + ' layers, ' + keymapCombos.length + ' combos, ' + keymapMacros.length + ' macros, ' + keymapBehaviors.length + ' behaviors, ' + keymapConditionalLayers.length + ' cond. layers' + (_kmNameSynced > 0 ? '. Synced ' + _kmNameSynced + ' layer name(s) → RGB tab' : ''));
+    showStatus('kmParseStatus', 'Parsed: ' + keymapLayers.length + ' layers, ' + keymapCombos.length + ' combos, ' + keymapMacros.length + ' macros, ' + keymapBehaviors.length + ' behaviors, ' + keymapConditionalLayers.length + ' cond. layers');
   };
 
   document.getElementById('kmClearSyncBtn').onclick = function() {
@@ -6893,6 +6872,31 @@ document.addEventListener('DOMContentLoaded', function() {
     renderKeymapBehaviorList();
     updateKeymapOutput();
     showStatus('kmParseStatus', 'Cleared synced RGB data');
+  };
+  document.getElementById('kmSyncNamesBtn').onclick = function() {
+    if (keymapLayers.length === 0) { showStatus('kmParseStatus', 'No keymap layers to sync from'); return; }
+    if (layers.length === 0) { showStatus('kmParseStatus', 'No RGB layers to sync to'); return; }
+    var synced = 0;
+    keymapLayers.forEach(function(kl, idx) {
+      if (kl.status === 'reserved') return;
+      var idxStr = String(idx);
+      for (var ri = 0; ri < layers.length; ri++) {
+        if (layers[ri].index === idxStr) {
+          var newBase = kl.displayName
+            ? kl.displayName.toUpperCase().replace(/[^A-Z0-9_]/g, '_')
+            : baseKey(kl.name);
+          if (!newBase) break;
+          var old = layers[ri].name;
+          if (/^L_/i.test(old))      layers[ri].name = 'L_' + newBase;
+          else if (/^LAYER_/i.test(old)) layers[ri].name = 'LAYER_' + newBase;
+          else                           layers[ri].name = newBase;
+          synced++;
+          break;
+        }
+      }
+    });
+    if (synced > 0) rgbRenderAll();
+    showStatus('kmParseStatus', 'Synced ' + synced + ' layer name(s) → RGB tab');
   };
 
   // Layer tabs event delegation (now sidebar)
