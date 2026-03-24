@@ -2149,7 +2149,7 @@ function charToZmkKeycode(ch) {
 // grid of keycodes. Pick a behavior, pick parameters, and click
 // Apply to save the binding to the layer. populateKeycodeGrids()
 // fills the grid; showBindingEditor() opens the panel.
-// More on this code can be found in 'RefDoc' line 800
+// More on this code can be found in 'RefDoc' line 829
 // ================================================================
 // populateKeycodeGrids() â€” Fills the keycode picker tabs (letters,
 // numbers, symbols, etc.) with clickable buttons for every ZMK keycode.
@@ -2442,7 +2442,7 @@ function cancelBindingEditor() {
 // renderComboMiniKb() draws a small keyboard for picking combo key
 // positions. renderKeymapComboList() shows all combos in a list.
 // Clicking "Edit" opens the combo editor panel (line 5470+).
-// More on this code can be found in 'RefDoc' line 855
+// More on this code can be found in 'RefDoc' line 870
 // ================================================================
 // renderComboMiniKb() â€” Draws a small keyboard inside the combo editor
 // panel. Clicking keys toggles their selection as combo positions.
@@ -2496,7 +2496,7 @@ function renderKeymapComboList() {
 // Each macro has a name, optional timing (wait/tap ms), and a list
 // of steps (e.g., "type H-E-L-L-O"). renderKeymapMacroList() shows
 // all macros. The macro editor lets you add/remove steps.
-// More on this code can be found in 'RefDoc' line 855
+// More on this code can be found in 'RefDoc' line 870
 // ================================================================
 // renderKeymapMacroList() â€” Shows all macros in a list with name, label,
 // and step count. Each macro has Edit/Delete buttons.
@@ -2634,7 +2634,7 @@ function renderMacroSteps() {
 // user-defined in the devicetree. renderKeymapBehaviorList() shows
 // all of them. showBehaviorConfig() opens the config panel where
 // you set timing, flavor, and other options for each behavior type.
-// More on this code can be found in 'RefDoc' line 855
+// More on this code can be found in 'RefDoc' line 870
 // ================================================================
 // renderKeymapBehaviorList() â€” Shows all custom behaviors in a list with
 // type (hold-tap, sticky-key, etc.), name, and Edit/Delete buttons.
@@ -2731,7 +2731,7 @@ function showBehaviorConfig(type) {
 // selected, and it assigns that keycode immediately. QA_KEYBOARD_MAP
 // maps browser KeyboardEvent.code values to ZMK keycodes.
 // openQuickAssign() activates the mode; closing it saves the result.
-// More on this code can be found in 'RefDoc' line 920
+// More on this code can be found in 'RefDoc' line 949
 // ================================================================
 var QA_KEYBOARD_MAP = {
   // Maps KeyboardEvent.code â†’ ZMK keycode
@@ -2946,7 +2946,7 @@ function renderQaOnScreenKb() {
 // other layers are active at the same time. For example, holding
 // layer 1 + layer 2 could activate layer 3. These use the ZMK
 // "tri_layer" or "conditional_layers" feature.
-// More on this code can be found in 'RefDoc' line 855
+// More on this code can be found in 'RefDoc' line 870
 // ================================================================
 var editingCondLayerIndex = -1;
 
@@ -2991,7 +2991,7 @@ function populateSensorLayerSelect() {
 // Each sensor entry has a layer index and a list of bindings
 // (clockwise, counter-clockwise). The sensor editor shows visual
 // cards for each encoder and lets you pick rotation actions.
-// More on this code can be found in 'RefDoc' line 855
+// More on this code can be found in 'RefDoc' line 870
 // ================================================================
 var editingSensorIndex = -1;   // index within keymapSensorBindings
 var editingSensorSubIdx = -1;  // which encoder token within that entry (-1 = adding new)
@@ -3071,7 +3071,7 @@ function renderKeymapSensorList() {
 // writes a complete .keymap file as text. This is what you copy
 // and paste back into your ZMK config folder.
 // Uses generateBehaviorCode() (line 4302) for custom behavior blocks.
-// More on this code can be found in 'RefDoc' line 970
+// More on this code can be found in 'RefDoc' line 984
 // ================================================================
 // updateKeymapOutput() â€” Generates the full .keymap file as text.
 // Outputs #include lines, custom behaviors, macros, combos, conditional
@@ -3445,7 +3445,7 @@ function updateKeymapOutput() {
 // ZMK devicetree text block. Each behavior type (hold-tap, sticky-key,
 // tap-dance, caps-word, etc.) has its own format with specific
 // properties. Called by updateKeymapOutput() for each custom behavior.
-// More on this code can be found in 'RefDoc' line 1040
+// More on this code can be found in 'RefDoc' line 1042
 // ================================================================
 function generateBehaviorCode(b) {
   var out = '';
@@ -3526,7 +3526,7 @@ function generateBehaviorCode(b) {
 // syncCrossTabData() copies keymap layers/combos/behaviors into
 // the RGB tab's arrays. syncRgbToKeymap() copies RGB data back.
 // Layers are sorted by index so they appear in order (0, 1, 2...).
-// More on this code can be found in 'RefDoc' line 1080
+// More on this code can be found in 'RefDoc' line 1107
 // ================================================================
 // syncCrossTabData() â€” Copies keymap layers, combos, behaviors, and macros
 // into the RGB tab's arrays so the RGB Generator sees them. Sorts layers

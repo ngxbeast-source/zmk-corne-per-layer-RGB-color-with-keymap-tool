@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZMK RGB &amp; Keymap Editor v12</title>
+  <title>ZMK RGB &amp; Keymap Editor v13</title>
   <style>
     /* ====== THEME VARIABLES ====== */
     :root {
@@ -277,6 +277,38 @@
     .beh-binding-wrap .beh-binding-raw { font-size: 0.88em; padding: 0.3em 0.5em; border: 1px solid var(--border); border-radius: 4px; background: var(--item-bg); color: var(--text); margin-top: 0.15em; }
     .beh-binding-wrap .beh-binding-raw:focus { border-color: var(--accent); outline: none; background: var(--card); }
 
+    /* Binding picker trigger button */
+    .bp-trigger { display: inline-flex; align-items: center; gap: 0.3em; font-size: 0.88em; padding: 0.3em 0.5em; border: 1px solid var(--border); border-radius: 4px; background: var(--item-bg); color: var(--text); cursor: pointer; min-width: 120px; text-align: left; }
+    .bp-trigger:hover { border-color: var(--accent); background: var(--card); }
+    .bp-trigger .bp-trigger-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bp-trigger .bp-trigger-arrow { color: var(--muted); font-size: 0.75em; flex-shrink: 0; }
+
+    /* Binding picker popup overlay */
+    .bp-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 400; display: none; align-items: center; justify-content: center; animation: fadeIn 0.15s ease; }
+    .bp-overlay.visible { display: flex; }
+    .bp-dialog { background: var(--card); border: 1px solid var(--border); border-radius: 10px; width: 540px; max-width: 95vw; max-height: 80vh; color: var(--text); box-shadow: 0 12px 40px rgba(0,0,0,0.35); animation: slideUp 0.2s ease; display: flex; flex-direction: column; overflow: hidden; }
+    .bp-header { padding: 0.5em 1em; border-bottom: 1px solid var(--border); display: flex; align-items: center; }
+    .bp-header h3 { margin: 0; font-size: 0.95em; color: var(--accent2); font-weight: 600; flex: 1; }
+    .bp-close { background: none; border: none; color: var(--muted); font-size: 1.2em; cursor: pointer; padding: 0 0.3em; }
+    .bp-close:hover { color: var(--text); }
+    .bp-body { padding: 0.6em 1em; overflow-y: auto; flex: 1; }
+    .bp-section { margin-bottom: 0.4em; }
+    .bp-section-title { font-size: 0.82em; font-weight: 600; color: var(--accent2); cursor: pointer; user-select: none; padding: 0.15em 0; }
+    .bp-section-title::before { content: '\25B8 '; font-size: 0.8em; }
+    .bp-section.open .bp-section-title::before { content: '\25BE '; }
+    .bp-section-grid { display: none; flex-wrap: wrap; gap: 4px; padding: 0.3em 0; }
+    .bp-section.open .bp-section-grid { display: flex; }
+    .bp-section-grid.bp-col { flex-direction: column; }
+    .bp-btn { background: var(--item-bg); border: 1px solid var(--border); border-radius: 4px; padding: 0.3em 0.6em; font-size: 0.8em; cursor: pointer; color: var(--text); transition: all 0.1s; white-space: nowrap; }
+    .bp-btn:hover { background: var(--key-hover); border-color: var(--accent); transform: scale(1.03); }
+    .bp-btn-macro .bp-btn-name { color: #9cc; }
+    .bp-btn .bp-btn-name { font-weight: 600; }
+    .bp-btn .bp-btn-desc { font-size: 0.85em; color: var(--muted); margin-left: 0.3em; }
+    .bp-layer-group { margin-bottom: 0.3em; }
+    .bp-layer-label { font-size: 0.78em; font-weight: 600; color: var(--muted); margin-bottom: 2px; }
+    .bp-layer-btns { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 2px; }
+    .bp-raw-row { border-top: 1px solid var(--border); padding-top: 0.5em; margin-top: 0.3em; }
+
     /* Combo editor */
     .combo-mini-kb { max-width: 500px; margin: 0.4em 0; }
 
@@ -411,7 +443,7 @@
 
   <!-- ====== TOPBAR ====== -->
   <div class="topbar">
-    <h1>ZMK Per-Layer Color and Keymap Editor <small>v12</small></h1>
+    <h1>ZMK Per-Layer Color and Keymap Editor <small>v13</small></h1>
     <div class="tab-bar">
       <button class="tab-btn active" data-tab="tabRgb">RGB Generator</button>
       <button class="tab-btn" data-tab="tabKeymap">Keymap Editor</button>
@@ -810,6 +842,38 @@
           <div class="be-actions">
             <button id="beApplyBtn">&#10003; Apply</button>
             <button id="beCancelBtn" style="background:var(--muted);">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- BINDING PICKER POPUP (shared by all binding trigger buttons) -->
+      <div class="bp-overlay" id="bindingPickerOverlay">
+        <div class="bp-dialog">
+          <div class="bp-header">
+            <h3 id="bpTitle">Select Binding</h3>
+            <button class="bp-close" id="bpCloseBtn">&times;</button>
+          </div>
+          <div class="bp-body" id="bpBody">
+            <div id="bpSections"></div>
+            <div id="bpSubPanel" style="display:none;">
+              <div style="display:flex;align-items:center;gap:0.5em;margin-bottom:0.5em;">
+                <button id="bpSubBack" style="font-size:0.82em;padding:2px 10px;cursor:pointer;background:var(--item-bg);border:1px solid var(--border);border-radius:4px;color:var(--text);">&larr; Back</button>
+                <span id="bpSubTitle" style="font-weight:600;font-size:0.88em;color:var(--accent2);"></span>
+              </div>
+              <div class="kc-search-wrap" id="bpKcSearchWrap">
+                <span class="search-icon">&#128269;</span>
+                <input type="text" id="bpKcSearch" placeholder="Search keycodes...">
+                <button class="search-clear" id="bpKcSearchClear" style="display:none;">&times;</button>
+              </div>
+              <div class="be-kc-scroll" id="bpSubScroll"></div>
+            </div>
+            <div class="bp-raw-row" id="bpRawRow">
+              <label style="font-size:0.8em;font-weight:600;color:var(--muted);margin-bottom:2px;display:block;">Or type raw code:</label>
+              <div style="display:flex;gap:4px;">
+                <input type="text" id="bpRawInput" placeholder="e.g. &amp;kp A" style="flex:1;font-size:0.85em;padding:0.3em 0.5em;border:1px solid var(--border);border-radius:4px;background:var(--item-bg);color:var(--text);">
+                <button id="bpRawApply" style="font-size:0.82em;padding:0.3em 0.8em;cursor:pointer;background:var(--accent);color:#fff;border:1px solid var(--accent);border-radius:4px;">Apply</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -2315,10 +2379,53 @@ function parseUserCode() {
     return ai - bi;
   });
 
+  // Sync RGB layer names → keymap layers (by matching index)
+  // Only fires when keymap layers already exist (deliberate user action)
+  var nameSyncCount = 0;
+  var newLayerCount = 0;
+  if (keymapLayers.length > 0 || layers.some(function(l) { return l.index !== '' && l.index !== undefined; })) {
+    var keyCount = keyboardLayout ? keyboardLayout.length : 42;
+    layers.forEach(function(rgbL) {
+      if (rgbL.index === '' || rgbL.index === undefined) return;
+      var idx = parseInt(rgbL.index);
+      if (idx < 0 || isNaN(idx)) return;
+      var rgbBase = baseKey(rgbL.name);
+      if (!rgbBase) return;
+      if (idx < keymapLayers.length) {
+        // Overwrite existing keymap layer's names with RGB layer name
+        if (keymapLayers[idx].status !== 'reserved') {
+          keymapLayers[idx].displayName = rgbBase;
+          keymapLayers[idx].name = rgbBase.toLowerCase() + '_' + idx;
+          nameSyncCount++;
+        }
+      } else {
+        // Create new keymap layers up to this index (orphan RGB layers)
+        while (keymapLayers.length <= idx) {
+          var gapIdx = keymapLayers.length;
+          var gapRgb = null;
+          for (var gi = 0; gi < layers.length; gi++) {
+            if (layers[gi].index === String(gapIdx)) { gapRgb = layers[gi]; break; }
+          }
+          var gapBase = gapRgb ? baseKey(gapRgb.name) : ('LAYER_' + gapIdx);
+          keymapLayers.push({
+            name: gapBase.toLowerCase() + '_' + gapIdx,
+            displayName: gapBase,
+            bindings: new Array(keyCount).fill('&trans'),
+            status: 'active'
+          });
+          newLayerCount++;
+        }
+      }
+    });
+  }
+
   var status = document.getElementById('userCodeStatus');
-  status.textContent = 'Parsed: ' + layers.length + ' layers, ' + macros.length + ' macros, ' + behaviors.length + ' behaviors, ' + dtsiNativeBehaviors.length + ' native behaviors, ' + combos.length + ' combos, ' + blinkMacros.length + ' blink macros.';
+  var msg = 'Parsed: ' + layers.length + ' layers, ' + macros.length + ' macros, ' + behaviors.length + ' behaviors, ' + dtsiNativeBehaviors.length + ' native behaviors, ' + combos.length + ' combos, ' + blinkMacros.length + ' blink macros.';
+  if (nameSyncCount > 0) msg += ' Synced ' + nameSyncCount + ' layer name(s) → Keymap.';
+  if (newLayerCount > 0) msg += ' Created ' + newLayerCount + ' new keymap layer(s).';
+  status.textContent = msg;
   status.style.display = 'inline';
-  setTimeout(function() { status.style.display = 'none'; }, 4000);
+  setTimeout(function() { status.style.display = 'none'; }, 6000);
   rgbRenderAll();
 }
 
@@ -2530,9 +2637,10 @@ function renderBehaviorList() {
     var div = document.createElement('div');
     div.className = 'item';
     var macroLabel = b.macro || '—';
+    var behLabelStr = b.label ? '<span style="color:#9cc;font-size:0.82em;margin:0 4px;" title="Label">&quot;' + esc(b.label) + '&quot;</span>' : '';
     div.innerHTML =
       '<b>' + esc(b.name) + '</b>' +
-      '<span class="item-detail">' + esc(b.label) + '</span>' +
+      behLabelStr +
       '<span class="item-detail muted">&rarr; ' + esc(macroLabel) + '</span>' +
       '<button class="btn-edit btn-sm" data-edit="behavior" data-i="' + i + '">&#9998; Edit</button>' +
       '<button class="btn-danger btn-sm" data-remove="behavior" data-i="' + i + '">&#10005;</button>';
@@ -3879,77 +3987,77 @@ function charToZmkKeycode(ch) {
 // ================================================================
 // populateKeycodeGrids() — Fills the keycode picker tabs (letters,
 // numbers, symbols, etc.) with clickable buttons for every ZMK keycode.
+var kcDescs = {
+  // Numbers
+  N0:'0',N1:'1',N2:'2',N3:'3',N4:'4',N5:'5',N6:'6',N7:'7',N8:'8',N9:'9',
+  NUMBER_0:'0 (alias)',NUMBER_1:'1 (alias)',NUMBER_2:'2 (alias)',NUMBER_3:'3 (alias)',NUMBER_4:'4 (alias)',
+  NUMBER_5:'5 (alias)',NUMBER_6:'6 (alias)',NUMBER_7:'7 (alias)',NUMBER_8:'8 (alias)',NUMBER_9:'9 (alias)',
+  // Modifiers
+  LSHIFT:'Left Shift',LSHFT:'Left Shift',LEFT_SHIFT:'Left Shift',RSHIFT:'Right Shift',RSHFT:'Right Shift',RIGHT_SHIFT:'Right Shift',
+  LCTRL:'Left Control',LEFT_CONTROL:'Left Control',RCTRL:'Right Control',RIGHT_CONTROL:'Right Control',
+  LALT:'Left Alt',LEFT_ALT:'Left Alt',RALT:'Right Alt',RIGHT_ALT:'Right Alt',
+  LGUI:'Left GUI (Win/Cmd)',LWIN:'Left Windows',LCMD:'Left Command',LMETA:'Left Meta',LEFT_GUI:'Left GUI',
+  RGUI:'Right GUI (Win/Cmd)',RWIN:'Right Windows',RCMD:'Right Command',RMETA:'Right Meta',RIGHT_GUI:'Right GUI',
+  // Navigation
+  UP:'Arrow Up',DOWN:'Arrow Down',LEFT:'Arrow Left',RIGHT:'Arrow Right',
+  HOME:'Home',END:'End',PG_UP:'Page Up',PAGE_UP:'Page Up',PG_DN:'Page Down',PAGE_DOWN:'Page Down',
+  // Control
+  ESC:'Escape',ESCAPE:'Escape',ENTER:'Enter',RET:'Return',RETURN:'Return',SPACE:'Spacebar',TAB:'Tab',
+  BSPC:'Backspace',BACKSPACE:'Backspace',DEL:'Delete',DELETE:'Delete',INS:'Insert',INSERT:'Insert',
+  // Locks
+  CAPS:'Caps Lock',CLCK:'Caps Lock',CAPSLOCK:'Caps Lock',SLCK:'Scroll Lock',SCROLLLOCK:'Scroll Lock',
+  LNLCK:'Num Lock',KP_NLCK:'Num Lock',KP_NUM:'Num Lock',KP_NUMLOCK:'Num Lock',
+  // Symbols
+  MINUS:'- Hyphen',EQUAL:'= Equals',LBKT:'[ Left Bracket',LBRC:'[ Left Bracket',LEFT_BRACKET:'[ Left Bracket',
+  RBKT:'] Right Bracket',RBRC:'] Right Bracket',RIGHT_BRACKET:'] Right Bracket',
+  BSLH:'\\ Backslash',BACKSLASH:'\\ Backslash',GRAVE:'` Grave Accent',
+  SQT:"' Single Quote",APOS:"' Apostrophe",APOSTROPHE:"' Apostrophe",
+  SEMI:'; Semicolon',COMMA:', Comma',DOT:'. Period',FSLH:'/ Forward Slash',SLASH:'/ Slash',
+  NON_US_HASH:'# Non-US Hash',NUHS:'# Non-US Hash',NON_US_BSLH:'\\ Non-US Backslash',NUBS:'\\ Non-US Backslash',
+  TILDE:'~ Tilde',EXCL:'! Exclamation',EXCLAMATION:'! Exclamation',AT:'@ At Sign',
+  HASH:'# Hash',POUND:'# Pound',DLLR:'$ Dollar',DOLLAR:'$ Dollar',PRCNT:'% Percent',PERCENT:'% Percent',
+  CARET:'^ Caret',AMPS:'& Ampersand',AMPERSAND:'& Ampersand',ASTRK:'* Asterisk',ASTERISK:'* Asterisk',STAR:'* Star',
+  LPAR:'( Left Paren',RPAR:') Right Paren',LEFT_PARENTHESIS:'( Left Paren',RIGHT_PARENTHESIS:') Right Paren',
+  UNDER:'_ Underscore',UNDERSCORE:'_ Underscore',PLUS:'+ Plus',PIPE:'| Pipe',PIPE2:'| Pipe2',
+  COLON:': Colon',DQT:'" Double Quote',DOUBLE_QUOTES:'" Double Quote',
+  LT:'< Less Than',LESS_THAN:'< Less Than',GT:'> Greater Than',GREATER_THAN:'> Greater Than',
+  QMARK:'? Question Mark',QUESTION:'? Question',
+  // Numpad
+  KP_N0:'Numpad 0',KP_N1:'Numpad 1',KP_N2:'Numpad 2',KP_N3:'Numpad 3',KP_N4:'Numpad 4',
+  KP_N5:'Numpad 5',KP_N6:'Numpad 6',KP_N7:'Numpad 7',KP_N8:'Numpad 8',KP_N9:'Numpad 9',
+  KP_PLUS:'Numpad +',KP_MINUS:'Numpad -',KP_SUBTRACT:'Numpad -',KP_MULTIPLY:'Numpad *',KP_ASTERISK:'Numpad *',
+  KP_DIVIDE:'Numpad /',KP_SLASH:'Numpad /',KP_DOT:'Numpad .',KP_ENTER:'Numpad Enter',KP_EQUAL:'Numpad =',
+  KP_COMMA:'Numpad ,',KP_LPAR:'Numpad (',KP_RPAR:'Numpad )',KP_CLEAR:'Numpad Clear',
+  // Media
+  C_VOL_UP:'Volume Up',C_VOLUME_UP:'Volume Up',C_VOL_DN:'Volume Down',C_VOLUME_DOWN:'Volume Down',C_MUTE:'Mute',
+  C_PLAY_PAUSE:'Play/Pause',C_PP:'Play/Pause',C_NEXT:'Next Track',C_PREV:'Previous Track',C_STOP:'Stop',
+  C_PLAY:'Play',C_PAUSE:'Pause',C_RECORD:'Record',C_REC:'Record',C_REWIND:'Rewind',C_RW:'Rewind',
+  C_FAST_FORWARD:'Fast Forward',C_FF:'Fast Forward',C_EJECT:'Eject',
+  C_BRI_UP:'Brightness Up',C_BRI_INC:'Brightness Up',C_BRI_DN:'Brightness Down',C_BRI_DEC:'Brightness Down',
+  C_BRI_MIN:'Brightness Min',C_BRI_MAX:'Brightness Max',C_BRI_AUTO:'Brightness Auto',
+  // Editing
+  C_AC_CUT:'Cut',K_CUT:'Cut',C_AC_COPY:'Copy',K_COPY:'Copy',C_AC_PASTE:'Paste',K_PASTE:'Paste',
+  C_AC_UNDO:'Undo',K_UNDO:'Undo',C_AC_REDO:'Redo',K_REDO:'Redo',K_AGAIN:'Again',
+  C_AC_SELECT_ALL:'Select All',C_AC_FIND:'Find',
+  // Applications
+  C_AC_SEARCH:'Search',C_AL_CALCULATOR:'Calculator',C_AL_CALC:'Calculator',C_AC_BOOKMARKS:'Bookmarks',
+  C_AL_MY_COMPUTER:'My Computer',C_AL_FILES:'File Manager',C_AL_TEXT_EDITOR:'Text Editor',C_AL_EMAIL:'Email Client',
+  GLOBE:'Globe / Fn',C_AC_HOME:'Browser Home',C_AC_BACK:'Browser Back',C_AC_FORWARD:'Browser Forward',
+  C_AC_REFRESH:'Refresh',C_AC_CLOSE:'Close',C_AC_EXIT:'Exit',
+  C_AC_SCROLL_UP:'Scroll Up',C_AC_SCROLL_DOWN:'Scroll Down',
+  C_AC_ZOOM_IN:'Zoom In',C_AC_ZOOM_OUT:'Zoom Out',
+  // Misc
+  PSCRN:'Print Screen',PRINTSCREEN:'Print Screen',PAUSE_BREAK:'Pause/Break',
+  K_APP:'Application Key',K_CMENU:'Context Menu',K_CANCEL:'Cancel',K_POWER:'Power',K_SLEEP:'Sleep',
+  // Power
+  C_PWR:'Power',C_POWER:'Power',K_PWR:'Power',C_SLEEP:'Sleep',C_AL_LOCK:'Lock Screen',C_MENU:'Menu'
+};
 function populateKeycodeGrids() {
   var gridMap = {
     letters: 'kcLetters', numbers: 'kcNumbers', modifiers: 'kcMods', navigation: 'kcNav',
     control: 'kcControl', locks: 'kcLocks', editing: 'kcEdit', symbols: 'kcSymbols',
     fkeys: 'kcFkeys', numpad: 'kcNumpad', media: 'kcMedia', applications: 'kcApps',
     misc: 'kcMisc', international: 'kcInternational', language: 'kcLanguage', power: 'kcPower'
-  };
-  var kcDescs = {
-    // Numbers
-    N0:'0',N1:'1',N2:'2',N3:'3',N4:'4',N5:'5',N6:'6',N7:'7',N8:'8',N9:'9',
-    NUMBER_0:'0 (alias)',NUMBER_1:'1 (alias)',NUMBER_2:'2 (alias)',NUMBER_3:'3 (alias)',NUMBER_4:'4 (alias)',
-    NUMBER_5:'5 (alias)',NUMBER_6:'6 (alias)',NUMBER_7:'7 (alias)',NUMBER_8:'8 (alias)',NUMBER_9:'9 (alias)',
-    // Modifiers
-    LSHIFT:'Left Shift',LSHFT:'Left Shift',LEFT_SHIFT:'Left Shift',RSHIFT:'Right Shift',RSHFT:'Right Shift',RIGHT_SHIFT:'Right Shift',
-    LCTRL:'Left Control',LEFT_CONTROL:'Left Control',RCTRL:'Right Control',RIGHT_CONTROL:'Right Control',
-    LALT:'Left Alt',LEFT_ALT:'Left Alt',RALT:'Right Alt',RIGHT_ALT:'Right Alt',
-    LGUI:'Left GUI (Win/Cmd)',LWIN:'Left Windows',LCMD:'Left Command',LMETA:'Left Meta',LEFT_GUI:'Left GUI',
-    RGUI:'Right GUI (Win/Cmd)',RWIN:'Right Windows',RCMD:'Right Command',RMETA:'Right Meta',RIGHT_GUI:'Right GUI',
-    // Navigation
-    UP:'Arrow Up',DOWN:'Arrow Down',LEFT:'Arrow Left',RIGHT:'Arrow Right',
-    HOME:'Home',END:'End',PG_UP:'Page Up',PAGE_UP:'Page Up',PG_DN:'Page Down',PAGE_DOWN:'Page Down',
-    // Control
-    ESC:'Escape',ESCAPE:'Escape',ENTER:'Enter',RET:'Return',RETURN:'Return',SPACE:'Spacebar',TAB:'Tab',
-    BSPC:'Backspace',BACKSPACE:'Backspace',DEL:'Delete',DELETE:'Delete',INS:'Insert',INSERT:'Insert',
-    // Locks
-    CAPS:'Caps Lock',CLCK:'Caps Lock',CAPSLOCK:'Caps Lock',SLCK:'Scroll Lock',SCROLLLOCK:'Scroll Lock',
-    LNLCK:'Num Lock',KP_NLCK:'Num Lock',KP_NUM:'Num Lock',KP_NUMLOCK:'Num Lock',
-    // Symbols
-    MINUS:'- Hyphen',EQUAL:'= Equals',LBKT:'[ Left Bracket',LBRC:'[ Left Bracket',LEFT_BRACKET:'[ Left Bracket',
-    RBKT:'] Right Bracket',RBRC:'] Right Bracket',RIGHT_BRACKET:'] Right Bracket',
-    BSLH:'\\ Backslash',BACKSLASH:'\\ Backslash',GRAVE:'` Grave Accent',
-    SQT:"' Single Quote",APOS:"' Apostrophe",APOSTROPHE:"' Apostrophe",
-    SEMI:'; Semicolon',COMMA:', Comma',DOT:'. Period',FSLH:'/ Forward Slash',SLASH:'/ Slash',
-    NON_US_HASH:'# Non-US Hash',NUHS:'# Non-US Hash',NON_US_BSLH:'\\ Non-US Backslash',NUBS:'\\ Non-US Backslash',
-    TILDE:'~ Tilde',EXCL:'! Exclamation',EXCLAMATION:'! Exclamation',AT:'@ At Sign',
-    HASH:'# Hash',POUND:'# Pound',DLLR:'$ Dollar',DOLLAR:'$ Dollar',PRCNT:'% Percent',PERCENT:'% Percent',
-    CARET:'^ Caret',AMPS:'& Ampersand',AMPERSAND:'& Ampersand',ASTRK:'* Asterisk',ASTERISK:'* Asterisk',STAR:'* Star',
-    LPAR:'( Left Paren',RPAR:') Right Paren',LEFT_PARENTHESIS:'( Left Paren',RIGHT_PARENTHESIS:') Right Paren',
-    UNDER:'_ Underscore',UNDERSCORE:'_ Underscore',PLUS:'+ Plus',PIPE:'| Pipe',PIPE2:'| Pipe2',
-    COLON:': Colon',DQT:'" Double Quote',DOUBLE_QUOTES:'" Double Quote',
-    LT:'< Less Than',LESS_THAN:'< Less Than',GT:'> Greater Than',GREATER_THAN:'> Greater Than',
-    QMARK:'? Question Mark',QUESTION:'? Question',
-    // Numpad
-    KP_N0:'Numpad 0',KP_N1:'Numpad 1',KP_N2:'Numpad 2',KP_N3:'Numpad 3',KP_N4:'Numpad 4',
-    KP_N5:'Numpad 5',KP_N6:'Numpad 6',KP_N7:'Numpad 7',KP_N8:'Numpad 8',KP_N9:'Numpad 9',
-    KP_PLUS:'Numpad +',KP_MINUS:'Numpad -',KP_SUBTRACT:'Numpad -',KP_MULTIPLY:'Numpad *',KP_ASTERISK:'Numpad *',
-    KP_DIVIDE:'Numpad /',KP_SLASH:'Numpad /',KP_DOT:'Numpad .',KP_ENTER:'Numpad Enter',KP_EQUAL:'Numpad =',
-    KP_COMMA:'Numpad ,',KP_LPAR:'Numpad (',KP_RPAR:'Numpad )',KP_CLEAR:'Numpad Clear',
-    // Media
-    C_VOL_UP:'Volume Up',C_VOLUME_UP:'Volume Up',C_VOL_DN:'Volume Down',C_VOLUME_DOWN:'Volume Down',C_MUTE:'Mute',
-    C_PLAY_PAUSE:'Play/Pause',C_PP:'Play/Pause',C_NEXT:'Next Track',C_PREV:'Previous Track',C_STOP:'Stop',
-    C_PLAY:'Play',C_PAUSE:'Pause',C_RECORD:'Record',C_REC:'Record',C_REWIND:'Rewind',C_RW:'Rewind',
-    C_FAST_FORWARD:'Fast Forward',C_FF:'Fast Forward',C_EJECT:'Eject',
-    C_BRI_UP:'Brightness Up',C_BRI_INC:'Brightness Up',C_BRI_DN:'Brightness Down',C_BRI_DEC:'Brightness Down',
-    C_BRI_MIN:'Brightness Min',C_BRI_MAX:'Brightness Max',C_BRI_AUTO:'Brightness Auto',
-    // Editing
-    C_AC_CUT:'Cut',K_CUT:'Cut',C_AC_COPY:'Copy',K_COPY:'Copy',C_AC_PASTE:'Paste',K_PASTE:'Paste',
-    C_AC_UNDO:'Undo',K_UNDO:'Undo',C_AC_REDO:'Redo',K_REDO:'Redo',K_AGAIN:'Again',
-    C_AC_SELECT_ALL:'Select All',C_AC_FIND:'Find',
-    // Applications
-    C_AC_SEARCH:'Search',C_AL_CALCULATOR:'Calculator',C_AL_CALC:'Calculator',C_AC_BOOKMARKS:'Bookmarks',
-    C_AL_MY_COMPUTER:'My Computer',C_AL_FILES:'File Manager',C_AL_TEXT_EDITOR:'Text Editor',C_AL_EMAIL:'Email Client',
-    GLOBE:'Globe / Fn',C_AC_HOME:'Browser Home',C_AC_BACK:'Browser Back',C_AC_FORWARD:'Browser Forward',
-    C_AC_REFRESH:'Refresh',C_AC_CLOSE:'Close',C_AC_EXIT:'Exit',
-    C_AC_SCROLL_UP:'Scroll Up',C_AC_SCROLL_DOWN:'Scroll Down',
-    C_AC_ZOOM_IN:'Zoom In',C_AC_ZOOM_OUT:'Zoom Out',
-    // Misc
-    PSCRN:'Print Screen',PRINTSCREEN:'Print Screen',PAUSE_BREAK:'Pause/Break',
-    K_APP:'Application Key',K_CMENU:'Context Menu',K_CANCEL:'Cancel',K_POWER:'Power',K_SLEEP:'Sleep',
-    // Power
-    C_PWR:'Power',C_POWER:'Power',K_PWR:'Power',C_SLEEP:'Sleep',C_AL_LOCK:'Lock Screen',C_MENU:'Menu'
   };
   Object.keys(ZMK_KEYCODES).forEach(function(cat) {
     var gridId = gridMap[cat];
@@ -4703,7 +4811,7 @@ function renderKeymapBehaviorList() {
     div.innerHTML =
       '<b>' + esc(b.name) + '</b>' +
       '<span style="color:var(--muted);">' + esc(b.type) + '</span>' +
-      (b.label ? '<span>"' + esc(b.label) + '"</span>' : '') +
+      (b.label ? '<span style="color:#9cc;font-size:0.82em;margin:0 4px;" title="Label">&quot;' + esc(b.label) + '&quot;</span>' : '') +
       '<button class="btn-sm" data-edit-behavior="' + i + '">Edit</button>' +
       '<button class="btn-danger btn-sm" data-remove-behavior="' + i + '">&#10005;</button>';
     list.appendChild(div);
@@ -4780,131 +4888,221 @@ function kmComboGetLayers() {
   return parts.join(' ');
 }
 
-// --- Binding select helper (dropdown + raw-code fallback) ---
-// Generates <option> elements for a binding select. optType: 'binding' or 'mods'.
-function behBindingOptionsHTML(selected, optType) {
-  selected = (selected || '').trim();
-  if (optType === 'mods') {
-    var mods = ['MOD_LSFT','MOD_RSFT','MOD_LCTL','MOD_RCTL','MOD_LALT','MOD_RALT','MOD_LGUI','MOD_RGUI'];
-    var html = '';
-    var matched = !selected;
-    if (!selected) html += '<option value="" selected disabled>\u2014 Select modifier \u2014</option>';
-    mods.forEach(function(m) {
-      var sel = '';
-      if (m === selected) { sel = ' selected'; matched = true; }
-      html += '<option value="' + esc(m) + '"' + sel + '>' + esc(m) + '</option>';
-    });
-    html += '<option value="__RAW__"' + (!matched && selected ? ' selected' : '') + '>\u270f Raw Code</option>';
-    return html;
+// --- Binding picker popup system (replaces select dropdowns) ---
+var bpTargetId = null;
+var bpTargetType = null;
+var bpKeycodePrefix = '';
+
+// Action lists for param behaviors
+var BP_ACTION_MAP = {
+  '&bt': { title: 'Bluetooth Action', list: function() { return BT_ACTIONS; } },
+  '&rgb_ug': { title: 'RGB Action', list: function() { return RGB_ACTIONS; } },
+  '&out': { title: 'Output Selection', list: function() { return OUT_ACTIONS; } },
+  '&bl': { title: 'Backlight', list: function() { return BL_ACTIONS; } },
+  '&ext_power': { title: 'External Power', list: function() { return EP_ACTIONS; } },
+  '&mkp': { title: 'Mouse Button', list: function() { return MOUSE_BUTTONS; } },
+  '&mmv': { title: 'Mouse Move', list: function() { return MOUSE_MOVES; } },
+  '&msc': { title: 'Mouse Scroll', list: function() { return MOUSE_SCROLLS; } }
+};
+var BP_KC_BEHAVIORS = ['&kp', '&kt', '&sk'];
+
+function openBindingPicker(targetId, optType) {
+  bpTargetId = targetId;
+  bpTargetType = optType || 'binding';
+  bpKeycodePrefix = '';
+  var overlay = document.getElementById('bindingPickerOverlay');
+  document.getElementById('bpTitle').textContent = bpTargetType === 'mods' ? 'Select Modifier' : 'Select Binding';
+  renderBindingPickerSections();
+  document.getElementById('bpSubPanel').style.display = 'none';
+  document.getElementById('bpSections').style.display = '';
+  document.getElementById('bpRawRow').style.display = '';
+  document.getElementById('bpRawInput').value = '';
+  overlay.classList.add('visible');
+}
+
+function closeBindingPicker() {
+  document.getElementById('bindingPickerOverlay').classList.remove('visible');
+  bpTargetId = null;
+}
+
+function selectBindingPickerValue(val) {
+  if (!bpTargetId) return;
+  var hidden = document.getElementById(bpTargetId + '_val');
+  var trigger = document.getElementById(bpTargetId);
+  if (hidden) hidden.value = val;
+  if (trigger) {
+    var textSpan = trigger.querySelector('.bp-trigger-text');
+    if (textSpan) textSpan.textContent = val || '\u2014 Select \u2014';
   }
-  // optType === 'binding'
+  closeBindingPicker();
+}
+
+function renderBindingPickerSections() {
+  var sections = document.getElementById('bpSections');
+  sections.innerHTML = '';
+  if (bpTargetType === 'mods') {
+    var mods = ['MOD_LSFT','MOD_RSFT','MOD_LCTL','MOD_RCTL','MOD_LALT','MOD_RALT','MOD_LGUI','MOD_RGUI'];
+    var html = '<div class="bp-section open"><div class="bp-section-title">Modifiers</div><div class="bp-section-grid">';
+    mods.forEach(function(m) {
+      html += '<button class="bp-btn" data-bp-val="' + esc(m) + '" title="' + esc(m) + '"><span class="bp-btn-name">' + esc(m) + '</span></button>';
+    });
+    html += '</div></div>';
+    sections.innerHTML = html;
+    return;
+  }
   var html = '';
-  var matched = !selected; // empty counts as matched (placeholder selected)
-  if (!selected) html += '<option value="" selected disabled>\u2014 Select binding \u2014</option>';
-  // -- Complete bindings (zero-param behaviors) --
+  // Complete Bindings (zero-param)
   var cg = '';
   ZMK_BEHAVIORS.forEach(function(b) {
     if (b.cells === 0) {
-      var sel = '';
-      if (b.name === selected) { sel = ' selected'; matched = true; }
-      cg += '<option value="' + esc(b.name) + '"' + sel + '>' + esc(b.name) + ' \u2014 ' + esc(b.label) + '</option>';
+      cg += '<button class="bp-btn" data-bp-val="' + esc(b.name) + '" title="' + esc(b.desc) + '">' +
+        '<span class="bp-btn-name">' + esc(b.name) + '</span><span class="bp-btn-desc">' + esc(b.label) + '</span></button>';
     }
   });
-  if (cg) html += '<optgroup label="Complete Bindings">' + cg + '</optgroup>';
-  // -- Layer actions with layer numbers --
+  if (cg) html += '<div class="bp-section open"><div class="bp-section-title">Complete Bindings</div><div class="bp-section-grid">' + cg + '</div></div>';
+  // Layer Actions
   var lg = '';
   var layerBehs = [
-    { prefix: '&mo', label: 'Momentary' },
-    { prefix: '&to', label: 'To Layer' },
-    { prefix: '&tog', label: 'Toggle' },
-    { prefix: '&sl', label: 'Sticky Layer' }
+    { prefix: '&mo', label: 'Momentary', desc: 'Activates layer while held' },
+    { prefix: '&to', label: 'To Layer', desc: 'Switches to a layer permanently' },
+    { prefix: '&tog', label: 'Toggle', desc: 'Toggles a layer on/off' },
+    { prefix: '&sl', label: 'Sticky Layer', desc: 'Activates layer for one keypress' }
   ];
   layerBehs.forEach(function(lb) {
+    lg += '<div class="bp-layer-group"><div class="bp-layer-label">' + esc(lb.prefix) + ' \u2014 ' + esc(lb.label) + '</div><div class="bp-layer-btns">';
     keymapLayers.forEach(function(l, i) {
       var val = lb.prefix + ' ' + i;
-      var sel = '';
-      if (val === selected) { sel = ' selected'; matched = true; }
-      lg += '<option value="' + esc(val) + '"' + sel + '>' + esc(val) + ' \u2014 ' + lb.label + ' (' + esc(l.name) + ')</option>';
+      lg += '<button class="bp-btn" data-bp-val="' + esc(val) + '" title="' + esc(lb.desc + ' (' + l.name + ')') + '">' +
+        '<span class="bp-btn-name">' + i + '</span><span class="bp-btn-desc">' + esc(l.name) + '</span></button>';
     });
+    lg += '</div></div>';
   });
-  if (lg) html += '<optgroup label="Layer Actions">' + lg + '</optgroup>';
-  // -- Behaviors that need parameters --
+  if (lg) html += '<div class="bp-section open"><div class="bp-section-title">Layer Actions</div><div class="bp-section-grid bp-col">' + lg + '</div></div>';
+  // Behaviors needing params
   var pg = '';
   var skipPrefixes = ['&mo','&to','&tog','&sl'];
   ZMK_BEHAVIORS.forEach(function(b) {
     if (b.cells > 0 && skipPrefixes.indexOf(b.name) === -1) {
-      var sel = '';
-      if (b.name === selected) { sel = ' selected'; matched = true; }
-      pg += '<option value="' + esc(b.name) + '"' + sel + '>' + esc(b.name) + ' \u2014 ' + esc(b.label) + ' (+ params)</option>';
+      pg += '<button class="bp-btn" data-bp-param="' + esc(b.name) + '" title="' + esc(b.desc) + '">' +
+        '<span class="bp-btn-name">' + esc(b.name) + '</span><span class="bp-btn-desc">' + esc(b.label) + '</span></button>';
     }
   });
-  if (pg) html += '<optgroup label="Behaviors (add params)">' + pg + '</optgroup>';
-  // -- Custom behaviors --
-  var cbg = '';
-  keymapBehaviors.forEach(function(cb) {
-    var val = '&' + cb.name;
-    var sel = '';
-    if (val === selected) { sel = ' selected'; matched = true; }
-    var tag = cb._builtin ? '(built-in)' : '(custom)';
-    cbg += '<option value="' + esc(val) + '"' + sel + '>' + esc(val) + ' ' + tag + '</option>';
-  });
-  if (cbg) html += '<optgroup label="Custom Behaviors">' + cbg + '</optgroup>';
-  // -- Macros --
-  var mg = '';
-  var addedM = {};
+  if (pg) html += '<div class="bp-section open"><div class="bp-section-title">Behaviors (+ params)</div><div class="bp-section-grid">' + pg + '</div></div>';
+  // Custom Behaviors
+  if (keymapBehaviors.length) {
+    var cbg = '';
+    keymapBehaviors.forEach(function(cb) {
+      var val = '&' + cb.name;
+      var tag = cb._builtin ? 'built-in' : 'custom';
+      cbg += '<button class="bp-btn" data-bp-val="' + esc(val) + '" title="' + esc(tag + ': ' + (cb.label || cb.type || '')) + '">' +
+        '<span class="bp-btn-name">' + esc(val) + '</span><span class="bp-btn-desc">(' + tag + ')</span></button>';
+    });
+    html += '<div class="bp-section"><div class="bp-section-title">Custom Behaviors</div><div class="bp-section-grid">' + cbg + '</div></div>';
+  }
+  // Macros
+  var mg = '', addedM = {};
   keymapMacros.forEach(function(m) {
     var ref = '&' + m.name;
     if (!addedM[ref]) {
       addedM[ref] = true;
-      var sel = '';
-      if (ref === selected) { sel = ' selected'; matched = true; }
-      mg += '<option value="' + esc(ref) + '"' + sel + '>' + esc(ref) + ' (macro)</option>';
+      mg += '<button class="bp-btn bp-btn-macro" data-bp-val="' + esc(ref) + '" title="Macro"><span class="bp-btn-name">' + esc(ref) + '</span></button>';
     }
   });
-  if (mg) html += '<optgroup label="Macros">' + mg + '</optgroup>';
-  // -- Raw Code --
-  html += '<option value="__RAW__"' + (!matched && selected ? ' selected' : '') + '>\u270f Raw Code</option>';
-  return html;
+  if (mg) html += '<div class="bp-section"><div class="bp-section-title">Macros</div><div class="bp-section-grid">' + mg + '</div></div>';
+  sections.innerHTML = html;
 }
 
-// Returns HTML for a binding <select> wrapped with a raw-code <input> fallback.
+function showBindingPickerSubPanel(prefix) {
+  bpKeycodePrefix = prefix;
+  document.getElementById('bpSections').style.display = 'none';
+  document.getElementById('bpRawRow').style.display = 'none';
+  var panel = document.getElementById('bpSubPanel');
+  panel.style.display = '';
+  var title = document.getElementById('bpSubTitle');
+  var searchWrap = document.getElementById('bpKcSearchWrap');
+  var scroll = document.getElementById('bpSubScroll');
+  // Check if it has an action list
+  if (BP_ACTION_MAP[prefix]) {
+    title.textContent = prefix + ' \u2014 ' + BP_ACTION_MAP[prefix].title;
+    searchWrap.style.display = 'none';
+    var actions = BP_ACTION_MAP[prefix].list();
+    scroll.innerHTML = '<div class="keycode-grid">' + actions.map(function(a) {
+      return '<button class="keycode-btn bp-sub-btn" data-bp-action="' + esc(a) + '">' + esc(a) + '</button>';
+    }).join('') + '</div>';
+  } else if (BP_KC_BEHAVIORS.indexOf(prefix) > -1) {
+    title.textContent = prefix + ' \u2014 Select Keycode';
+    searchWrap.style.display = '';
+    document.getElementById('bpKcSearch').value = '';
+    document.getElementById('bpKcSearchClear').style.display = 'none';
+    populatePickerKeycodeGrids(scroll);
+  } else {
+    // Fallback: raw mode
+    hideBindingPickerSubPanel();
+    document.getElementById('bpRawInput').value = prefix + ' ';
+    document.getElementById('bpRawInput').focus();
+    return;
+  }
+}
+
+function hideBindingPickerSubPanel() {
+  document.getElementById('bpSubPanel').style.display = 'none';
+  document.getElementById('bpSections').style.display = '';
+  document.getElementById('bpRawRow').style.display = '';
+  bpKeycodePrefix = '';
+}
+
+function populatePickerKeycodeGrids(container) {
+  var catMap = {
+    letters: 'Letters', numbers: 'Numbers', modifiers: 'Modifiers',
+    control: 'Control & Whitespace', navigation: 'Navigation',
+    locks: 'Locks', symbols: 'Symbols', fkeys: 'Function Keys',
+    numpad: 'Numpad', media: 'Media', editing: 'Editing',
+    applications: 'Applications', misc: 'Miscellaneous',
+    international: 'International', language: 'Language', power: 'Power & Lock'
+  };
+  var html = '';
+  Object.keys(catMap).forEach(function(cat) {
+    if (!ZMK_KEYCODES[cat] || !ZMK_KEYCODES[cat].length) return;
+    var isFirst = cat === 'letters';
+    html += '<details class="keycode-category"' + (isFirst ? ' open' : '') + '><summary>' + catMap[cat] + '</summary><div class="keycode-grid">';
+    ZMK_KEYCODES[cat].forEach(function(kc) {
+      var tip = kcDescs[kc] ? ' title="' + esc(kcDescs[kc]) + '"' : '';
+      html += '<button class="keycode-btn bp-sub-btn" data-bp-kc="' + kc + '"' + tip + '>' + kc + '</button>';
+    });
+    html += '</div></details>';
+  });
+  container.innerHTML = html;
+}
+
+// Returns HTML for a binding trigger button with hidden value input.
 function bindingSelectHTML(id, selected, optType, width) {
   var w = width || '160px';
   selected = (selected || '').trim();
-  var opts = behBindingOptionsHTML(selected, optType);
-  var isRaw = opts.indexOf('value="__RAW__" selected') > -1;
+  var displayText = selected || '\u2014 Select \u2014';
   return '<span class="beh-binding-wrap">' +
-    '<select id="' + id + '" class="beh-binding-select" style="width:' + w + ';">' + opts + '</select>' +
-    '<input type="text" id="' + id + '_raw" class="beh-binding-raw" placeholder="e.g. &amp;kp A" style="width:' + w + ';' + (isRaw ? '' : 'display:none;') + '"' + (isRaw ? ' value="' + esc(selected) + '"' : '') + '>' +
+    '<button type="button" class="bp-trigger" id="' + id + '" data-bp-type="' + esc(optType || 'binding') + '" style="width:' + w + ';">' +
+      '<span class="bp-trigger-text">' + esc(displayText) + '</span>' +
+      '<span class="bp-trigger-arrow">&#9662;</span>' +
+    '</button>' +
+    '<input type="hidden" id="' + id + '_val" value="' + esc(selected) + '">' +
     '</span>';
 }
 
-// Read the effective value from a binding select (or its raw fallback).
+// Read the effective value from a binding picker (hidden input).
 function getBehBindingValue(id) {
-  var sel = document.getElementById(id);
-  if (!sel) return '';
-  if (sel.value === '__RAW__') {
-    var raw = document.getElementById(id + '_raw');
-    return raw ? raw.value.trim() : '';
-  }
-  return sel.value;
+  var hidden = document.getElementById(id + '_val');
+  return hidden ? hidden.value.trim() : '';
 }
 
-// Set a binding select to a value, falling back to raw if no option matches.
+// Set a binding picker to a value and update its trigger button text.
 function setBehBindingValue(id, val) {
-  var sel = document.getElementById(id);
-  if (!sel) return;
   val = (val || '').trim();
-  var found = false;
-  for (var i = 0; i < sel.options.length; i++) {
-    if (sel.options[i].value === val) { sel.value = val; found = true; break; }
-  }
-  var raw = document.getElementById(id + '_raw');
-  if (!found) {
-    sel.value = '__RAW__';
-    if (raw) { raw.value = val; raw.style.display = ''; }
-  } else {
-    if (raw) { raw.style.display = 'none'; raw.value = ''; }
+  var hidden = document.getElementById(id + '_val');
+  if (hidden) hidden.value = val;
+  var trigger = document.getElementById(id);
+  if (trigger) {
+    var textSpan = trigger.querySelector('.bp-trigger-text');
+    if (textSpan) textSpan.textContent = val || '\u2014 Select \u2014';
   }
 }
 
@@ -5376,7 +5574,7 @@ function updateKeymapOutput() {
       out += '#include "' + dtsiName + '"\n';
     }
   } else {
-    out += '/*\n * Generated by RGB Keymap Editor v12\n */\n\n';
+    out += '/*\n * Generated by RGB Keymap Editor v13\n */\n\n';
     out += '#include <behaviors.dtsi>\n';
     out += '#include <dt-bindings/zmk/bt.h>\n';
     out += '#include <dt-bindings/zmk/keys.h>\n';
@@ -5448,7 +5646,15 @@ function updateKeymapOutput() {
       if (m.label) s += '            label = "' + m.label + '";\n';
       if (m.waitMs) s += '            wait-ms = <' + m.waitMs + '>;\n';
       if (m.tapMs) s += '            tap-ms = <' + m.tapMs + '>;\n';
-      s += '            bindings = <' + m.steps.join(' ') + '>;\n';
+      if (m.steps.length > 7) {
+        var lines = [];
+        for (var si = 0; si < m.steps.length; si += 7) {
+          lines.push(m.steps.slice(si, si + 7).join(' '));
+        }
+        s += '            bindings = <' + lines.join('\n                ') + '>;\n';
+      } else {
+        s += '            bindings = <' + m.steps.join(' ') + '>;\n';
+      }
       s += '        };\n';
       return s;
     }
@@ -5900,8 +6106,8 @@ function syncCrossTabData() {
     var dispBase = kl.displayName ? kl.displayName.toUpperCase().replace(/[^A-Z0-9]/g, '_') : '';
     if (existingBaseKeys[klBase] || existingBaseKeys[klBaseStripped] || (dispBase && existingBaseKeys[dispBase])) return;
     // Push as a real layer entry so user can assign RGB color
-    // Use the keymap display name directly (no L_ prefix) so RGB defines match user intent
-    var layerName = (dispBase || klBaseStripped || klBase);
+    // Use the keymap node name (not display name) so RGB defines match the layer name
+    var layerName = (klBase || klBaseStripped || dispBase);
     layers.push({
       name: layerName,
       index: idxStr,
@@ -6332,29 +6538,66 @@ document.addEventListener('DOMContentLoaded', function() {
   // --- Dark mode ---
   document.getElementById('darkToggle').onclick = toggleDarkMode;
 
-  // --- Binding select change handler (shared for all beh-binding-select) ---
-  document.addEventListener('change', function(e) {
-    if (!e.target.classList.contains('beh-binding-select')) return;
-    var rawInput = document.getElementById(e.target.id + '_raw');
-    if (!rawInput) return;
-    if (e.target.value === '__RAW__') {
-      rawInput.style.display = '';
-      rawInput.focus();
-    } else {
-      // If the selected behavior needs params (cells > 0 and not a layer action with number),
-      // auto-switch to raw mode with the prefix pre-filled
-      var val = e.target.value;
-      var needsParams = ZMK_BEHAVIORS.some(function(b) { return b.name === val && b.cells > 0; });
-      if (needsParams) {
-        rawInput.value = val + ' ';
-        e.target.value = '__RAW__';
-        rawInput.style.display = '';
-        rawInput.focus();
-      } else {
-        rawInput.style.display = 'none';
-        rawInput.value = '';
-      }
+  // --- Binding picker popup event handlers ---
+  // Open picker on trigger button click
+  document.addEventListener('click', function(e) {
+    var trigger = e.target.closest('.bp-trigger');
+    if (trigger) {
+      e.preventDefault();
+      openBindingPicker(trigger.id, trigger.dataset.bpType || 'binding');
     }
+  });
+  // Popup interactions (delegated)
+  document.getElementById('bindingPickerOverlay').addEventListener('click', function(e) {
+    // Backdrop click → close
+    if (e.target === this) { closeBindingPicker(); return; }
+    // Close button
+    if (e.target.id === 'bpCloseBtn' || e.target.closest('#bpCloseBtn')) { closeBindingPicker(); return; }
+    // Section title toggle
+    var title = e.target.closest('.bp-section-title');
+    if (title) { title.parentElement.classList.toggle('open'); return; }
+    // Direct value selection
+    var valBtn = e.target.closest('.bp-btn[data-bp-val]');
+    if (valBtn) { selectBindingPickerValue(valBtn.dataset.bpVal); return; }
+    // Param behavior → open sub-panel (keycode grid, action list, or raw)
+    var paramBtn = e.target.closest('.bp-btn[data-bp-param]');
+    if (paramBtn) { showBindingPickerSubPanel(paramBtn.dataset.bpParam); return; }
+    // Sub-panel keycode click
+    var kcBtn = e.target.closest('.bp-sub-btn[data-bp-kc]');
+    if (kcBtn) { selectBindingPickerValue(bpKeycodePrefix + ' ' + kcBtn.dataset.bpKc); return; }
+    // Sub-panel action click
+    var actBtn = e.target.closest('.bp-sub-btn[data-bp-action]');
+    if (actBtn) { selectBindingPickerValue(bpKeycodePrefix + ' ' + actBtn.dataset.bpAction); return; }
+    // Back from sub-panel
+    if (e.target.id === 'bpSubBack' || e.target.closest('#bpSubBack')) { hideBindingPickerSubPanel(); return; }
+    // Raw apply
+    if (e.target.id === 'bpRawApply' || e.target.closest('#bpRawApply')) {
+      var rawVal = document.getElementById('bpRawInput').value.trim();
+      if (rawVal) selectBindingPickerValue(rawVal);
+      return;
+    }
+  });
+  // Raw input Enter key
+  document.getElementById('bpRawInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      var rawVal = this.value.trim();
+      if (rawVal) selectBindingPickerValue(rawVal);
+    }
+  });
+  // Keycode search in sub-panel
+  document.getElementById('bpKcSearch').addEventListener('input', function() {
+    var q = this.value.trim().toLowerCase();
+    document.getElementById('bpKcSearchClear').style.display = q ? '' : 'none';
+    document.querySelectorAll('#bpSubScroll .bp-sub-btn').forEach(function(btn) {
+      var kc = (btn.dataset.bpKc || '').toLowerCase();
+      var desc = (btn.title || '').toLowerCase();
+      btn.classList.toggle('hidden', q && kc.indexOf(q) === -1 && desc.indexOf(q) === -1);
+    });
+  });
+  document.getElementById('bpKcSearchClear').addEventListener('click', function() {
+    document.getElementById('bpKcSearch').value = '';
+    this.style.display = 'none';
+    document.querySelectorAll('#bpSubScroll .bp-sub-btn').forEach(function(btn) { btn.classList.remove('hidden'); });
   });
 
   // --- RGB Generator wiring (Tab 1) ---
@@ -6589,6 +6832,32 @@ document.addEventListener('DOMContentLoaded', function() {
     var text = document.getElementById('kmKeymapPaste').value;
     if (!text.trim()) { alert('Paste a .keymap file first'); return; }
     parseKeymap(text);
+    // Sync keymap layer names → RGB layers (by matching index)
+    // Only fires when RGB layers already exist (deliberate user action)
+    var _kmNameSynced = 0;
+    if (layers.length > 0) {
+      keymapLayers.forEach(function(kl, idx) {
+        if (kl.status === 'reserved') return;
+        var idxStr = String(idx);
+        for (var ri = 0; ri < layers.length; ri++) {
+          if (layers[ri].index === idxStr) {
+            // Derive new base name from keymap layer
+            var newBase = kl.displayName
+              ? kl.displayName.toUpperCase().replace(/[^A-Z0-9_]/g, '_')
+              : baseKey(kl.name);
+            if (!newBase) break;
+            // Preserve the existing prefix convention (L_, LAYER_, or none)
+            var old = layers[ri].name;
+            if (/^L_/i.test(old))      layers[ri].name = 'L_' + newBase;
+            else if (/^LAYER_/i.test(old)) layers[ri].name = 'LAYER_' + newBase;
+            else                           layers[ri].name = newBase;
+            _kmNameSynced++;
+            break;
+          }
+        }
+      });
+      if (_kmNameSynced > 0) rgbRenderAll();
+    }
     // Auto-detect layout based on key count
     if (keymapLayers.length > 0) {
       var bindCount = keymapLayers[0].bindings.length;
@@ -6611,7 +6880,7 @@ document.addEventListener('DOMContentLoaded', function() {
     renderKeymapCondLayerList();
     renderKeymapSensorList();
     updateKeymapOutput();
-    showStatus('kmParseStatus', 'Parsed: ' + keymapLayers.length + ' layers, ' + keymapCombos.length + ' combos, ' + keymapMacros.length + ' macros, ' + keymapBehaviors.length + ' behaviors, ' + keymapConditionalLayers.length + ' cond. layers');
+    showStatus('kmParseStatus', 'Parsed: ' + keymapLayers.length + ' layers, ' + keymapCombos.length + ' combos, ' + keymapMacros.length + ' macros, ' + keymapBehaviors.length + ' behaviors, ' + keymapConditionalLayers.length + ' cond. layers' + (_kmNameSynced > 0 ? '. Synced ' + _kmNameSynced + ' layer name(s) → RGB tab' : ''));
   };
 
   document.getElementById('kmClearSyncBtn').onclick = function() {

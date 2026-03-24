@@ -359,6 +359,42 @@ Coverage note: this reflects everything I can reliably reconstruct from availabl
 - **`addBlinkMacro()` updated**: Now reads `blinkType` dropdown; for MO_BLINK, stores `layer` from `blinkLayer` select; for KP_BLINK, stores `key` from `blinkKey` input. Both tagged with `_helper` field.
 - **`updateHeaderDropdowns()` updated**: Populates `blinkLayer` dropdown, toggles Key/Layer fields and experimental note based on `blinkType` selection.
 
+## 2026-03-24 (Session 7) - Binding Picker Collapse Fix, Macro Color
+
+### Bug fixes
+- **Layer Actions section not collapsible**: The Layer Actions category in the binding picker popup had an inline `style="display:flex;flex-direction:column;"` on the grid element, which overrode the CSS `display:none` rule when the `.open` class was toggled off. Replaced inline style with a new `.bp-col` CSS class that only applies `flex-direction:column` when the parent has `.open`.
+- **Macro buttons missing light-blue color**: Macro buttons in the binding picker popup used standard `.bp-btn` styling with no visual distinction. Added `.bp-btn-macro` class and CSS rule (`.bp-btn-macro .bp-btn-name { color: #9cc; }`) matching the established light-blue convention used in macro/behavior list labels elsewhere.
+
+## 2026-03-24 (Session 6) - Binding Picker Popup, Layer Name Sync, Macro Line Breaking, Label Formatting
+
+### Major additions — Binding Picker Popup
+- **Replaced all `<select>` binding dropdowns** with clickable trigger buttons that open a shared popup overlay (`#bindingPickerOverlay`, z-index 400).
+- **Popup sections**: Complete Bindings (zero-param), Layer Actions (grouped by &mo/&to/&tog/&sl with layer names), Behaviors (+ params), Custom Behaviors, Macros, Raw Code input at bottom.
+- **Collapsible sections**: Each section has a clickable title that toggles open/closed state.
+- **Keycode sub-panel**: Clicking `&kp`, `&kt`, or `&sk` in the Behaviors section opens a keycode grid (with search) reusing `ZMK_KEYCODES` and `kcDescs` data. Clicking a keycode selects e.g. `&kp A`.
+- **Action sub-panels**: Clicking `&bt`, `&rgb_ug`, `&out`, `&bl`, `&ext_power`, `&mkp`, `&mmv`, `&msc` opens a sub-panel with their respective action lists (BT_ACTIONS, RGB_ACTIONS, etc.) as clickable buttons.
+- **Hover tooltips**: All behavior buttons have `title` attributes showing descriptions from `ZMK_BEHAVIORS[].desc`.
+- **Global `kcDescs`**: Extracted from local scope in `populateKeycodeGrids()` to global variable for reuse by popup keycode grids.
+- **New functions** (~line 4864): `openBindingPicker()`, `closeBindingPicker()`, `selectBindingPickerValue()`, `renderBindingPickerSections()`, `showBindingPickerSubPanel()`, `hideBindingPickerSubPanel()`, `populatePickerKeycodeGrids()`.
+- **Replaced functions**: `behBindingOptionsHTML()` removed; `bindingSelectHTML()` now returns trigger button + hidden input; `getBehBindingValue()` reads hidden input; `setBehBindingValue()` writes hidden input + updates button text.
+- **New CSS**: `.bp-trigger`, `.bp-overlay`, `.bp-dialog`, `.bp-section`, `.bp-btn`, `.bp-layer-group`, `.bp-raw-row` classes (~line 281).
+- **Event handlers**: Delegated click handlers on `document` for `.bp-trigger` buttons and on `#bindingPickerOverlay` for all popup interactions; keycode search input handler; raw input Enter key.
+- **Removed**: Old `change` event handler for `.beh-binding-select` class; `behBindingOptionsHTML()` function; `__RAW__` value pattern.
+
+### RGB layer names — use node name
+- **`syncCrossTabData()`**: Changed layer name priority from `(dispBase || klBaseStripped || klBase)` to `(klBase || klBaseStripped || dispBase)`. RGB `#define` output now uses the keymap node name (e.g. `NEW_LAYER_1`) instead of display name (e.g. `NEW`).
+
+### Layer name cross-tab sync on parse
+- **RGB "Parse & Reflect"**: When parsing .dtsi while keymap layers exist, RGB layer names overwrite the matching keymap layer's `displayName` and `name` (by index). Orphan RGB layers (indices beyond keymap count) auto-create new empty keymap layers.
+- **Keymap "Parse Keymap"**: When parsing .keymap while RGB layers exist, keymap layer names overwrite the matching RGB layer's `name` (preserving L_/LAYER_ prefix). Sync count shown in status message.
+
+### Macro output line breaking
+- **`macroBlock()`**: When a macro has >7 steps, the `bindings = <...>` output now wraps onto continuation lines (7 steps per line, indented 16 spaces for alignment).
+
+### Label display formatting
+- **`renderBehaviorList()` (RGB tab)**: Labels now display in light blue quoted text (`color:#9cc`, `&quot;label&quot;`) matching the macro list format.
+- **`renderKeymapBehaviorList()` (keymap tab)**: Labels now use the same light blue quoted format for consistency across tabs.
+
 ## 2026-03-24 (Session 5) - Binding Editor Overhaul, Positional Hold Picker, Binding Select Dropdowns
 
 ### Major additions — Binding Editor Reformat

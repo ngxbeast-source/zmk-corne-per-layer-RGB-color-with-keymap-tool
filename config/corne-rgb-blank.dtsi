@@ -117,8 +117,8 @@
         };
 
 /* ---- COMBO HELPER ---- */
-#define CMB(name, bind, p1, p2, ...) \
-    name { bindings = <bind>; key-positions = <p1 p2>; layers = <__VA_ARGS__>; timeout-ms = <50>; }
+#define CMB(name, bind, ..., ...) \
+    name { bindings = <bind>; key-positions = <__VA_ARGS__>; layers = <__VA_ARGS__>; timeout-ms = <50>; }
 
 
 
