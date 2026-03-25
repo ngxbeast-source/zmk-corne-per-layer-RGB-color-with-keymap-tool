@@ -3095,17 +3095,30 @@ function updateRgbOutput() {
     }
   });
 
+  // Reserved RGB action names that must not be used as color define names
+  var reservedRgbNames = {};
+  RGB_ACTIONS.forEach(function(a) { reservedRgbNames[a.split('(')[0]] = true; });
+  var colorRenameMap = {}; // tracks renamed colors: old name -> new name
+
   out += '\n/* ---- STEP 1a: DEFINE COLORS ---- */\n';
   mergedArr.forEach(function(l) {
+    if (l.index === '' || l.index === undefined) return; // non-layer (blink helpers) go through orphan path
     if (hasHsbVal(l.h) && hasHsbVal(l.s) && hasHsbVal(l.b)) {
       var name = l.name.startsWith('RGB_') ? l.name : 'RGB_' + l.bk;
+      name = name.replace(/\s/g, '_');
+      // Avoid collision with ZMK built-in RGB action names (e.g. RGB_TOG)
+      if (reservedRgbNames[name]) {
+        var newName = 'RGB_LYR_' + l.bk;
+        colorRenameMap[name] = newName;
+        name = newName;
+      }
       var cmt = l.label ? '      /* ' + l.label + ' */' : '';
-      out += '#define ' + name.replace(/\s/g, '_') + ' RGB_COLOR_HSB(' + l.h + ',' + l.s + ',' + l.b + ')' + cmt + '\n';
+      out += '#define ' + name + ' RGB_COLOR_HSB(' + l.h + ',' + l.s + ',' + l.b + ')' + cmt + '\n';
     }
   });
 
   var mergedBKs = {};
-  mergedArr.forEach(function(l) { mergedBKs[l.bk] = true; });
+  mergedArr.forEach(function(l) { if (l.index !== '' && l.index !== undefined) mergedBKs[l.bk] = true; });
   var orphanColors = [];
   Object.keys(colorValueMap).forEach(function(ck) {
     if (!mergedBKs[baseKey(ck)] && !colorValueMap[ck]._autoSync) orphanColors.push(ck);
@@ -3129,6 +3142,9 @@ function updateRgbOutput() {
       });
     }
   }
+
+  // Resolve renamed color references
+  function rc(colorName) { return colorRenameMap[colorName] || colorName; }
 
   if (includeHelpers) {
     out += '\n/* ---- HELPER DEFINITIONS ---- */\n';
@@ -3162,11 +3178,11 @@ function updateRgbOutput() {
       if (mc) out += '        ' + mc.replace(/\n/g, '\n        ') + '\n';
       var lbl = m.label || m.name;
       if (m.type === 'MO_RGB') {
-        out += '        MO_RGB(' + m.name + ', "' + lbl + '", ' + m.layer + ', ' + m.color + ', ' + m.releaseColor + ')\n';
+        out += '        MO_RGB(' + m.name + ', "' + lbl + '", ' + m.layer + ', ' + rc(m.color) + ', ' + rc(m.releaseColor) + ')\n';
       } else if (m.type === 'TO_RGB_PRESS') {
-        out += '        TO_RGB_PRESS(' + m.name + ', "' + lbl + '", ' + m.layer + ', ' + m.color + ')\n';
+        out += '        TO_RGB_PRESS(' + m.name + ', "' + lbl + '", ' + m.layer + ', ' + rc(m.color) + ')\n';
       } else {
-        out += '        TO_RGB(' + m.name + ', "' + lbl + '", ' + m.layer + ', ' + m.color + ')\n';
+        out += '        TO_RGB(' + m.name + ', "' + lbl + '", ' + m.layer + ', ' + rc(m.color) + ')\n';
       }
     });
     out += '    };\n';
@@ -3176,7 +3192,13 @@ function updateRgbOutput() {
   if (hasNativeMacroBeh) {
     dtsiNativeBehaviors.forEach(function(db) {
       if (db.type === 'macro-one-param' || db.type === 'macro-two-param') {
-        out += '    ' + db._rawText.replace(/\n/g, '\n    ') + '\n';
+        var lines = (db._rawText || '').split('\n');
+        var minIndent = Infinity;
+        lines.forEach(function(ln) { if (ln.trim()) { var m = ln.match(/^(\s*)/); minIndent = Math.min(minIndent, m[1].length); } });
+        if (minIndent === Infinity) minIndent = 0;
+        var raw = lines.map(function(ln) { return ln.substring(minIndent); }).join('\n');
+        if (!/;\s*$/.test(raw)) raw += ';';
+        out += '    ' + raw.replace(/\n/g, '\n    ') + '\n';
       }
     });
   }
@@ -3194,27 +3216,27 @@ function updateRgbOutput() {
         // MO_BLINK output
         var mlbl = bm.label || bm.name;
         if (includeHelpers) {
-          out += '    MO_BLINK(' + bm.name + ', "' + mlbl + '", ' + (bm.layer || '') + ', ' + bm.color + ', ' + bm.returnColor + ', ' + (bm.wait || '80') + ')\n';
+          out += '    MO_BLINK(' + bm.name + ', "' + mlbl + '", ' + (bm.layer || '') + ', ' + rc(bm.color) + ', ' + rc(bm.returnColor) + ', ' + (bm.wait || '80') + ')\n';
         } else {
           out += '    ZMK_MACRO(' + bm.name + ',\n';
           if (bm.label) out += '        label = "' + bm.label + '";\n';
-          out += '        bindings = <&macro_press &mo ' + (bm.layer || '') + ' BLINK_SEQ(' + bm.color + ', ' + bm.returnColor + ', ' + (bm.wait || '80') + ')>,\n';
+          out += '        bindings = <&macro_press &mo ' + (bm.layer || '') + ' BLINK_SEQ(' + rc(bm.color) + ', ' + rc(bm.returnColor) + ', ' + (bm.wait || '80') + ')>,\n';
           out += '                   <&macro_pause_for_release>,\n';
           out += '                   <&macro_release &mo ' + (bm.layer || '') + '>;\n';
           out += '    )\n';
         }
       } else if (includeHelpers && bm.key && bm.key.indexOf('&mo') !== 0) {
         var blbl = bm.label || bm.name;
-        out += '        KP_BLINK(' + bm.name + ', "' + blbl + '", ' + bm.key + ', ' + bm.color + ', ' + bm.returnColor + ', ' + bm.wait + ')\n';
+        out += '        KP_BLINK(' + bm.name + ', "' + blbl + '", ' + bm.key + ', ' + rc(bm.color) + ', ' + rc(bm.returnColor) + ', ' + bm.wait + ')\n';
       } else {
         out += '    ZMK_MACRO(' + bm.name + ',\n';
         if (bm.label) out += '        label = "' + bm.label + '";\n';
         if (bm.key && bm.key.indexOf('&mo') === 0) {
-          out += '        bindings = <&macro_press ' + bm.key + ' BLINK_SEQ(' + bm.color + ', ' + bm.returnColor + ', ' + bm.wait + ')>,\n';
+          out += '        bindings = <&macro_press ' + bm.key + ' BLINK_SEQ(' + rc(bm.color) + ', ' + rc(bm.returnColor) + ', ' + bm.wait + ')>,\n';
           out += '                   <&macro_pause_for_release>,\n';
           out += '                   <&macro_release ' + bm.key + '>;\n';
         } else {
-          out += '        bindings = <&macro_tap &kp ' + bm.key + ' BLINK_SEQ(' + bm.color + ', ' + bm.returnColor + ', ' + bm.wait + ')>;\n';
+          out += '        bindings = <&macro_tap &kp ' + bm.key + ' BLINK_SEQ(' + rc(bm.color) + ', ' + rc(bm.returnColor) + ', ' + bm.wait + ')>;\n';
         }
         out += '    )\n';
       }
@@ -3225,14 +3247,18 @@ function updateRgbOutput() {
     out += '    /* ---- STEP 4: BEHAVIORS - HOLD-TAP ---- */\n';
     out += '    behaviors {\n';
     behaviors.forEach(function(b) {
-      out += '    RGB_HT(' + b.name + ', "' + b.label + '", ' + b.macro + ')\n';
+      out += '        RGB_HT(' + b.name + ', "' + b.label + '", ' + b.macro + ')\n';
     });
     // Native behaviors (hold-tap, tap-dance, etc.) inside behaviors section
     dtsiNativeBehaviors.forEach(function(db) {
       if (db.type !== 'macro-one-param' && db.type !== 'macro-two-param') {
-        // Remove any leading spaces from each line of _rawText, then indent 4 spaces
-        var raw = (db._rawText || '').split('\n').map(function(line) { return line.replace(/^\s+/, ''); }).join('\n');
-        out += '\n    ' + raw.replace(/\n/g, '\n    ') + '\n';
+        var lines = (db._rawText || '').split('\n');
+        var minIndent = Infinity;
+        lines.forEach(function(ln) { if (ln.trim()) { var m = ln.match(/^(\s*)/); minIndent = Math.min(minIndent, m[1].length); } });
+        if (minIndent === Infinity) minIndent = 0;
+        var raw = lines.map(function(ln) { return ln.substring(minIndent); }).join('\n');
+        if (!/;\s*$/.test(raw)) raw += ';';
+        out += '\n        ' + raw.replace(/\n/g, '\n        ') + '\n';
       }
     });
     out += '    };\n';

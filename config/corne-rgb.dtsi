@@ -121,28 +121,28 @@
         /* Toggled and momentary macros for RGB layers */
         /* Momentary Layers:
              These are bound to a hold-tap behavior for full effect */
-        MO_RGB(xtra2_led, "xtra2Layer Momentary LED Macro", XTR2, RGB_XTR2, RGB_ABC)
-        MO_RGB(kpad_led, "KeyPadLayer Momentary LED Macro", KPAD, RGB_KPAD, RGB_ABC)
-        MO_RGB(xtra_led, "ExtraLayer Momentary LED Macro", XTRA, RGB_XTRA, RGB_ABC)
-        MO_RGB(nmrw_led, "NumberRowLayer Momentary LED Macro", NMRW, RGB_NMRW, RGB_ABC)
-        MO_RGB(gfun_led, "GameLayer Sublayer Momentary LED Macro", GFUN, RGB_GFUN, RGB_GAME)
-        MO_RGB(t2_s1_led, "ToggleLayer2 SubLayer1 Momentary LED Macro", TGLLR_2_SUBLR_1, RGB_TGLLR_2_SUBLR_1, RGB_TGLLR_2)
-        MO_RGB(t1_s1_led, "ToggleLayer1 Sublayer1 Momentary LED Macro", TGLLR_1_SUBLR_1, RGB_TGLLR_1_SUBLR_1, RGB_TGLLR_1)
-        MO_RGB(g2_s1_led, "GameLayer2 SubLayer1 Momentary LED Macro", GAME2_SUBLR1, RGB_GAME2_SUBLR1, RGB_GAME2) 
+        MO_RGB(mo_rgb_xtra2, "xtra2Layer Momentary LED Macro", XTR2, RGB_XTR2, RGB_ABC)
+        MO_RGB(mo_rgb_kpad, "KeyPadLayer Momentary LED Macro", KPAD, RGB_KPAD, RGB_ABC)
+        MO_RGB(mo_rgb_xtra, "ExtraLayer Momentary LED Macro", XTRA, RGB_XTRA, RGB_ABC)
+        MO_RGB(mo_rgb_nmrw, "NumberRowLayer Momentary LED Macro", NMRW, RGB_NMRW, RGB_ABC)
+        MO_RGB(mo_rgb_gfun, "GameLayer Sublayer Momentary LED Macro", GFUN, RGB_GFUN, RGB_GAME)
+        MO_RGB(mo_rgb_t2_s1, "ToggleLayer2 SubLayer1 Momentary LED Macro", TGLLR_2_SUBLR_1, RGB_TGLLR_2_SUBLR_1, RGB_TGLLR_2)
+        MO_RGB(mo_rgb_t1_s1, "ToggleLayer1 Sublayer1 Momentary LED Macro", TGLLR_1_SUBLR_1, RGB_TGLLR_1_SUBLR_1, RGB_TGLLR_1)
+        MO_RGB(mo_rgb_g2_s1, "GameLayer2 SubLayer1 Momentary LED Macro", GAME2_SUBLR1, RGB_GAME2_SUBLR1, RGB_GAME2) 
 
         /* TOGGLED Layers:
                 These are bound straight to the keymap, OR to a combo. */
-        TO_RGB(to_default_led, "Base Layer LED", ABC, RGB_ABC)
-        TO_RGB(to_t1_led, "ToggleLayer1 LED", TGLLR_1, RGB_TGLLR_1)
-        TO_RGB(to_t2_led, "ToggleLayer2 LED", TGLLR_2, RGB_TGLLR_2)
-        TO_RGB(to_game_led, "GameLayer LED Macro", GAME, RGB_GAME)
+        TO_RGB(to_rgb_default, "Base Layer LED", ABC, RGB_ABC)
+        TO_RGB(to_rgb_t1, "ToggleLayer1 LED", TGLLR_1, RGB_TGLLR_1)
+        TO_RGB(to_rgb_t2, "ToggleLayer2 LED", TGLLR_2, RGB_TGLLR_2)
+        TO_RGB(to_rgb_game, "GameLayer LED Macro", GAME, RGB_GAME)
         
-        TO_RGB(to_g2_s1_led, "Toggle Game2 SubLayer1 LED", GAME2_SUBLR1, RGB_GAME2_SUBLR1)
-        TO_RGB(to_g2_led, "Toggle Game2 LED", GAME2, RGB_GAME2)
+        TO_RGB(to_rgb_g2_s1, "Toggle Game2 SubLayer1 LED", GAME2_SUBLR1, RGB_GAME2_SUBLR1)
+        TO_RGB(to_rgb_g2, "Toggle Game2 LED", GAME2, RGB_GAME2)
 
         //Toggle Layers/Gateways
-        TO_RGB_PRESS(top_toglayers_leds, "ToggleLayer LED", TGL, RGB_TGL)
-        TO_RGB_PRESS(top_gtgl_led, "gametoggle LED Macro", GAMETGL, RGB_GAMETGL)
+        TO_RGB_PRESS(top_rgb_toglayers, "ToggleLayer LED", TGL, RGB_TGL)
+        TO_RGB_PRESS(top_rgb_gtgl, "gametoggle LED Macro", GAMETGL, RGB_GAMETGL)
     };
     /* ---- (optional) BLINK/STATUS MACROS ---- */
     blnk: blnk {
@@ -168,14 +168,14 @@
 
     /* ---- STEP 4: BEHAVIORS - HOLD-TAP ---- */
     behaviors {
-        RGB_HT(RGB_ht_nmrw, "RGB HOLD_TAP_NMRW", nmrw_led)
-        RGB_HT(RGB_ht_xtra2, "RGB HOLD_TAP_XTRA2", xtra2_led)
-        RGB_HT(RGB_ht_kpad, "RGB HOLD_TAP_KPAD", kpad_led)
-        RGB_HT(RGB_ht_xtra, "RGB HOLD_TAP_XTRA", xtra_led)
-        RGB_HT(RGB_ht_gfun, "RGB HOLD_TAP_GFUN", gfun_led)
-        RGB_HT(RGB_ht_t2_s1, "RGB HOLD_TAP_layer2_sublayer1", t2_s1_led)
-        RGB_HT(RGB_ht_g2_s1, "RGB HOLD_TAP_GAME2_SUBLAYER1", g2_s1_led)
-        RGB_HT(RGB_ht_t1_s1, "RGB HOLD_TAP_TOGGLELAYER1_SUBLAYER1", t1_s1_led)
+        RGB_HT(RGB_ht_nmrw, "RGB HOLD_TAP_NMRW", mo_rgb_nmrw)
+        RGB_HT(RGB_ht_xtra2, "RGB HOLD_TAP_XTRA2", mo_rgb_xtra2)
+        RGB_HT(RGB_ht_kpad, "RGB HOLD_TAP_KPAD", mo_rgb_kpad)
+        RGB_HT(RGB_ht_xtra, "RGB HOLD_TAP_XTRA", mo_rgb_xtra)
+        RGB_HT(RGB_ht_gfun, "RGB HOLD_TAP_GFUN", mo_rgb_gfun)
+        RGB_HT(RGB_ht_t2_s1, "RGB HOLD_TAP_layer2_sublayer1", mo_rgb_t2_s1)
+        RGB_HT(RGB_ht_g2_s1, "RGB HOLD_TAP_GAME2_SUBLAYER1", mo_rgb_g2_s1)
+        RGB_HT(RGB_ht_t1_s1, "RGB HOLD_TAP_TOGGLELAYER1_SUBLAYER1", mo_rgb_t1_s1)
 
         RGB_HT(BLINK_ht_f, "f blink test; &kp BINDABEL", f_blink_sa)
 
@@ -221,14 +221,14 @@
 
         //Pathing
             // Gateways 
-        CMB(toggleLayer, &top_toglayers_leds,  38,39, ABC TGLLR_1 TGLLR_2);
-        CMB(game_toggle, &top_gtgl_led,        38,39, GAME GAME2);
+        CMB(toggleLayer, &top_rgb_toglayers,  38,39, ABC TGLLR_1 TGLLR_2);
+        CMB(game_toggle, &top_rgb_gtgl,        38,39, GAME GAME2);
             // Sub-Layers to (Sub)Base
-        CMB(gameLayer_2_BaseLayer, &to_default_led, 0,11, GAME);
-        CMB(gameLayer,  &to_game_led, 0,11, ABC TGL GAME2);
+        CMB(gameLayer_2_BaseLayer, &to_rgb_default, 0,11, GAME);
+        CMB(gameLayer,  &to_rgb_game, 0,11, ABC TGL GAME2);
             // "Exit" Combos; Return to (Sub)Base
-        CMB(toggleLayer_2_BaseLayer, &to_default_led, 39,38, TGL);
-        CMB(game_toggle_2_game, &to_game_led, 38,39, GAMETGL);
+        CMB(toggleLayer_2_BaseLayer, &to_rgb_default, 39,38, TGL);
+        CMB(game_toggle_2_game, &to_rgb_game, 38,39, GAMETGL);
     };
 
  };
