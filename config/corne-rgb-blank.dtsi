@@ -68,7 +68,7 @@
         ) */
 
 /* ---- MACRO HELPERS ---- */
-#define MOMENTARY_RGB_MACRO(node_name, node_label, layer, active_color, release_color) \
+#define MO_RGB_MACRO(node_name, node_label, layer, active_color, release_color) \
         ZMK_MACRO(node_name, \
             bindings = \
                 <&macro_press>, \
@@ -104,7 +104,7 @@
         )
 
 /* ---- HOLD-TAP BEHAVIOR HELPER---- */
-#define RGB_HOLD_TAP(node_name, node_label, macro_ref) \
+#define RGB_HT(node_name, node_label, macro_ref) \
         node_name: node_name { \
             compatible = "zmk,behavior-hold-tap"; \
             label = node_label; \

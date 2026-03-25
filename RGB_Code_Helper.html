@@ -2389,6 +2389,91 @@ function parseUserCode() {
   rgbRenderAll();
 }
 
+// propagateLayerRenames(renameMap) — When layer names change, updates
+// macro layer/color references and combo layer references to match.
+function propagateLayerRenames(renameMap) {
+  if (!renameMap || Object.keys(renameMap).length === 0) return;
+  // Build lookup: old base key → new name, old color → new color
+  var nameMap = {};   // oldName → newName (full name match)
+  var colorMap = {};  // oldColor → newColor
+  Object.keys(renameMap).forEach(function(oldName) {
+    var newName = renameMap[oldName];
+    nameMap[oldName] = newName;
+    nameMap[baseKey(oldName)] = baseKey(newName); // bare key match too
+    colorMap['RGB_' + baseKey(oldName)] = 'RGB_' + baseKey(newName);
+  });
+  macros.forEach(function(m) {
+    if (nameMap[m.layer]) m.layer = nameMap[m.layer];
+    if (colorMap[m.color]) m.color = colorMap[m.color];
+    if (colorMap[m.releaseColor]) m.releaseColor = colorMap[m.releaseColor];
+  });
+  // Rename macro node names: replace old base key within the name (case-insensitive)
+  var macroRenameMap = {}; // oldMacroName → newMacroName
+  Object.keys(renameMap).forEach(function(oldName) {
+    var oldBk = baseKey(oldName).toLowerCase();
+    var newBk = baseKey(renameMap[oldName]).toLowerCase();
+    if (oldBk === newBk) return;
+    macros.forEach(function(m) {
+      var re = new RegExp(oldBk.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      if (re.test(m.name)) {
+        var updated = m.name.replace(re, newBk);
+        macroRenameMap[m.name] = updated;
+        m.name = updated;
+      }
+    });
+  });
+  // Update behavior references to track renamed macros, and rename behavior names/labels
+  if (Object.keys(macroRenameMap).length > 0 || Object.keys(renameMap).length > 0) {
+    behaviors.forEach(function(b) {
+      if (macroRenameMap[b.macro]) b.macro = macroRenameMap[b.macro];
+      Object.keys(renameMap).forEach(function(oldName) {
+        var oldBk = baseKey(oldName);
+        var newBk = baseKey(renameMap[oldName]);
+        if (oldBk === newBk) return;
+        var re = new RegExp(oldBk.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+        if (re.test(b.name))  b.name  = b.name.replace(re, newBk.toLowerCase());
+        if (re.test(b.label)) b.label = b.label.replace(re, newBk);
+      });
+    });
+  }
+  combos.forEach(function(c) {
+    if (!c.layers) return;
+    var parts = c.layers.trim().split(/\s+/);
+    var changed = false;
+    for (var i = 0; i < parts.length; i++) {
+      if (nameMap[parts[i]]) { parts[i] = nameMap[parts[i]]; changed = true; }
+    }
+    if (changed) c.layers = parts.join(' ');
+  });
+  // Migrate colorValueMap / colorLabelMap entries: old color key → new color key
+  Object.keys(colorMap).forEach(function(oldCk) {
+    var newCk = colorMap[oldCk];
+    if (oldCk === newCk) return;
+    if (colorValueMap[oldCk]) {
+      colorValueMap[newCk] = colorValueMap[oldCk];
+      delete colorValueMap[oldCk];
+    }
+    if (colorLabelMap[oldCk] !== undefined) {
+      colorLabelMap[newCk] = colorLabelMap[oldCk];
+      delete colorLabelMap[oldCk];
+    }
+  });
+}
+
+// resequenceLayers() — Re-numbers all indexed layers sequentially (0, 1, 2...)
+// Orphan layers (no index) are left untouched.
+function resequenceLayers() {
+  var indexed = layers.filter(function(l) {
+    return l.index !== '' && l.index !== undefined;
+  });
+  indexed.sort(function(a, b) {
+    return parseInt(a.index) - parseInt(b.index);
+  });
+  for (var i = 0; i < indexed.length; i++) {
+    indexed[i].index = String(i);
+  }
+}
+
 // RGB Render functions
 // rgbRenderAll() — Redraws the entire RGB tab: layer list, macro
 // list, behavior list, combo list, blink macros, and the output text.
@@ -2438,7 +2523,7 @@ function renderLayerList() {
     list.appendChild(div);
   });
   list.onclick = function(e) {
-    if (e.target.dataset.remove === 'layer') { pushRgbUndo(); layers.splice(parseInt(e.target.dataset.i), 1); rgbRenderAll(); return; }
+    if (e.target.dataset.remove === 'layer') { pushRgbUndo(); layers.splice(parseInt(e.target.dataset.i), 1); resequenceLayers(); rgbRenderAll(); return; }
     // Open HSB picker on swatch click
     var swatch = e.target.closest('[data-color-pick]');
     if (swatch && swatch.dataset.colorPick !== undefined) {
@@ -2446,10 +2531,27 @@ function renderLayerList() {
     }
   };
   var _rgbLayerUndoPushed = false;
+  var _oldLayerName = null;
+  var _oldLayerIdx = -1;
   list.addEventListener('focusin', function(e) {
     if (e.target.dataset.field && !_rgbLayerUndoPushed) { _rgbLayerUndoPushed = true; pushRgbUndo(); }
+    if (e.target.dataset.field === 'name') {
+      var li = parseInt(e.target.dataset.i);
+      if (!isNaN(li) && layers[li]) { _oldLayerName = layers[li].name; _oldLayerIdx = li; }
+    }
   });
-  list.addEventListener('focusout', function() { _rgbLayerUndoPushed = false; });
+  list.addEventListener('focusout', function(e) {
+    _rgbLayerUndoPushed = false;
+    if (_oldLayerName !== null && _oldLayerIdx >= 0 && layers[_oldLayerIdx]) {
+      var cur = layers[_oldLayerIdx].name;
+      if (cur !== _oldLayerName) {
+        var map = {}; map[_oldLayerName] = cur;
+        propagateLayerRenames(map);
+        rgbRenderAll();
+      }
+    }
+    _oldLayerName = null; _oldLayerIdx = -1;
+  });
   list.oninput = list.onchange = function(e) {
     var idx = parseInt(e.target.dataset.i), field = e.target.dataset.field;
     if (field === undefined || isNaN(idx)) return;
@@ -2461,6 +2563,11 @@ function renderLayerList() {
       return;
     }
     layers[idx][field] = e.target.value;
+    if (field === 'index') {
+      resequenceLayers();
+      rgbRenderAll();
+      return;
+    }
     if (field === 'name') {
       colorValueMap = {}; colorLabelMap = {};
       layers.forEach(function(_, li) { updateColorMapFromLayer(li); });
@@ -6667,8 +6774,11 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   document.getElementById('addBlinkMacroBtn').onclick = addBlinkMacro;
   document.getElementById('copyOutputBtn').onclick = function() {
-    var out = document.getElementById('output');
-    out.select(); document.execCommand('copy');
+    var ta = document.getElementById('output');
+    var text = ta.value;
+    navigator.clipboard.writeText(text).catch(function() {
+      ta.select(); document.execCommand('copy');
+    });
   };
   document.getElementById('includeHelpers').onchange = updateRgbOutput;
   document.getElementById('macroType').onchange = function() {
@@ -6877,6 +6987,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (keymapLayers.length === 0) { showStatus('kmParseStatus', 'No keymap layers to sync from'); return; }
     if (layers.length === 0) { showStatus('kmParseStatus', 'No RGB layers to sync to'); return; }
     var synced = 0;
+    var renameMap = {};
     keymapLayers.forEach(function(kl, idx) {
       if (kl.status === 'reserved') return;
       var idxStr = String(idx);
@@ -6886,15 +6997,19 @@ document.addEventListener('DOMContentLoaded', function() {
             ? kl.displayName.toUpperCase().replace(/[^A-Z0-9_]/g, '_')
             : baseKey(kl.name);
           if (!newBase) break;
-          var old = layers[ri].name;
-          if (/^L_/i.test(old))      layers[ri].name = 'L_' + newBase;
-          else if (/^LAYER_/i.test(old)) layers[ri].name = 'LAYER_' + newBase;
-          else                           layers[ri].name = newBase;
+          var oldName = layers[ri].name;
+          var newName;
+          if (/^L_/i.test(oldName))      newName = 'L_' + newBase;
+          else if (/^LAYER_/i.test(oldName)) newName = 'LAYER_' + newBase;
+          else                           newName = newBase;
+          if (oldName !== newName) { renameMap[oldName] = newName; }
+          layers[ri].name = newName;
           synced++;
           break;
         }
       }
     });
+    propagateLayerRenames(renameMap);
     if (synced > 0) rgbRenderAll();
     showStatus('kmParseStatus', 'Synced ' + synced + ' layer name(s) → RGB tab');
   };

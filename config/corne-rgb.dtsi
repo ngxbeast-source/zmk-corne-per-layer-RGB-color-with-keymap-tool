@@ -219,13 +219,14 @@
         CMB(bac,        &kp BACKSLASH,      5, 6, ABC);
         CMB(pipe,       &kp PIPE,           17,18, ABC);
 
-            // Gateways + "Back-Pathing"
+        //Pathing
+            // Gateways 
         CMB(toggleLayer, &top_toglayers_leds,  38,39, ABC TGLLR_1 TGLLR_2);
         CMB(game_toggle, &top_gtgl_led,        38,39, GAME GAME2);
-            // Sub-Layers to Sub/Base
+            // Sub-Layers to (Sub)Base
         CMB(gameLayer_2_BaseLayer, &to_default_led, 0,11, GAME);
         CMB(gameLayer,  &to_game_led, 0,11, ABC TGL GAME2);
-            // "Exit" Combos; Return to Sub/Base
+            // "Exit" Combos; Return to (Sub)Base
         CMB(toggleLayer_2_BaseLayer, &to_default_led, 39,38, TGL);
         CMB(game_toggle_2_game, &to_game_led, 38,39, GAMETGL);
     };
