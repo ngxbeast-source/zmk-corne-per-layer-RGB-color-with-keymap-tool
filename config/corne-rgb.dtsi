@@ -147,7 +147,7 @@
     /* ---- (optional) BLINK/STATUS MACROS ---- */
     blnk: blnk {
         compatible = "zmk,behavior-macro-one-param";
-        label = "Makes Chosen Keypress 'blink'";
+        label = "Configurable Blink Macro";
         #binding-cells = <1>;
         wait-ms = <0>;
         tap-ms  = <0>;

@@ -445,3 +445,45 @@ Coverage note: this reflects everything I can reliably reconstruct from availabl
 - **Macro RAW binding fix**: Step type change to 'custom' now passes empty `raw` string.
 - **Auto-detect layout**: After `parseKeymap()`, auto-loads Lotus58 if ≥58 keys, Corne if ≤42 keys.
 - **Behavior descriptions**: Added `desc` field to all `ZMK_BEHAVIORS` entries; shown in binding editor dropdown and `#beDescRow`.
+
+## 2026-03-26 (Session 9) - Multi-Fix Batch + UI Overhaul
+
+### Bug fixes
+- **Behavior indentation drift**: `minIndent` calculation in native behavior output now skips first line (`li > 0`) to avoid 0-indent anchor; first line stripped separately.
+- **Keymap output whitespace**: Column widths now computed per-layer instead of globally across all layers, preventing cross-layer alignment bleeding.
+- **RGB_ht binding editor**: Synced RGB_HT behaviors now include `holdBinding`/`tapBinding` in config so `isMacroHold` detection works in the behavior config panel.
+
+### Major additions — Resizable Keyboard Container
+- `.keyboard-container` gets `resize: vertical`, `min-height: 120px`, `max-height: 80vh`, flexbox layout.
+- `.keyboard-svg` uses `width: 100%; height: 100%; flex: 1` with `viewBox` for proportional scaling when resized.
+
+### Major additions — Tap-Dance Slot-Based Binding Picker
+- Replaced text input for tap-dance bindings with visual slot-based system.
+- New functions: `initTdSlots()`, `parseTdBindings()`, `tdSlotsSerialized()`, `renderTdSlots()`, `openTdSlotPicker()`.
+- Uses `bpCallback` variable added to binding picker system for callback-based selection.
+
+### Major additions — Hover Descriptions on Dropdowns
+- Added `title` attributes to all major dropdowns: behavior type selector, macro param type, macro step type trigger, macro step behavior trigger.
+
+### Major additions — Macro Editor Popup-Style Selection
+- Replaced step-type `<select>` with `.ms-type-trigger` button + `openMacroStepTypePicker()` popup overlay.
+- Replaced step-behavior `<select>` with `.ms-beh-trigger` button using binding picker via `bpCallback`.
+- New functions: `openMacroStepTypePicker()`, `closeMacroStepTypePicker()`, `openMacroStepBehPicker()`.
+
+### Major additions — Sub-Tabs for Editing Sections
+- Wrapped Combos, Macros, Built-in Behaviors, Behaviors, and Conditional Layers in `.km-subtab-panel` divs.
+- Added `.km-subtab-bar` navigation with 5 buttons for tab switching.
+- New function: `initSubtabs()` — click-based tab switching with `.active` class toggling.
+- New CSS: `.km-subtab-bar`, `.km-subtab-btn`, `.km-subtab-content`, `.km-subtab-panel`.
+
+## 2026-03-26 (Session 10) - Bug Fixes from Session 9
+
+### Bug fixes — Sub-Tab Layout
+- **Sub-tabs not switching**: Root cause was `display: flex; flex-direction: column` on `.km-center` causing subtab-content to collapse to 0 height (keyboard-container with `flex-shrink: 0` consumed all flex space). Reverted `.km-center` to regular block layout with `overflow-y: auto`. Removed now-unnecessary flex properties from `.km-subtab-bar` (`flex-shrink: 0`) and `.km-subtab-content` (`flex: 1; min-height: 0; overflow-y: auto`).
+- **Layout conflicts with parsing area**: Same flex-column root cause — the `display: flex; flex-direction: column` on `.km-center` disrupted how it interacted with the output panel in the `.km-layout` flex row. Reverting to block layout fixed rendering.
+
+### Major additions — Parameter Dropdown Descriptions
+- **`PARAM_DESCS` lookup object** (line ~1752): Descriptions for all 55 parameter values across BT_ACTIONS (14), RGB_ACTIONS (12), OUT_ACTIONS (3), BL_ACTIONS (7), EP_ACTIONS (3), MOUSE_BUTTONS (5), MOUSE_MOVES (4), MOUSE_SCROLLS (4).
+- **Binding editor dropdowns**: All `<option>` elements in `updateBindingEditorFields()` for `&bt`, `&rgb_ug`, `&out`, `&bl`, `&ext_power`, `&mkp`, `&mmv`, `&msc` now have `title` attributes from `PARAM_DESCS`.
+- **Macro step param controls**: `renderParamControl()` direction and enum dropdown options also get `title` attributes.
+- **Search picker descriptions**: `vpBuildChoices()` now uses `PARAM_DESCS` for detailed descriptions instead of generic category labels (e.g., "Toggle external power on/off" instead of "Power").

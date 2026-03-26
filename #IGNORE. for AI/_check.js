@@ -243,7 +243,7 @@ var DEFAULT_LOTUS58_LAYOUT = {
 // supports. Used to populate the keycode picker grid in the Binding
 // Editor (populateKeycodeGrids, line 3017) and to validate user input.
 // ZMK_BEHAVIORS lists all built-in behaviors (&kp, &mo, &lt, etc.).
-// More on this code can be found in 'RefDoc' line 245
+// More on this code can be found in 'RefDoc' line 252
 // ================================================================
 var ZMK_KEYCODES = {
   letters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'],
@@ -319,7 +319,7 @@ var MOUSE_SCROLLS = ['SCRL_UP','SCRL_DOWN','SCRL_LEFT','SCRL_RIGHT'];
 //   hasHsbVal(v) â€” checks if a value is non-empty
 //   baseKey(name) â€” strips "LAYER_" or "RGB_" prefix from a name
 //   esc(str) â€” makes a string safe for HTML (prevents code injection)
-// More on this code can be found in 'RefDoc' line 280
+// More on this code can be found in 'RefDoc' line 287
 // ================================================================
 function hsbToHex(h, s, b) {
   h = parseInt(h) || 0; s = parseInt(s) || 0; b = parseInt(b) || 0;
@@ -360,7 +360,7 @@ function esc(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;'
 // on the right is the Hue slider. Drag either to choose a color.
 // This updates the layer's h/s/b values and regenerates the output.
 // Created once by ensureHsbPicker() and reused for every layer.
-// More on this code can be found in 'RefDoc' line 320
+// More on this code can be found in 'RefDoc' line 327
 // ================================================================
 var hsbPickerLayerIdx = -1;
 var hsbPickerDragging = null; // 'sv' or 'hue'
@@ -555,7 +555,7 @@ function closeHsbPicker() {
 // tab uses. For example, layerOptionsHTML() builds the <option> list
 // for layer dropdown menus, and colorOptionsHTML() does the same for
 // colors. The output panel resize handler lives here too.
-// More on this code can be found in 'RefDoc' line 365
+// More on this code can be found in 'RefDoc' line 372
 // ================================================================
 function layerOptionsHTML(selected) {
   // Build a sorted copy so dropdown options follow sequential index order (0, 1, 2...)
@@ -675,7 +675,7 @@ function initResize(handleId, wrapId) {
 // to find color definitions, layers, macros, blink macros, behaviors,
 // and combos. It stores them in the global arrays (layers, macros, etc.).
 // After parsing, it calls rgbRenderAll() to refresh the UI.
-// More on this code can be found in 'RefDoc' line 410
+// More on this code can be found in 'RefDoc' line 417
 // ================================================================
 function parseUserCode() {
   var code = document.getElementById('userCodePaste').value;
@@ -1334,7 +1334,7 @@ function updateRgbOutput() {
 // from keyboardLayout is turned into an SVG <rect> and <text> element.
 // Clicking a key calls showBindingEditor() to let you change it.
 // Also used in combo mode to show which keys are in a combo.
-// More on this code can be found in 'RefDoc' line 595
+// More on this code can be found in 'RefDoc' line 602
 // ================================================================
 var KEY_SCALE = 56; // pixels per unit
 var KEY_SIZE = 52;  // inner key size (slightly less than KEY_SCALE for gap)
@@ -1567,7 +1567,7 @@ function getLayerLabel(idx) {
 // bindings. Results go into keymapLayers[], keymapCombos[], etc.
 // Layers are assigned sequential index numbers (0, 1, 2...) based
 // on the order they appear in the keymap {} block.
-// More on this code can be found in 'RefDoc' line 680
+// More on this code can be found in 'RefDoc' line 687
 // ================================================================
 // parseKeymap(text) \u2014 The main .keymap parser. Reads ZMK devicetree text\n// and extracts layers, combos, macros, behaviors, conditional layers, and\n// sensor bindings. This is the biggest function in the file. It works by\n// using regex patterns to find each section of the devicetree format.\nfunction parseKeymap(text) {
   // Preserve cross-tab data (items synced from RGB tab)
@@ -1902,7 +1902,7 @@ function parseBindings(str) {
 // switch the active layer; right-click for options (rename, move,
 // status, delete). renderLayerTabs() rebuilds these tabs whenever
 // layers change. The active layer's bindings are shown on the SVG.
-// More on this code can be found in 'RefDoc' line 750
+// More on this code can be found in 'RefDoc' line 757
 // ================================================================
 // renderLayerTabs() â€” Rebuilds the layer sidebar tabs (left panel).
 // Each layer gets a clickable tab. Active layer is highlighted.
@@ -1959,7 +1959,7 @@ function updateLayerHeader() {
 // SECTION: LAYER CONTEXT MENU
 // Right-clicking a layer tab opens a dropdown with options:
 // rename, change display name, toggle status, move up/down, delete.
-// More on this code can be found in 'RefDoc' line 750
+// More on this code can be found in 'RefDoc' line 757
 // ================================================================
 // showLayerContextMenu(anchorEl) â€” Opens a right-click menu next to
 // a layer tab with options to rename, change status, move, or delete.
@@ -2090,7 +2090,7 @@ function closeLayerCustomizeDialog() {
 // These helpers translate ZMK modifier function names like LS(A)
 // into human-readable labels. MOD_FUNCS maps short names to their
 // function wrappers. Used by bindingToLabels() and the binding editor.
-// More on this code can be found in 'RefDoc' line 640
+// More on this code can be found in 'RefDoc' line 647
 // ================================================================
 var MOD_FUNCS = {
   LSHFT: 'LS', LALT: 'LA', LCTRL: 'LC', LGUI: 'LG',
@@ -2149,7 +2149,7 @@ function charToZmkKeycode(ch) {
 // grid of keycodes. Pick a behavior, pick parameters, and click
 // Apply to save the binding to the layer. populateKeycodeGrids()
 // fills the grid; showBindingEditor() opens the panel.
-// More on this code can be found in 'RefDoc' line 829
+// More on this code can be found in 'RefDoc' line 836
 // ================================================================
 // populateKeycodeGrids() â€” Fills the keycode picker tabs (letters,
 // numbers, symbols, etc.) with clickable buttons for every ZMK keycode.
@@ -2442,7 +2442,7 @@ function cancelBindingEditor() {
 // renderComboMiniKb() draws a small keyboard for picking combo key
 // positions. renderKeymapComboList() shows all combos in a list.
 // Clicking "Edit" opens the combo editor panel (line 5470+).
-// More on this code can be found in 'RefDoc' line 870
+// More on this code can be found in 'RefDoc' line 877
 // ================================================================
 // renderComboMiniKb() â€” Draws a small keyboard inside the combo editor
 // panel. Clicking keys toggles their selection as combo positions.
@@ -2496,7 +2496,7 @@ function renderKeymapComboList() {
 // Each macro has a name, optional timing (wait/tap ms), and a list
 // of steps (e.g., "type H-E-L-L-O"). renderKeymapMacroList() shows
 // all macros. The macro editor lets you add/remove steps.
-// More on this code can be found in 'RefDoc' line 870
+// More on this code can be found in 'RefDoc' line 877
 // ================================================================
 // renderKeymapMacroList() â€” Shows all macros in a list with name, label,
 // and step count. Each macro has Edit/Delete buttons.
@@ -2634,7 +2634,7 @@ function renderMacroSteps() {
 // user-defined in the devicetree. renderKeymapBehaviorList() shows
 // all of them. showBehaviorConfig() opens the config panel where
 // you set timing, flavor, and other options for each behavior type.
-// More on this code can be found in 'RefDoc' line 870
+// More on this code can be found in 'RefDoc' line 877
 // ================================================================
 // renderKeymapBehaviorList() â€” Shows all custom behaviors in a list with
 // type (hold-tap, sticky-key, etc.), name, and Edit/Delete buttons.
@@ -2946,7 +2946,7 @@ function renderQaOnScreenKb() {
 // other layers are active at the same time. For example, holding
 // layer 1 + layer 2 could activate layer 3. These use the ZMK
 // "tri_layer" or "conditional_layers" feature.
-// More on this code can be found in 'RefDoc' line 870
+// More on this code can be found in 'RefDoc' line 877
 // ================================================================
 var editingCondLayerIndex = -1;
 
@@ -2991,7 +2991,7 @@ function populateSensorLayerSelect() {
 // Each sensor entry has a layer index and a list of bindings
 // (clockwise, counter-clockwise). The sensor editor shows visual
 // cards for each encoder and lets you pick rotation actions.
-// More on this code can be found in 'RefDoc' line 870
+// More on this code can be found in 'RefDoc' line 877
 // ================================================================
 var editingSensorIndex = -1;   // index within keymapSensorBindings
 var editingSensorSubIdx = -1;  // which encoder token within that entry (-1 = adding new)
