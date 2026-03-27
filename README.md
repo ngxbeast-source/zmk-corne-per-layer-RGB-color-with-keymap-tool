@@ -97,7 +97,8 @@ I used Copilot to help modularize and refine the macros and combos. The modular 
   - There is an integrated keymap editor I pulled mostly from (https://nickcoutsos.github.io/keymap-editor/) for an idea. I haven't really tried it out but it seems mostly functional.
   - There are certainly bugs(its ALL AI written), I haven't really used this much yet; I can say that the RGB builder does work well enough so feel free to use it you want, there are included "helpers" in the generator.
 ![editor](ZMKPer-LayerColor_RGB_Tool_with_keymap_editor1.png)
-
+![editor4](ZMKPer-LayerColor_RGB_Tool_with_keymap_editor4.png)
+![editor3](ZMKPer-LayerColor_RGB_Tool_with_keymap_editor3.png)
 ![editor2](ZMKPer-LayerColor_RGB_Tool_with_keymap_editor2.png)
   - This has most of the capabilities of the original keymap editor, minus some bugs and obvious UI improvements that could be made, but with the added functionality of a RGB generator.
      - You should be able to edit your keymap and assign colors to the layer from the tool.
