@@ -85,7 +85,7 @@ Enjoy — Pull requests or suggestions to simplify and improve the code are welc
 
 - Early implementation mistake: layer-tap behavior was inside macros, causing macros to run on every layer-tap. I separated the layer-tap from macros so simple taps no longer trigger LED changes.
 - There were some timing/overlap issues when combining certain macros (e.g., returning to default color after leaving the game layer). Conditional layer combos helped mitigate this.
-- The current approach is functional but can likely be simplified; contributions and suggestions are welcome.
+- The current approach is functional but can likely be simplified; contributions and suggestions are welcomed.
 
 ---
 
