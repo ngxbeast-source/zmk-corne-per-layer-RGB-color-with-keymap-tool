@@ -487,3 +487,14 @@ Coverage note: this reflects everything I can reliably reconstruct from availabl
 - **Binding editor dropdowns**: All `<option>` elements in `updateBindingEditorFields()` for `&bt`, `&rgb_ug`, `&out`, `&bl`, `&ext_power`, `&mkp`, `&mmv`, `&msc` now have `title` attributes from `PARAM_DESCS`.
 - **Macro step param controls**: `renderParamControl()` direction and enum dropdown options also get `title` attributes.
 - **Search picker descriptions**: `vpBuildChoices()` now uses `PARAM_DESCS` for detailed descriptions instead of generic category labels (e.g., "Toggle external power on/off" instead of "Power").
+
+## 2026-03-26 (Session 11)
+
+### Bug fix — dtsi behaviors now editable
+- **`_fromDtsi` behaviors visible in editor**: Removed `_fromDtsi` filter from `renderKeymapBehaviorList()` so behaviors parsed from `.dtsi` (like `hml`, `hmr`) now appear in the Behaviors list with a "dtsi" badge and Edit/Delete buttons.
+- **Editing promotes to .keymap output**: When a `_fromDtsi` behavior is saved, `_fromEditor` is set to `true` and `_fromDtsi` flag is cleared, so the behavior is included in `.keymap` output generation.
+- **Full hold-tap property parsing from .dtsi**: `parseUserCode()` dtsi behavior parser now captures all hold-tap properties: `quick-tap-ms`, `require-prior-idle-ms`, `hold-trigger-key-positions`, `retro-tap`, `hold-while-undecided`, `hold-while-undecided-linger`, `hold-trigger-on-release`, `global-quick-tap` (previously only captured `tapping-term-ms`, `flavor`, `bindings`).
+- **`hold-while-undecided` regex fix**: Both dtsi and keymap parsers now correctly detect `hold-while-undecided` when `hold-while-undecided-linger` is also present (strips `-linger` variant before testing).
+
+### Bug fix — Macro step type popup overflow
+- **Dynamic max-height**: `openMacroStepTypePicker()` now sets `maxHeight` based on actual popup top position (`window.innerHeight - popTop - 10`) instead of relying solely on CSS `max-height: 70vh`, preventing the popup from extending below the viewport.

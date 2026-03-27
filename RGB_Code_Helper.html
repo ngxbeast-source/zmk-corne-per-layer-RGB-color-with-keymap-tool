@@ -2494,7 +2494,20 @@ function parseUserCode() {
       var dtt = dbbody.match(/tapping-term-ms\s*=\s*<(\d+)>/);
       var dfl = dbbody.match(/flavor\s*=\s*"([^"]*)"/);
       var dbn = dbbody.match(/bindings\s*=\s*<([^>]*)>\s*,\s*<([^>]*)>/);
-      dbconfig = { tappingTerm: dtt ? dtt[1] : '200', flavor: dfl ? dfl[1] : 'tap-preferred', holdBinding: dbn ? dbn[1].trim() : '', tapBinding: dbn ? dbn[2].trim() : '' };
+      var dqt = dbbody.match(/quick-tap-ms\s*=\s*<(\d+)>/);
+      var drpi = dbbody.match(/require-prior-idle-ms\s*=\s*<(\d+)>/);
+      var dhtp = dbbody.match(/hold-trigger-key-positions\s*=\s*<([^>]*)>/);
+      dbconfig = {
+        tappingTerm: dtt ? dtt[1] : '200', flavor: dfl ? dfl[1] : 'tap-preferred',
+        holdBinding: dbn ? dbn[1].trim() : '', tapBinding: dbn ? dbn[2].trim() : '',
+        quickTap: dqt ? dqt[1] : '', requirePriorIdle: drpi ? drpi[1] : '',
+        holdTriggerPositions: dhtp ? dhtp[1].trim() : '',
+        retroTap: /retro-tap\s*;/.test(dbbody),
+        holdWhileUndecided: /hold-while-undecided\s*;/.test(dbbody.replace(/hold-while-undecided-linger/g, '')),
+        holdWhileUndecidedLinger: /hold-while-undecided-linger\s*;/.test(dbbody),
+        holdTriggerOnRelease: /hold-trigger-on-release\s*;/.test(dbbody),
+        globalQuickTap: /global-quick-tap\s*;/.test(dbbody)
+      };
     } else if (dbcompat[1] === 'zmk,behavior-tap-dance') {
       dbtype = 'tap-dance';
       var dtt2 = dbbody.match(/tapping-term-ms\s*=\s*<(\d+)>/);
@@ -3885,7 +3898,7 @@ function parseKeymap(text) {
         var rpi = bbody.match(/require-prior-idle-ms\s*=\s*<(\d+)>/);
         var htkp = bbody.match(/hold-trigger-key-positions\s*=\s*<([^>]*)>/);
         var rt = /retro-tap\s*;/.test(bbody);
-        var hwu = /hold-while-undecided\s*;/.test(bbody) && !/hold-while-undecided-linger/.test(bbody);
+        var hwu = /hold-while-undecided\s*;/.test(bbody.replace(/hold-while-undecided-linger/g, ''));
         var hwul = /hold-while-undecided-linger\s*;/.test(bbody);
         var htor = /hold-trigger-on-release\s*;/.test(bbody);
         var gqt = /global-quick-tap\s*;/.test(bbody);
@@ -4989,10 +5002,12 @@ function openMacroStepTypePicker(stepIdx, anchorEl) {
   popup.className = 'mst-popup';
   popup.id = 'macroStepTypePopup';
 
-  // Position near anchor
+  // Position near anchor, ensure it fits within viewport
   var rect = anchorEl.getBoundingClientRect();
   popup.style.left = Math.min(rect.left, window.innerWidth - 440) + 'px';
-  popup.style.top = Math.min(rect.bottom + 4, window.innerHeight - 400) + 'px';
+  var popTop = Math.min(rect.bottom + 4, window.innerHeight - 400);
+  popup.style.top = popTop + 'px';
+  popup.style.maxHeight = Math.max(200, window.innerHeight - popTop - 10) + 'px';
 
   var html = '<div class="mst-popup-header"><h4>Select Step Type</h4><button class="mst-popup-close" id="mstCloseBtn">&times;</button></div>';
   html += '<div class="mst-popup-body">';
@@ -5330,12 +5345,14 @@ function renderKeymapBehaviorList() {
   var list = document.getElementById('kmBehaviorList');
   list.innerHTML = '';
   keymapBehaviors.forEach(function(b, i) {
-    if (b._builtin || b._fromRgb || b._fromDtsi) return;
+    if (b._builtin || b._fromRgb) return;
     var div = document.createElement('div');
     div.className = 'item';
+    var badge = b._fromDtsi ? '<span style="color:#e8a;font-size:0.72em;margin:0 4px;opacity:0.8;" title="Parsed from .dtsi — edit to include in .keymap output">dtsi</span>' : '';
     div.innerHTML =
       '<b>' + esc(b.name) + '</b>' +
       '<span style="color:var(--muted);">' + esc(b.type) + '</span>' +
+      badge +
       (b.label ? '<span style="color:#9cc;font-size:0.82em;margin:0 4px;" title="Label">&quot;' + esc(b.label) + '&quot;</span>' : '') +
       '<button class="btn-sm" data-edit-behavior="' + i + '">Edit</button>' +
       '<button class="btn-danger btn-sm" data-remove-behavior="' + i + '">&#10005;</button>';
@@ -8721,7 +8738,7 @@ document.addEventListener('DOMContentLoaded', function() {
       config: config
     };
     if (editingBehaviorIndex >= 0) {
-      beh._fromEditor = keymapBehaviors[editingBehaviorIndex]._fromEditor || false;
+      beh._fromEditor = true;
       keymapBehaviors[editingBehaviorIndex] = beh;
     } else {
       beh._fromEditor = true;
