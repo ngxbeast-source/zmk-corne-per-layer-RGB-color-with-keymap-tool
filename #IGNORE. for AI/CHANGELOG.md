@@ -4,6 +4,40 @@ This changelog combines:
 - Git commit history available in this repo (sampled from the oldest currently visible commits up to now)
 - Session memory from this workspace (design notes, bug hunts, and fix rounds)
 
+## 2026-03-29 — Auto Homerow Mod Positions & Cleanup
+
+### Major addition — Auto-generated `hold-trigger-key-positions` for hml/hmr
+- New utility function `getKeyPositionsForSide(side)` (line 6849) computes left or right key indices from the loaded keyboard layout using the same split-detection algorithm as `updateKeymapOutput()`.
+- `generateBehaviorCode()` (line 6885) now auto-fills `hold-trigger-key-positions` for the `hml` and `hmr` built-in behaviors: `hml` gets all right-side key indices, `hmr` gets all left-side key indices.
+- Works with any loaded layout (Corne, Sofle, reviung41, etc.) — positions update dynamically when a new layout JSON is applied.
+
+### Removed — Clear Sync buttons
+- Removed "Clear RGB Data" button (`kmClearSyncBtn`) from the Keymap Editor tab (HTML + JS handler).
+- Removed "Clear Keymap Data" button (`rgbClearSyncBtn`) from the RGB Generator tab (HTML + JS handler).
+
+## 2026-03-27 — Universal Layout JSON Support
+
+### Major fix — `loadLayout()` rewrite for any keyboard .json format
+- Previously, `loadLayout()` only accepted JSON with a hardcoded `"default_layout"` key inside `layouts`. Any community .json file (Sofle, reviung41, etc.) that uses the keyboard name as the key (e.g. `"Sofle"`, `"reviung41"`, `"Default"`) was silently ignored.
+- `loadLayout()` now accepts three JSON formats:
+  1. `{ layouts: { "<name>": { layout: [...] } } }` — standard keyboard .json (picks the first key)
+  2. `{ layout: [...] }` — direct layout wrapper
+  3. `[...]` — flat array of key positions
+- **Row/col inference**: Community .json files typically lack `row` and `col` fields (only have `x`, `y`, `r`, `rx`, `ry`). When `row` is missing, the function now infers row breaks by detecting when `x` drops by more than 2 units from the previous key (indicating the layout wrapped to a new physical row). Sequential column indices are assigned within each row.
+- **Keyboard name extraction**: The layout key name (e.g. `"Sofle"`) is extracted, lowercased, and stored in `currentLayoutId` for use in `#include` generation. An explicit `"id"` field in the JSON overrides the key name.
+
+### Major fix — Dynamic `#include "-rgb.dtsi"` naming
+- Previously, the `#include` line was hardcoded to choose between `corne-rgb.dtsi` and `lotus58-rgb.dtsi` only.
+- Now uses `currentLayoutId + '-rgb.dtsi'` dynamically, so loading a Sofle layout produces `#include "sofle-rgb.dtsi"`, loading reviung41 produces `#include "reviung41-rgb.dtsi"`, etc.
+- Updated in both code paths: preserved-includes (Path A) and generated-defaults (Path B) in `updateKeymapOutput()`.
+
+### Improvements — Layout switch include replacement
+- Default Corne and Lotus58 button handlers now use a generic regex (`/[a-z0-9_]+-rgb\.dtsi/gi`) to replace any keyboard's `-rgb.dtsi` include, not just the other hardcoded name.
+- JSON Apply button now updates existing `#include` paths when the loaded layout has a different name than the previous one.
+- JSON Apply button now calls `updateKeymapOutput()` so the output refreshes immediately.
+- Status message after JSON apply now shows the detected keyboard name.
+- Placeholder text updated to indicate any keyboard .json format is accepted.
+
 Coverage note: this reflects everything I can reliably reconstruct from available history and session context.
 
 ## 2026-03-18 - Firmware and Layer Foundation Phase

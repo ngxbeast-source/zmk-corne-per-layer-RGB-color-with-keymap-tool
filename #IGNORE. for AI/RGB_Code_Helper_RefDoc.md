@@ -114,7 +114,7 @@
 # ============================================================
 # SECTION 3: GLOBAL DATA MODEL (the "memory" of the tool)
 # ============================================================
-# Ref. Lines 1378-1420 in code
+# Ref. Lines 1376-1418 in code
 #
 # The tool stores everything in JavaScript arrays and variables.
 # Think of each array as a "notebook" that holds a list of items.
@@ -161,7 +161,7 @@
 # ============================================================
 # SECTION 4: UNDO/REDO SYSTEM
 # ============================================================
-# Ref. Lines 1424-1607 in code
+# Ref. Lines 1422-1605 in code
 #
 # The undo system works like a camera taking snapshots:
 #
@@ -196,28 +196,32 @@
 # ============================================================
 # SECTION 5: DEFAULT KEYBOARD LAYOUTS
 # ============================================================
-# Ref. Lines 1608-1686 in code
+# Ref. Lines 1606-1684 in code
 #
 # A "layout" describes the physical positions and sizes of every key
 # on the keyboard. The tool uses this to draw the SVG keyboard picture.
 #
-# DEFAULT_CORNE_LAYOUT (line 1608):
+# DEFAULT_CORNE_LAYOUT (line 1606):
 #   42 keys arranged in a split ergonomic layout.
 #   Each key has: x (horizontal position), y (vertical position),
-#   w (width, defaults to 1), h (height, defaults to 1),
+#   row, col (row/column indices for output formatting),
 #   and optionally r (rotation angle) and rx/ry (rotation center).
 #
-# DEFAULT_LOTUS58_LAYOUT (line 1641):
+# DEFAULT_LOTUS58_LAYOUT (line 1639):
 #   A larger 60-key layout with built-in encoders.
 #
 # These defaults are used when no custom layout JSON is imported.
-# The function loadLayout() (line 3413) applies the layout to
+# The function loadLayout() (line 3432) applies the layout to
 # the SVG renderer. See Section 13 (line 487 in this doc).
+#
+# Custom layouts (.json files from any keyboard) can be pasted via
+# the "Load Layout JSON" button. loadLayout() accepts any key name
+# inside the "layouts" object and infers row/col if missing.
 
 # ============================================================
 # SECTION 6: ZMK KEYCODES & BEHAVIOR REFERENCE TABLES
 # ============================================================
-# Ref. Lines 1687-1783 in code
+# Ref. Lines 1685-1781 in code
 #
 # ZMK_KEYCODES (line 1687):
 #   A big lookup table of every key the keyboard can send.
@@ -250,7 +254,7 @@
 # ============================================================
 # SECTION 7: COLOR UTILITIES (HSB, Hex, RGB)
 # ============================================================
-# Ref. Lines 1856-1899 in code
+# Ref. Lines 1854-1897 in code
 #
 # These small functions convert colors between different formats.
 # Keyboards use HSB (Hue, Saturation, Brightness) for LED colors.
@@ -279,7 +283,7 @@
 # ============================================================
 # SECTION 8: HSB COLOR PICKER
 # ============================================================
-# Ref. Lines 1900-2092 in code
+# Ref. Lines 1898-2090 in code
 #
 # This is the floating color picker popup that appears when you
 # click a color swatch in the layer list.
@@ -305,7 +309,7 @@
 # ============================================================
 # SECTION 9: RGB TAB HELPER FUNCTIONS
 # ============================================================
-# Ref. Lines 2093-2265 in code
+# Ref. Lines 2091-2263 in code
 #
 # Small functions used by other parts of the RGB tab.
 #
@@ -486,18 +490,26 @@
 # ============================================================
 # SECTION 13: SVG KEYBOARD RENDERER
 # ============================================================
-# Ref. Lines 3413-3526 in code
+# Ref. Lines 3432-3594 in code
 #
 # These functions draw the keyboard picture using SVG (Scalable
 # Vector Graphics — a way to draw shapes in HTML).
 #
-#   loadLayout(layoutObj) (line 3413):
-#     Takes a keyboard layout (array of key positions) and stores it.
-#     Triggers a re-render of the keyboard SVG.
+#   loadLayout(layoutObj) (line 3432):
+#     Takes a keyboard layout JSON and extracts the key position array.
+#     Accepts three formats:
+#       1. { layouts: { "<name>": { layout: [...] } } } — standard .json
+#       2. { layout: [...] } — direct layout wrapper
+#       3. [...] — flat array of key positions
+#     If keys don't have row/col fields (common in community .json files
+#     like Sofle, reviung41, etc.), they are inferred from x/y positions:
+#     a new row starts when x drops by more than 2 from the previous key.
+#     The keyboard name from the layout key (e.g. "Sofle") is stored in
+#     currentLayoutId (line 1397) for use in #include "-rgb.dtsi" output.
 #
-#   renderKeyboardSvg(targetId, options) (line 3427):
+#   renderKeyboardSvg(targetId, options) (line 3495):
 #     The main drawing function. For each key in the layout:
-#       - Calculates the position (x, y) and size (w, h)
+#       - Calculates the position (x, y) and size
 #       - Handles rotated keys (some ergonomic keys are angled)
 #       - Adds click handlers so you can click a key to edit it
 #       - Shows the current binding label on each key
@@ -511,9 +523,9 @@
 # ============================================================
 # SECTION 14: BINDING LABELS (how keys show text)
 # ============================================================
-# Ref. Lines 3527-3644 in code
+# Ref. Lines 3595-3712 in code
 #
-#   bindingToLabels(binding) (line 3527):
+#   bindingToLabels(binding) (line 3595):
 #     Converts a binding string like "&kp A" into display labels
 #     for the SVG key. Returns { top, bottom, full } where:
 #       - top = short behavior name (e.g., "A")
@@ -522,13 +534,13 @@
 #     Handles special cases: &trans shows "▽", &none shows "✕",
 #     &mo shows "MO 2", &lt shows "LT 3 SPC", etc.
 #
-#   simplifyKeycode(kc) (line 3587):
+#   simplifyKeycode(kc) (line 3655):
 #     Shortens keycode names for display: ESCAPE→ESC, DELETE→DEL, etc.
 #
-#   simplifyMod(mod) (line 3612):
+#   simplifyMod(mod) (line 3680):
 #     Shortens modifier names: LEFT_CONTROL→LCTL, RIGHT_SHIFT→RSFT, etc.
 #
-#   getLayerLabel(idx) (line 3623):
+#   getLayerLabel(idx) (line 3691):
 #     Returns a display name for a layer index number.
 #     Looks at keymapLayers and layers arrays for a matching name.
 
@@ -695,13 +707,17 @@
 # ============================================================
 # SECTION 20: KEYMAP OUTPUT GENERATION (updateKeymapOutput)
 # ============================================================
-# Ref. Lines 6322-6775 in code
+# Ref. Lines 6394-6884 in code
 #
 # This is the biggest output function. It generates the complete
 # .keymap file text from all the parsed/edited data.
 #
 # Output order:
-#   1. #include lines (preserved from original file)
+#   1. #include lines (preserved from original file, or generated defaults).
+#      The RGB dtsi #include uses currentLayoutId dynamically:
+#      `#include "<currentLayoutId>-rgb.dtsi"` — e.g. "corne-rgb.dtsi",
+#      "sofle-rgb.dtsi", "reviung41-rgb.dtsi", depending on which layout
+#      JSON was loaded. This name is set by loadLayout() (line 3434).
 #   2. #define macros for enabled built-in behaviors (e.g.,
 #      `#define AS(keycode) &as LS(keycode) keycode` for autoshift,
 #      `#define MO_TOG(layer) &mo_tog layer layer` for mo_tog).
@@ -727,9 +743,16 @@
 # ============================================================
 # SECTION 21: BEHAVIOR CODE GENERATION
 # ============================================================
-# Ref. Lines 6776-6860 in code
+# Ref. Lines 6849-6976 in code
 #
-#   generateBehaviorCode(b) (line 6776):
+#   getKeyPositionsForSide(side) (line 6849):
+#     Returns a space-separated string of key indices for the 'left'
+#     or 'right' side of a split keyboard. Uses the same split detection
+#     as updateKeymapOutput(): finds the largest x-position gap to
+#     determine where left ends and right begins. Called by
+#     generateBehaviorCode() to auto-fill hold-trigger-key-positions.
+#
+#   generateBehaviorCode(b) (line 6885):
 #     Takes a behavior object ({name, type, label, config}) and
 #     generates the devicetree code for it.
 #     Each behavior type has a different "compatible" string and
@@ -740,17 +763,19 @@
 #         hold-while-undecided, hold-trigger-on-release, global-quick-tap
 #       - tap-dance: compatible = "zmk,behavior-tap-dance"
 #         properties: tapping-term-ms, bindings
-#     This function is called by updateKeymapOutput() (line 6322)
+#     For hml/hmr built-in behaviors, hold-trigger-key-positions are
+#     auto-generated: hml gets right-side keys, hmr gets left-side keys.
+#     This function is called by updateKeymapOutput() (line 6394)
 #     when generating the behavior section of the .keymap file.
 
 # ============================================================
 # SECTION 22: CROSS-TAB SYNC (how RGB & Keymap tabs talk)
 # ============================================================
-# Ref. Lines ~6861-7023 in code
+# Ref. Lines ~6977-7139 in code
 #
 # The two tabs have separate data, but they need to stay in agreement.
 #
-#   syncCrossTabData() (line 6861):
+#   syncCrossTabData() (line 6977):
 #     Called when switching TO the RGB tab.
 #     Goes through every keymapLayer and adds matching entries to
 #     the RGB layers[] array (if they don't already exist).
@@ -877,7 +902,7 @@
 # ============================================================
 # SECTION 25: DOMContentLoaded (wiring everything up)
 # ============================================================
-# Ref. Lines 7304-9176 in code
+# Ref. Lines 7420-9280 in code
 #
 # This is the longest section. It runs once when the page finishes
 # loading. Its job is to connect HTML elements to JavaScript functions.
@@ -1120,14 +1145,19 @@
 # after macros{}; others (hold-tap, tap-dance, etc.) go inside behaviors{}.
 
 # ============================================================
-# SECTION 32: LAYOUT SWITCH #INCLUDE UPDATE
+# SECTION 32: LAYOUT SWITCH & JSON IMPORT #INCLUDE UPDATE
 # ============================================================
-# Ref. Lines ~8236-8261 in DOMContentLoaded in code
+# Ref. Lines ~7720-7750 in DOMContentLoaded in code
 #
-# When the user clicks "Use Corne" or "Use Lotus58" layout buttons,
-# the handlers now also update keymapParsedIncludes[] by regex-replacing
-# the dtsi filename (e.g., corne-rgb.dtsi <-> lotus58-rgb.dtsi).
+# When the user clicks "Use Corne", "Use Lotus58", or "Apply Layout"
+# (for a custom JSON), the handlers update keymapParsedIncludes[] by
+# regex-replacing any existing -rgb.dtsi filename with the new
+# keyboard's name (e.g., sofle-rgb.dtsi → corne-rgb.dtsi).
+# The regex /[a-z0-9_]+-rgb\.dtsi/gi matches any keyboard prefix.
 # Then updateKeymapOutput() is called to regenerate with correct path.
+#
+# The JSON Apply handler (line ~7726) also saves oldId before calling
+# loadLayout(), then compares to detect a name change and updates includes.
 
 # ============================================================
 # SECTION 33: KEYMAP EDITOR POPUP OVERLAYS

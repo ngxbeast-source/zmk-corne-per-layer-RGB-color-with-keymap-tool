@@ -19,8 +19,8 @@
 
 /* ---- STEP 1: DEFINE LAYERS ---- */
 // Example: #define LAYER_BASE 0
-// #define LAYER_FN 1
-// #define LAYER_ADJUST 2
+// #define L_FN 1
+// #define ADJUST 2
                 /* -------------------REMOVE & DEFINE HERE------------------- */
 
 
@@ -61,7 +61,7 @@
                        <&macro_release &mo layer>; \
         )
 // EXPERIMENTAL: Blink helper - Hardcode a &kp you want to "blink", used in conjunction with tap-dance
-// USED FOR NUM/CAPSLOCK BLINK BEHAVIOR, COLORS NEED TO HARDCODED TO THE &kp in A macro then we can move it to the tap-dance
+// USED FOR NUM/CAPSLOCK BLINK BEHAVIOR, COLORS NEED TO HARDCODED TO THE &kp IN A MACRO THEN WE CAN MOVE IT TO TAP-DANCE.
 #define KP_BLINK(node_name, node_label, key, blink_color, return_color, wait) \
          ZMK_MACRO(node_name, \
             label = node_label; \

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZMK RGB &amp; Keymap Editor v0.23</title>
+  <title>ZMK RGB &amp; Keymap Editor v0.33</title>
   <style>
     /* ====== THEME VARIABLES ====== */
     :root {
@@ -487,7 +487,7 @@
 
   <!-- ====== TOPBAR ====== -->
   <div class="topbar">
-    <h1>ZMK Per-Layer Color and Keymap Editor <small>v0.23</small></h1>
+    <h1>ZMK Per-Layer Color and Keymap Editor <small>v0.33</small></h1>
     <div class="tab-bar">
       <button class="tab-btn active" data-tab="tabRgb">RGB Generator</button>
       <button class="tab-btn" data-tab="tabKeymap">Keymap Editor</button>
@@ -514,7 +514,6 @@
           <div style="margin-top:0.4em;display:flex;align-items:center;gap:0.5em;">
             <button id="parseBtn">Parse &amp; Reflect</button>
             <button id="rgbSyncNamesBtn" title="Overwrite Keymap tab layer names with RGB layer names (by index)" style="background:#2a4a5a;color:#cde;border:1px solid #5a8a9a;font-size:0.85em;padding:0.25em 0.7em;border-radius:4px;cursor:pointer;">Sync Names → Keymap</button>
-            <button id="rgbClearSyncBtn" title="Remove data synced from Keymap tab" style="background:#6a3030;color:#eee;border:1px solid #944;font-size:0.85em;padding:0.25em 0.7em;border-radius:4px;cursor:pointer;">Clear Keymap Data</button>
             <span id="userCodeStatus" class="status-msg" style="display:none;"></span>
             <button class="btn-sm" id="rgbUndoBtn" title="Undo (Ctrl+Z)" disabled style="margin-left:auto;background:var(--item-bg);color:var(--text);border:1px solid var(--border);">&#x21B6; Undo</button>
             <button class="btn-sm" id="rgbRedoBtn" title="Redo (Ctrl+Y)" disabled style="background:var(--item-bg);color:var(--text);border:1px solid var(--border);">&#x21B7; Redo</button>
@@ -741,7 +740,6 @@
           <div style="margin-top:0.4em;display:flex;align-items:center;gap:0.5em;">
             <button id="kmParseBtn">Parse Keymap</button>
             <button id="kmSyncNamesBtn" title="Overwrite RGB tab layer names with Keymap layer names (by index)" style="background:#2a4a5a;color:#cde;border:1px solid #5a8a9a;font-size:0.85em;padding:0.25em 0.7em;border-radius:4px;cursor:pointer;">Sync Names → RGB</button>
-            <button id="kmClearSyncBtn" title="Remove data synced from RGB tab" style="background:#6a3030;color:#eee;border:1px solid #944;font-size:0.85em;padding:0.25em 0.7em;border-radius:4px;cursor:pointer;">Clear RGB Data</button>
             <span id="kmParseStatus" class="status-msg" style="display:none;"></span>
           </div>
         </div>
@@ -1357,7 +1355,7 @@
   <div id="layoutJsonOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;">
     <div style="background:var(--card);border-radius:10px;padding:1.2em;width:90%;max-width:600px;max-height:80vh;overflow:auto;border:1px solid var(--border);">
       <h3 style="margin-bottom:0.5em;color:var(--accent2);">Load Keyboard Layout JSON</h3>
-      <textarea id="layoutJsonInput" rows="12" placeholder='Paste keyboard layout JSON (corne.json format)...'></textarea>
+      <textarea id="layoutJsonInput" rows="12" placeholder='Paste keyboard layout JSON (any keyboard .json format — Corne, Sofle, reviung41, etc.)...'></textarea>
       <div style="margin-top:0.4em;display:flex;gap:0.5em;">
         <button id="layoutJsonApplyBtn">Apply Layout</button>
         <button id="layoutJsonCancelBtn" style="background:var(--muted);">Cancel</button>
@@ -3422,15 +3420,72 @@ var KEY_SIZE = 52;  // inner key size (slightly less than KEY_SCALE for gap)
 var KEY_RADIUS = 5;
 
 // loadLayout(layoutObj) — Takes a keyboard layout JSON and extracts
-// the physical key position array. Falls back to null if invalid.
+// the physical key position array. Accepts multiple JSON formats:
+//   1. { layouts: { "<name>": { layout: [...] } } } — standard keyboard .json
+//   2. { layout: [...] } — direct layout wrapper
+//   3. [...] — flat array of key positions
+// If keys lack row/col fields (common in community .json files), they are
+// inferred from x/y positions: a new row starts when x drops by more than 2
+// from the previous key (indicating the line wrapped back to the left side).
+// The keyboard name (e.g. "Sofle") is extracted from the layout key and stored
+// in currentLayoutId for use in #include "-rgb.dtsi" output generation.
 function loadLayout(layoutObj) {
-  if (layoutObj && layoutObj.layouts && layoutObj.layouts.default_layout) {
-    keyboardLayout = layoutObj.layouts.default_layout.layout;
-    if (layoutObj.id) currentLayoutId = layoutObj.id;
-  } else if (Array.isArray(layoutObj)) {
-    keyboardLayout = layoutObj;
-  } else {
+  var layoutArr = null;
+  var layoutName = null;
+
+  // Format 1: { layouts: { "<name>": { layout: [...] } } }
+  if (layoutObj && layoutObj.layouts && typeof layoutObj.layouts === 'object') {
+    var keys = Object.keys(layoutObj.layouts);
+    if (keys.length > 0) {
+      layoutName = keys[0];
+      var inner = layoutObj.layouts[layoutName];
+      if (inner && Array.isArray(inner.layout)) {
+        layoutArr = inner.layout;
+      }
+    }
+    // An explicit "id" field overrides the layout key name
+    if (layoutObj.id) layoutName = layoutObj.id;
+  }
+
+  // Format 2: { layout: [...] }
+  if (!layoutArr && layoutObj && Array.isArray(layoutObj.layout)) {
+    layoutArr = layoutObj.layout;
+    if (layoutObj.id) layoutName = layoutObj.id;
+  }
+
+  // Format 3: flat array of key positions
+  if (!layoutArr && Array.isArray(layoutObj)) {
+    layoutArr = layoutObj;
+  }
+
+  if (!layoutArr || layoutArr.length === 0) {
     keyboardLayout = null;
+    return;
+  }
+
+  // Infer row and col from x/y positions if the first key lacks a row field.
+  // Row breaks are detected when x drops significantly (> 2 units) from the
+  // previous key, which means the layout wrapped to a new physical row.
+  if (layoutArr[0].row === undefined) {
+    var row = 0;
+    var colInRow = 0;
+    for (var i = 0; i < layoutArr.length; i++) {
+      if (i > 0 && layoutArr[i].x < layoutArr[i - 1].x - 2) {
+        row++;
+        colInRow = 0;
+      }
+      layoutArr[i].row = row;
+      layoutArr[i].col = colInRow++;
+    }
+  }
+
+  keyboardLayout = layoutArr;
+
+  // Set currentLayoutId from the layout name (e.g. "Sofle" → "sofle",
+  // "LAYOUT_split_3x6_3" → "layout_split_3x6_3"). This name is used
+  // to generate the correct #include "<name>-rgb.dtsi" in output.
+  if (layoutName) {
+    currentLayoutId = layoutName.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
   }
 }
 
@@ -6349,20 +6404,21 @@ function updateKeymapOutput() {
     // Check if existing includes already have the rgb dtsi include
     var hasRgbInclude = keymapParsedIncludes.some(function(inc) { return inc.indexOf('-rgb.dtsi') >= 0; });
     keymapParsedIncludes.forEach(function(inc) { out += inc + '\n'; });
-    // Add rgb dtsi include if toggle is on and not already present
+    // Add rgb dtsi include if toggle is on and not already present.
+    // Uses currentLayoutId so the filename matches the loaded keyboard.
     if (includeRgbDtsi && !hasRgbInclude) {
-      var dtsiName = currentLayoutId === 'lotus58' ? 'lotus58-rgb.dtsi' : 'corne-rgb.dtsi';
+      var dtsiName = currentLayoutId + '-rgb.dtsi';
       out += '#include "' + dtsiName + '"\n';
     }
   } else {
-    out += '/*\n * Generated by RGB Keymap Editor v0.23\n */\n\n';
+    out += '/*\n * Generated by RGB Keymap Editor v0.33\n */\n\n';
     out += '#include <behaviors.dtsi>\n';
     out += '#include <dt-bindings/zmk/bt.h>\n';
     out += '#include <dt-bindings/zmk/keys.h>\n';
     out += '#include <dt-bindings/zmk/outputs.h>\n';
     out += '#include <dt-bindings/zmk/rgb.h>\n';
     if (includeRgbDtsi) {
-      var dtsiName2 = currentLayoutId === 'lotus58' ? 'lotus58-rgb.dtsi' : 'corne-rgb.dtsi';
+      var dtsiName2 = currentLayoutId + '-rgb.dtsi';
       out += '#include "' + dtsiName2 + '"\n';
     }
     // Auto-detect additional includes
@@ -6784,10 +6840,46 @@ function updateKeymapOutput() {
 
 // ================================================================
 // SECTION: BEHAVIOR CODE GENERATION
+// getKeyPositionsForSide(side) — Returns a space-separated string of key
+// indices belonging to the given side ('left' or 'right') of a split keyboard.
+// Uses the same split detection as updateKeymapOutput(): finds the largest
+// horizontal gap in the layout's x-positions to split left vs right halves.
+// Used by generateBehaviorCode() to auto-fill hold-trigger-key-positions
+// for hml (needs right-side keys) and hmr (needs left-side keys).
+function getKeyPositionsForSide(side) {
+  if (!keyboardLayout || keyboardLayout.length === 0) return '';
+  // Build x-position lookup and detect largest horizontal gap (the split)
+  var splitX = -1;
+  var maxXGap = 2;
+  keyboardLayout.forEach(function(k, i) {
+    for (var j = i + 1; j < keyboardLayout.length; j++) {
+      var kj = keyboardLayout[j];
+      // Only compare keys in same row to find the split
+      if (k.row === kj.row) {
+        var gap = Math.abs(kj.x - k.x);
+        if (gap > maxXGap) {
+          maxXGap = gap;
+          splitX = (Math.min(k.x, kj.x) + Math.max(k.x, kj.x)) / 2;
+        }
+      }
+    }
+  });
+  if (splitX < 0) return ''; // No split detected (not a split keyboard)
+  // Collect key indices for the requested side
+  var positions = [];
+  keyboardLayout.forEach(function(k, i) {
+    if (side === 'left' && k.x < splitX) positions.push(i);
+    else if (side === 'right' && k.x >= splitX) positions.push(i);
+  });
+  return positions.join(' ');
+}
+
 // generateBehaviorCode() turns a custom behavior object into its
 // ZMK devicetree text block. Each behavior type (hold-tap, sticky-key,
 // tap-dance, caps-word, etc.) has its own format with specific
 // properties. Called by updateKeymapOutput() for each custom behavior.
+// For hml/hmr built-in behaviors, hold-trigger-key-positions are auto-
+// generated from the loaded keyboard layout using getKeyPositionsForSide().
 // More on this code can be found in 'RefDoc' line 623
 // ================================================================
 function generateBehaviorCode(b) {
@@ -6802,7 +6894,14 @@ function generateBehaviorCode(b) {
     if (b.config.requirePriorIdle) out += '            require-prior-idle-ms = <' + b.config.requirePriorIdle + '>;\n';
     out += '            flavor = "' + (b.config.flavor || 'tap-preferred') + '";\n';
     out += '            bindings = <' + (b.config.holdBinding || '&mo 0') + '>, <' + (b.config.tapBinding || '&kp') + '>;\n';
-    if (b.config.holdTriggerPositions) out += '            hold-trigger-key-positions = <' + b.config.holdTriggerPositions + '>;\n';
+    // Auto-generate hold-trigger-key-positions for hml/hmr built-in behaviors:
+    // hml (left homerow mod) needs right-side key positions so taps on the
+    // opposite hand don't interfere; hmr needs left-side positions.
+    var autoPositions = '';
+    if (b._builtin === 'hml') autoPositions = getKeyPositionsForSide('right');
+    else if (b._builtin === 'hmr') autoPositions = getKeyPositionsForSide('left');
+    var finalPositions = autoPositions || b.config.holdTriggerPositions || '';
+    if (finalPositions) out += '            hold-trigger-key-positions = <' + finalPositions + '>;\n';
     if (b.config.retroTap) out += '            retro-tap;\n';
     if (b.config.holdWhileUndecided) out += '            hold-while-undecided;\n';
     if (b.config.holdWhileUndecidedLinger) out += '            hold-while-undecided-linger;\n';
@@ -7485,15 +7584,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // --- RGB Generator wiring (Tab 1) ---
   document.getElementById('parseBtn').onclick = parseUserCode;
-  document.getElementById('rgbClearSyncBtn').onclick = function() {
-    pushRgbUndo();
-    // Remove items synced from Keymap tab
-    layers = layers.filter(function(l) { return !l._fromKeymap; });
-    behaviors = behaviors.filter(function(b) { return !b._fromKeymap; });
-    Object.keys(colorValueMap).forEach(function(k) { if (colorValueMap[k]._autoSync) { delete colorValueMap[k]; delete colorLabelMap[k]; } });
-    rgbRenderAll();
-    showStatus('userCodeStatus', 'Cleared synced keymap data');
-  };
   document.getElementById('rgbSyncNamesBtn').onclick = function() {
     if (layers.length === 0) { showStatus('userCodeStatus', 'No RGB layers to sync from'); return; }
     if (keymapLayers.length === 0) { showStatus('userCodeStatus', 'No keymap layers to sync to'); return; }
@@ -7723,21 +7813,29 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('layoutJsonApplyBtn').onclick = function() {
     try {
       var json = JSON.parse(document.getElementById('layoutJsonInput').value);
+      var oldId = currentLayoutId;
       loadLayout(json);
+      // Update any existing parsed #include paths to use the new keyboard's dtsi name
+      if (keymapParsedIncludes && oldId !== currentLayoutId) {
+        keymapParsedIncludes = keymapParsedIncludes.map(function(inc) {
+          return inc.replace(new RegExp('[a-z0-9_]+-rgb\\.dtsi', 'gi'), currentLayoutId + '-rgb.dtsi');
+        });
+      }
       renderKeyboardSvg('keyboardSvg');
       renderKeymapSensorList();
+      updateKeymapOutput();
       document.getElementById('layoutJsonOverlay').style.display = 'none';
-      showStatus('kmLayoutStatus', 'Layout loaded: ' + keyboardLayout.length + ' keys');
+      showStatus('kmLayoutStatus', 'Layout loaded: ' + keyboardLayout.length + ' keys (' + currentLayoutId + ')');
     } catch(e) {
       alert('Invalid JSON: ' + e.message);
     }
   };
   document.getElementById('kmUseDefaultLayoutBtn').onclick = function() {
     loadLayout(DEFAULT_CORNE_LAYOUT);
-    // Update parsed #include paths to use corne dtsi name
+    // Update parsed #include paths to use corne dtsi name (replaces any keyboard's -rgb.dtsi)
     if (keymapParsedIncludes) {
       keymapParsedIncludes = keymapParsedIncludes.map(function(inc) {
-        return inc.replace(/lotus58-rgb\.dtsi/, 'corne-rgb.dtsi').replace(/lotus58\/corne-rgb\.dtsi/, 'corne-rgb.dtsi');
+        return inc.replace(/[a-z0-9_]+-rgb\.dtsi/gi, 'corne-rgb.dtsi');
       });
     }
     renderKeyboardSvg('keyboardSvg');
@@ -7747,10 +7845,10 @@ document.addEventListener('DOMContentLoaded', function() {
   };
   document.getElementById('kmUseLotus58Btn').onclick = function() {
     loadLayout(DEFAULT_LOTUS58_LAYOUT);
-    // Update parsed #include paths to use lotus58 dtsi name
+    // Update parsed #include paths to use lotus58 dtsi name (replaces any keyboard's -rgb.dtsi)
     if (keymapParsedIncludes) {
       keymapParsedIncludes = keymapParsedIncludes.map(function(inc) {
-        return inc.replace(/corne-rgb\.dtsi/, 'lotus58-rgb.dtsi');
+        return inc.replace(/[a-z0-9_]+-rgb\.dtsi/gi, 'lotus58-rgb.dtsi');
       });
     }
     renderKeyboardSvg('keyboardSvg');
@@ -7789,17 +7887,6 @@ document.addEventListener('DOMContentLoaded', function() {
     showStatus('kmParseStatus', 'Parsed: ' + keymapLayers.length + ' layers, ' + keymapCombos.length + ' combos, ' + keymapMacros.length + ' macros, ' + keymapBehaviors.length + ' behaviors, ' + keymapConditionalLayers.length + ' cond. layers');
   };
 
-  document.getElementById('kmClearSyncBtn').onclick = function() {
-    // Remove items synced from RGB tab
-    keymapMacros = keymapMacros.filter(function(m) { return !m._fromRgb; });
-    keymapBehaviors = keymapBehaviors.filter(function(b) { return !b._fromRgb && !b._fromDtsi; });
-    keymapCombos = keymapCombos.filter(function(c) { return !c._fromRgb; });
-    populateBehaviorDropdown();
-    renderKeymapMacroList();
-    renderKeymapBehaviorList();
-    updateKeymapOutput();
-    showStatus('kmParseStatus', 'Cleared synced RGB data');
-  };
   document.getElementById('kmSyncNamesBtn').onclick = function() {
     if (keymapLayers.length === 0) { showStatus('kmParseStatus', 'No keymap layers to sync from'); return; }
     if (layers.length === 0) { showStatus('kmParseStatus', 'No RGB layers to sync to'); return; }
