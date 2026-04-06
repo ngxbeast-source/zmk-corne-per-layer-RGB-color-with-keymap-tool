@@ -4,6 +4,20 @@ This changelog combines:
 - Git commit history available in this repo (sampled from the oldest currently visible commits up to now)
 - Session memory from this workspace (design notes, bug hunts, and fix rounds)
 
+## 2026-04-06 — Mini Keyboard Physical Layout Fix
+
+### Major fix — `renderQaMiniKeyboard()` rewrite (line 6195)
+- Previously used col/row grid positioning (logical grid), which produced a flat rectangular grid that didn't match the actual keyboard shape.
+- Now uses x/y physical positions from `keyboardLayout` (same as the main `renderKeyboardSvg`, line 3495), so the mini keyboard in the Quick Assign panel shows the correct split-keyboard shape with proper thumb key rotation.
+- Bounding box calculation now accounts for rotated keys (r/rx/ry), matching the approach in `renderKeyboardSvg` (line 3495).
+- Scale reduced from 32→28 (keySize 30→26) for a more compact fit.
+- SVG uses `preserveAspectRatio="xMidYMid meet"` with a max-width of 600px and auto-centering margins.
+- Unicode symbols for `&trans` / `&none` now use escape sequences (`\u25BD` / `\u2715`) for better cross-platform compatibility.
+
+### CSS — `.qa-mini-kb` container centering (line 412)
+- Added `max-height: 180px; display: flex; align-items: center; justify-content: center;` to the container.
+- Changed `.qa-mini-kb .keyboard-svg` from `width: 100%` to `max-height: 160px` to prevent overflow.
+
 ## 2026-03-29 — Auto Homerow Mod Positions & Cleanup
 
 ### Major addition — Auto-generated `hold-trigger-key-positions` for hml/hmr

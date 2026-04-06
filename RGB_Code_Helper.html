@@ -409,8 +409,8 @@
     .qa-panel .qa-desc { color: var(--muted); font-size: 0.85em; margin-bottom: 0.8em; }
     .qa-current { background: var(--item-bg); border: 1px solid var(--border); border-radius: 6px; padding: 0.6em 0.8em; margin-bottom: 0.8em; font-size: 0.9em; }
     .qa-current b { color: var(--accent2); }
-    .qa-mini-kb { background: var(--svg-bg); border: 1px solid var(--border); border-radius: 8px; padding: 0.5em; margin-bottom: 0.8em; overflow: visible; }
-    .qa-mini-kb .keyboard-svg { width: 100%; display: block; }
+    .qa-mini-kb { background: var(--svg-bg); border: 1px solid var(--border); border-radius: 8px; padding: 0.5em; margin-bottom: 0.8em; overflow: visible; max-height: 180px; display: flex; align-items: center; justify-content: center; }
+    .qa-mini-kb .keyboard-svg { display: block; max-height: 160px; }
     .qa-mini-kb .key-group { cursor: pointer; }
     .qa-mini-kb .key-group.qa-highlight .key-rect { fill: var(--accent); stroke: var(--accent2); stroke-width: 2.5; }
     .qa-mini-kb .key-group.qa-highlight .key-label { fill: #fff; }
@@ -6187,6 +6187,11 @@ function qaKeydownHandler(e) {
   if (zmk) qaAssign(zmk);
 }
 
+// renderQaMiniKeyboard() — Draws a compact mini version of the keyboard
+// inside the Quick Assign panel. Uses x/y positions from keyboardLayout
+// (same as the main renderKeyboardSvg, line 3496) so the shape matches
+// the actual keyboard layout (split gap, thumb key rotation, etc.).
+// Scale is smaller (28px per unit) to keep the mini keyboard compact.
 function renderQaMiniKeyboard() {
   var container = document.getElementById('qaMiniKb');
   if (!keyboardLayout || !keymapLayers[activeLayerIndex]) {
@@ -6194,45 +6199,75 @@ function renderQaMiniKeyboard() {
     return;
   }
   var layer = keymapLayers[activeLayerIndex];
-  var scale = 32;
-  var keySize = 30;
-  var padding = 6;
+  // Smaller scale than the main SVG (KEY_SCALE=56) so the mini keyboard stays compact
+  var scale = 28;
+  var keySize = 26;
+  var pad = 6;
 
-  var maxCol = 0, maxRow = 0;
+  // Calculate bounding box from x/y positions, accounting for rotation
+  // (same approach as renderKeyboardSvg, line 3506)
+  var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
   keyboardLayout.forEach(function(k) {
-    if (k.col + (k.w || 1) > maxCol) maxCol = k.col + (k.w || 1);
-    if (k.row + (k.h || 1) > maxRow) maxRow = k.row + (k.h || 1);
+    var x = k.x * scale, y = k.y * scale;
+    var r = k.r || 0;
+    if (r !== 0) {
+      var rpx = (k.rx || 0) * scale, rpy = (k.ry || 0) * scale;
+      var rad = r * Math.PI / 180;
+      var cr = Math.cos(rad), sr = Math.sin(rad);
+      [[x,y],[x+keySize,y],[x,y+keySize],[x+keySize,y+keySize]].forEach(function(c) {
+        var dx = c[0] - rpx, dy = c[1] - rpy;
+        var nx = rpx + dx * cr - dy * sr;
+        var ny = rpy + dx * sr + dy * cr;
+        if (nx < minX) minX = nx; if (ny < minY) minY = ny;
+        if (nx > maxX) maxX = nx; if (ny > maxY) maxY = ny;
+      });
+    } else {
+      if (x < minX) minX = x; if (y < minY) minY = y;
+      if (x + keySize > maxX) maxX = x + keySize;
+      if (y + keySize > maxY) maxY = y + keySize;
+    }
   });
 
-  var svgW = maxCol * scale + padding * 2;
-  var svgH = maxRow * scale + padding * 2;
+  var svgW = maxX - minX + pad * 2;
+  var svgH = maxY - minY + pad * 2;
+  var vbX = minX - pad;
+  var vbY = minY - pad;
 
-  var svg = '<svg class="keyboard-svg" viewBox="0 0 ' + svgW + ' ' + svgH + '" style="width:100%;max-width:' + svgW + 'px;">';
+  // Cap the SVG max-width so the mini keyboard stays small inside the panel
+  var svg = '<svg class="keyboard-svg" viewBox="' + vbX + ' ' + vbY + ' ' + svgW + ' ' + svgH +
+    '" preserveAspectRatio="xMidYMid meet" style="width:100%;max-width:600px;display:block;margin:0 auto;">';
 
   keyboardLayout.forEach(function(k, idx) {
-    var x = k.col * scale + padding;
-    var y = k.row * scale + padding;
-    var w = (k.w || 1) * scale - 2;
-    var h = (k.h || 1) * scale - 2;
+    // Use x/y positions (physical layout) instead of col/row (logical grid)
+    var x = k.x * scale;
+    var y = k.y * scale;
+    var r = k.r || 0;
+    var rx = (k.rx || 0) * scale;
+    var ry = (k.ry || 0) * scale;
+    var transform = '';
+    if (r !== 0) {
+      transform = ' transform="rotate(' + r + ' ' + rx + ' ' + ry + ')"';
+    }
+
     var binding = layer.bindings[idx] || '&trans';
     var label = binding.replace(/^&\w+\s*/, '').substring(0, 6) || binding.substring(0, 6);
-    if (binding === '&trans') label = '▽';
-    else if (binding === '&none') label = '✕';
+    if (binding === '&trans') label = '\u25BD';
+    else if (binding === '&none') label = '\u2715';
 
     var cls = 'key-group';
     if (idx === qaKeyIndex) cls += ' qa-highlight';
     else if (qaOriginalBindings && layer.bindings[idx] !== qaOriginalBindings[idx]) cls += ' qa-done';
 
-    svg += '<g class="' + cls + '" data-qa-key="' + idx + '">';
-    svg += '<rect class="key-rect" x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="3" ry="3"/>';
-    svg += '<text class="key-label" x="' + (x + w / 2) + '" y="' + (y + h / 2) + '" font-size="7">' + esc(label) + '</text>';
+    svg += '<g class="' + cls + '" data-qa-key="' + idx + '"' + transform + '>';
+    svg += '<rect class="key-rect" x="' + x + '" y="' + y + '" width="' + keySize + '" height="' + keySize + '" rx="3" ry="3"/>';
+    svg += '<text class="key-label" x="' + (x + keySize / 2) + '" y="' + (y + keySize / 2) + '" font-size="7">' + esc(label) + '</text>';
     svg += '</g>';
   });
 
   svg += '</svg>';
   container.innerHTML = svg;
 
-  // Click handler for mini keyboard keys
+  // Click handler for mini keyboard keys — jump to that key index
   container.onclick = function(e) {
     var g = e.target.closest('[data-qa-key]');
     if (g && qaActive) {

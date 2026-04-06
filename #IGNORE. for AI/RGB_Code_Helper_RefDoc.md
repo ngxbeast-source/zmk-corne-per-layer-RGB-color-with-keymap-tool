@@ -24,35 +24,35 @@
 # Line  115  — Section 3:  Global Data Model (the "memory" of the tool)
 # Line  162  — Section 4:  Undo/Redo System
 # Line  197  — Section 5:  Default Keyboard Layouts
-# Line  218  — Section 6:  ZMK Keycodes & Behavior Reference Tables
-# Line  251  — Section 7:  Color Utilities (HSB, Hex, RGB)
-# Line  280  — Section 8:  HSB Color Picker
-# Line  306  — Section 9:  RGB Tab Helper Functions
-# Line  355  — Section 10: .dtsi Code Parser (parseUserCode)
-# Line  414  — Section 11: RGB Tab Rendering (Lists, Dropdowns, UI)
-# Line  442  — Section 12: RGB Output Generation (updateRgbOutput)
-# Line  487  — Section 13: SVG Keyboard Renderer
-# Line  512  — Section 14: Binding Labels (how keys show text)
-# Line  536  — Section 15: .keymap File Parser (parseKeymap)
-# Line  571  — Section 16: Layer Tabs & Management
-# Line  593  — Section 17: Binding Editor (how you change a key)
-# Line  624  — Section 18: Combo, Macro, Behavior & Built-in Behavior Editors
-# Line  678  — Section 19: Quick-Assign System
-# Line  696  — Section 20: Keymap Output Generation (updateKeymapOutput)
-# Line  728  — Section 21: Behavior Code Generation
-# Line  747  — Section 22: Cross-Tab Sync (how RGB & Keymap tabs talk)
-# Line  837  — Section 23: Value Picker (floating search widget)
-# Line  858  — Section 24: Tab Switching & Dark Mode
-# Line  878  — Section 25: DOMContentLoaded (wiring everything up)
-# Line  926  — Section 26: Layer Ordering (how layers stay in sequence)
-# Line  965  — Section 27: Macro Param Controls (context-aware editing)
-# Line 1000 — Section 28: Comment Preservation (.dtsi round-trip)
-# Line 1037 — Section 29: Clear Layer Feature
-# Line 1058 — Section 30: Popup Editor Overlays (Combo & Behavior)
-# Line 1094 — Section 31: RGB Output Structure (/ { ... }; wrapper)
-# Line 1123 — Section 32: Layout Switch #include Update
-# Line 1133 — Section 33: Keymap Editor Popup Overlays
-# Line 1313 — Section 34: Binding Picker Popup (visual binding chooser)
+# Line  222  — Section 6:  ZMK Keycodes & Behavior Reference Tables
+# Line  255  — Section 7:  Color Utilities (HSB, Hex, RGB)
+# Line  284  — Section 8:  HSB Color Picker
+# Line  310  — Section 9:  RGB Tab Helper Functions
+# Line  359  — Section 10: .dtsi Code Parser (parseUserCode)
+# Line  418  — Section 11: RGB Tab Rendering (Lists, Dropdowns, UI)
+# Line  446  — Section 12: RGB Output Generation (updateRgbOutput)
+# Line  491  — Section 13: SVG Keyboard Renderer
+# Line  524  — Section 14: Binding Labels (how keys show text)
+# Line  548  — Section 15: .keymap File Parser (parseKeymap)
+# Line  583  — Section 16: Layer Tabs & Management
+# Line  605  — Section 17: Binding Editor (how you change a key)
+# Line  636  — Section 18: Combo, Macro, Behavior & Built-in Behavior Editors
+# Line  690  — Section 19: Quick-Assign System
+# Line  714  — Section 20: Keymap Output Generation (updateKeymapOutput)
+# Line  750  — Section 21: Behavior Code Generation
+# Line  778  — Section 22: Cross-Tab Sync (how RGB & Keymap tabs talk)
+# Line  868  — Section 23: Value Picker (floating search widget)
+# Line  889  — Section 24: Tab Switching & Dark Mode
+# Line  909  — Section 25: DOMContentLoaded (wiring everything up)
+# Line  957  — Section 26: Layer Ordering (how layers stay in sequence)
+# Line  996  — Section 27: Macro Param Controls (context-aware editing)
+# Line 1031 — Section 28: Comment Preservation (.dtsi round-trip)
+# Line 1068 — Section 29: Clear Layer Feature
+# Line 1089 — Section 30: Popup Editor Overlays (Combo & Behavior)
+# Line 1125 — Section 31: RGB Output Structure (/ { ... }; wrapper)
+# Line 1154 — Section 32: Layout Switch & JSON Import #include Update
+# Line 1169 — Section 33: Keymap Editor Popup Overlays
+# Line 1349 — Section 34: Binding Picker Popup (visual binding chooser)
 
 # ============================================================
 # SECTION 1: WHAT THIS TOOL DOES (Overview)
@@ -689,7 +689,7 @@
 # ============================================================
 # SECTION 19: QUICK-ASSIGN SYSTEM
 # ============================================================
-# Ref. Lines 5979-6321 in code
+# Ref. Lines 6051-6428 in code
 #
 # Quick-assign lets you rapidly assign keycodes to every key
 # by pressing keys on your physical keyboard.
@@ -703,11 +703,17 @@
 #
 # The on-screen keyboard (rendered by renderQaOnScreenKb) provides
 # a visual alternative for keys not on your physical keyboard.
+#
+# renderQaMiniKeyboard() (line 6195) draws a compact mini version
+# of the keyboard inside the Quick Assign panel. It uses x/y physical
+# positions from keyboardLayout (same as renderKeyboardSvg, line 3495)
+# so the shape matches the actual keyboard layout (split gap, thumb
+# key rotation, etc.). Scale is 28px per unit (vs 56 in the main SVG).
 
 # ============================================================
 # SECTION 20: KEYMAP OUTPUT GENERATION (updateKeymapOutput)
 # ============================================================
-# Ref. Lines 6394-6884 in code
+# Ref. Lines 6429-6919 in code
 #
 # This is the biggest output function. It generates the complete
 # .keymap file text from all the parsed/edited data.
