@@ -4,6 +4,19 @@ This changelog combines:
 - Git commit history available in this repo (sampled from the oldest currently visible commits up to now)
 - Session memory from this workspace (design notes, bug hunts, and fix rounds)
 
+## 2026-04-07 — QMK JSON Support, CSS Fix & ZMK Studio Assessment
+
+### Major addition — QMK Configurator JSON import (Format 4)
+- New function `generateGridLayout(keyCount)` (line 3428) creates a generic split-keyboard grid layout when no physical key positions are provided. Keys are arranged in two halves of 6 columns each with a 2-unit gap.
+- `loadLayout()` (line 3466) now recognises QMK Configurator export format (`{ keyboard, layout: "LAYOUT", layers: [[...]] }`). When detected, it auto-generates a grid layout from `layers[0].length` and extracts the keyboard name from the `keyboard` path (e.g. "mechboards/sofle/pro" → "sofle_pro").
+- Apply button handler (line 7898) now guards against null `keyboardLayout` — shows a descriptive alert instead of crashing with "Cannot read properties of null".
+
+### CSS fix — Number input width overflow
+- All H/S/B and Idx number inputs widened from `width:52px` to `width:56px` in both the header (lines 533-536) and the JS-generated layer list (lines 2678-2681). Prevents "100" from clipping behind the spin buttons.
+
+### ZMK Studio Assessment
+- User requested ZMK Studio-like live keyboard connection tab. After assessment: ZMK Studio uses WebUSB + Protocol Buffers over a custom HID transport with firmware-side `CONFIG_ZMK_STUDIO=y` support. Reimplementing this in a single HTML file is not feasible — would require the entire protobuf protocol, USB transport layer, and real-time state management. Feature not pursued per user's prior instruction.
+
 ## 2026-04-06 — Mini Keyboard Physical Layout Fix
 
 ### Major fix — `renderQaMiniKeyboard()` rewrite (line 6195)

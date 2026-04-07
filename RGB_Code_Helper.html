@@ -530,10 +530,10 @@
         <div class="section-body" id="layerBody">
           <div class="input-row">
             <div class="input-group"><label>Name</label><input type="text" id="layerName" placeholder="L_ABC" style="width:120px;"></div>
-            <div class="input-group"><label>Idx</label><input type="number" id="layerIndex" min="0" placeholder="—" style="width:52px;"></div>
-            <div class="input-group"><label>H</label><input type="range" id="hue" min="0" max="360" value="0"><input type="number" id="hueNum" min="0" max="360" value="0" style="width:52px;"></div>
-            <div class="input-group"><label>S</label><input type="range" id="sat" min="0" max="100" value="100"><input type="number" id="satNum" min="0" max="100" value="100" style="width:52px;"></div>
-            <div class="input-group"><label>B</label><input type="range" id="bri" min="0" max="100" value="50"><input type="number" id="briNum" min="0" max="100" value="50" style="width:52px;"></div>
+            <div class="input-group"><label>Idx</label><input type="number" id="layerIndex" min="0" placeholder="—" style="width:56px;"></div>
+            <div class="input-group"><label>H</label><input type="range" id="hue" min="0" max="360" value="0"><input type="number" id="hueNum" min="0" max="360" value="0" style="width:56px;"></div>
+            <div class="input-group"><label>S</label><input type="range" id="sat" min="0" max="100" value="100"><input type="number" id="satNum" min="0" max="100" value="100" style="width:56px;"></div>
+            <div class="input-group"><label>B</label><input type="range" id="bri" min="0" max="100" value="50"><input type="number" id="briNum" min="0" max="100" value="50" style="width:56px;"></div>
             <div class="color-swatch" id="colorPreview">
               <input type="color" id="colorWheel" value="#ff0000" title="Pick a color">
             </div>
@@ -2675,10 +2675,10 @@ function renderLayerList() {
     div.innerHTML =
       toggleHTML +
       '<div class="input-group"><label>Name</label><input type="text" value="' + esc(l.name) + '" data-field="name" data-i="' + i + '" style="width:110px;font-weight:600;color:var(--accent2);"></div>' +
-      '<div class="input-group"><label>Idx</label><input type="number" value="' + esc(l.index) + '" min="0" style="width:52px" data-field="index" data-i="' + i + '"></div>' +
-      '<div class="input-group"><label>H</label><input type="number" min="0" max="360" value="' + esc(l.h) + '" style="width:52px" data-field="h" data-i="' + i + '"></div>' +
-      '<div class="input-group"><label>S</label><input type="number" min="0" max="100" value="' + esc(l.s) + '" style="width:52px" data-field="s" data-i="' + i + '"></div>' +
-      '<div class="input-group"><label>B</label><input type="number" min="0" max="100" value="' + esc(l.b) + '" style="width:52px" data-field="b" data-i="' + i + '"></div>' +
+      '<div class="input-group"><label>Idx</label><input type="number" value="' + esc(l.index) + '" min="0" style="width:56px" data-field="index" data-i="' + i + '"></div>' +
+      '<div class="input-group"><label>H</label><input type="number" min="0" max="360" value="' + esc(l.h) + '" style="width:56px" data-field="h" data-i="' + i + '"></div>' +
+      '<div class="input-group"><label>S</label><input type="number" min="0" max="100" value="' + esc(l.s) + '" style="width:56px" data-field="s" data-i="' + i + '"></div>' +
+      '<div class="input-group"><label>B</label><input type="number" min="0" max="100" value="' + esc(l.b) + '" style="width:56px" data-field="b" data-i="' + i + '"></div>' +
       '<div class="color-swatch" style="background:' + hex + ';" data-color-pick="' + i + '" title="Pick color (HSB)"></div>' +
       '<div class="input-group"><label>Lbl</label><input type="text" value="' + esc(l.label || '') + '" data-field="label" data-i="' + i + '" style="width:110px"></div>' +
       '<button class="btn-danger btn-sm" data-remove="layer" data-i="' + i + '">&#10005;</button>';
@@ -3419,11 +3419,45 @@ var KEY_SCALE = 56; // pixels per unit
 var KEY_SIZE = 52;  // inner key size (slightly less than KEY_SCALE for gap)
 var KEY_RADIUS = 5;
 
+// generateGridLayout(keyCount) — Creates a generic split-keyboard grid layout
+// when no physical position data is available (e.g. QMK Configurator exports).
+// Keys are split evenly into left/right halves, arranged in rows of 6 columns
+// each, with a 2-unit horizontal gap between halves. Any remaining keys on
+// each side form a partial thumb-cluster row at the bottom.
+// Used by loadLayout() Format 4 when only keycode data exists.
+function generateGridLayout(keyCount) {
+  var half = Math.ceil(keyCount / 2);
+  var colsPerSide = 6;
+  var gap = 2; // horizontal gap between left and right halves
+  var keys = [];
+
+  // Build left half, then right half. Each half fills rows of colsPerSide keys.
+  for (var side = 0; side < 2; side++) {
+    var count = (side === 0) ? half : (keyCount - half);
+    var xOffset = (side === 0) ? 0 : (colsPerSide + gap);
+    for (var k = 0; k < count; k++) {
+      var row = Math.floor(k / colsPerSide);
+      var col = k % colsPerSide;
+      keys.push({
+        x: xOffset + col,
+        y: row,
+        row: row,
+        col: (side === 0) ? col : (col + colsPerSide + 1)
+      });
+    }
+  }
+
+  return keys;
+}
+
 // loadLayout(layoutObj) — Takes a keyboard layout JSON and extracts
 // the physical key position array. Accepts multiple JSON formats:
 //   1. { layouts: { "<name>": { layout: [...] } } } — standard keyboard .json
 //   2. { layout: [...] } — direct layout wrapper
 //   3. [...] — flat array of key positions
+//   4. { keyboard: "...", layers: [[...], ...] } — QMK Configurator export
+//      (contains keycodes but no physical positions; a grid layout is generated
+//      from the key count, and the keyboard name is extracted from the path)
 // If keys lack row/col fields (common in community .json files), they are
 // inferred from x/y positions: a new row starts when x drops by more than 2
 // from the previous key (indicating the line wrapped back to the left side).
@@ -3456,6 +3490,22 @@ function loadLayout(layoutObj) {
   // Format 3: flat array of key positions
   if (!layoutArr && Array.isArray(layoutObj)) {
     layoutArr = layoutObj;
+  }
+
+  // Format 4: QMK Configurator export — { keyboard: "vendor/name/variant",
+  // layout: "LAYOUT", layers: [[keycodes...], ...] }.  These exports contain
+  // only keycodes with no physical key positions, so we auto-generate a
+  // split-keyboard grid from the key count in the first layer.  The keyboard
+  // name is extracted from the "keyboard" path (e.g. "mechboards/sofle/pro"
+  // → "sofle_pro").  See generateGridLayout() above for the grid logic.
+  if (!layoutArr && layoutObj && layoutObj.keyboard && layoutObj.layers && Array.isArray(layoutObj.layers)) {
+    var keyCount = layoutObj.layers[0] ? layoutObj.layers[0].length : 0;
+    if (keyCount > 0) {
+      layoutArr = generateGridLayout(keyCount);
+      // "mechboards/sofle/pro" → ["mechboards","sofle","pro"] → "sofle_pro"
+      var parts = layoutObj.keyboard.split('/');
+      layoutName = parts.length > 1 ? parts.slice(1).join('_') : parts[0];
+    }
   }
 
   if (!layoutArr || layoutArr.length === 0) {
@@ -7850,6 +7900,12 @@ document.addEventListener('DOMContentLoaded', function() {
       var json = JSON.parse(document.getElementById('layoutJsonInput').value);
       var oldId = currentLayoutId;
       loadLayout(json);
+      // Guard against unrecognised JSON that yields no layout (loadLayout sets
+      // keyboardLayout = null when no key positions can be found or generated).
+      if (!keyboardLayout) {
+        alert('Could not extract a layout from this JSON. Ensure it contains key position data or is a QMK Configurator export with a "layers" array.');
+        return;
+      }
       // Update any existing parsed #include paths to use the new keyboard's dtsi name
       if (keymapParsedIncludes && oldId !== currentLayoutId) {
         keymapParsedIncludes = keymapParsedIncludes.map(function(inc) {
