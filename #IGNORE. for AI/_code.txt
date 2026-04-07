@@ -1,5 +1,4 @@
-﻿<script>
-// ================================================================
+﻿// ================================================================
 // SECTION: SHARED DATA MODEL
 // These arrays hold ALL tool data. Think of them as notebooks:
 // each one stores a list of items the user has created or parsed.
@@ -725,10 +724,12 @@ function closeHsbPicker() {
 // ================================================================
 function layerOptionsHTML(selected) {
   // Build a sorted copy so dropdown options follow sequential index order (0, 1, 2...)
-  var sorted = layers.slice().sort(function(a, b) {
-    var ai = (a.index !== '' && a.index !== undefined) ? parseInt(a.index) : 9999;
-    var bi = (b.index !== '' && b.index !== undefined) ? parseInt(b.index) : 9999;
-    return ai - bi;
+  // Filter out color-only entries (no index) â€” these are RGB helper colors like
+  // RGB_BLINK_ON that aren't actual keyboard layers and shouldn't appear in dropdowns
+  var sorted = layers.filter(function(l) {
+    return l.index !== '' && l.index !== undefined;
+  }).sort(function(a, b) {
+    return parseInt(a.index) - parseInt(b.index);
   });
   return sorted.map(function(l) {
     var sel = l.name === selected ? ' selected' : '';
@@ -1395,8 +1396,10 @@ function renderMacroList() {
       labelStr +
       '<span style="color:#888;font-size:0.85em;margin:0 6px;">' + typeLabel + '</span>' +
       '<span style="color:#aaa;font-size:0.85em;">' + infoStr + '</span>' +
-      '<button class="btn-sm" data-edit-macro="' + i + '" style="margin-left:auto;padding:2px 8px;background:#3a3a5a;color:#e0e0e0;border:1px solid #555;border-radius:4px;cursor:pointer;">&#9998; Edit</button>' +
-      '<button class="btn-danger btn-sm" data-remove="macro" data-i="' + i + '" style="margin-left:4px;">&#10005;</button>';
+      '<span style="margin-left:auto;display:flex;gap:4px;">' +
+      '<button class="btn-sm" data-edit-macro="' + i + '" style="padding:2px 8px;background:#3a3a5a;color:#e0e0e0;border:1px solid #555;border-radius:4px;cursor:pointer;">&#9998; Edit</button>' +
+      '<button class="btn-danger btn-sm" data-remove="macro" data-i="' + i + '">&#10005;</button>' +
+      '</span>';
     list.appendChild(div);
   });
   list.onclick = function(e) {
@@ -1506,8 +1509,10 @@ function renderBehaviorList() {
       '<b>' + esc(b.name) + '</b>' +
       behLabelStr +
       '<span class="item-detail muted">&rarr; ' + esc(macroLabel) + '</span>' +
+      '<span style="margin-left:auto;display:flex;gap:4px;">' +
       '<button class="btn-edit btn-sm" data-edit="behavior" data-i="' + i + '">&#9998; Edit</button>' +
-      '<button class="btn-danger btn-sm" data-remove="behavior" data-i="' + i + '">&#10005;</button>';
+      '<button class="btn-danger btn-sm" data-remove="behavior" data-i="' + i + '">&#10005;</button>' +
+      '</span>';
     list.appendChild(div);
   });
   list.onclick = function(e) {
@@ -1530,9 +1535,12 @@ function renderComboList() {
       '<b>' + esc(c.name) + '</b>' +
       '<span class="item-detail">' + esc(c.bind) + '</span>' +
       '<span class="item-detail muted">P:' + esc(c.pos) + '</span>' +
+      '<span style="margin-left:auto;display:flex;align-items:center;gap:8px;">' +
       '<span class="item-tags">' + tagsHtml + '</span>' +
+      '<span style="display:flex;gap:4px;">' +
       '<button class="btn-edit btn-sm" data-edit="combo" data-i="' + i + '">&#9998; Edit</button>' +
-      '<button class="btn-danger btn-sm" data-remove="combo" data-i="' + i + '">&#10005;</button>';
+      '<button class="btn-danger btn-sm" data-remove="combo" data-i="' + i + '">&#10005;</button>' +
+      '</span></span>';
     list.appendChild(div);
   });
   list.onclick = function(e) {
@@ -1564,7 +1572,7 @@ function renderBlinkMacroList() {
       '<div class="input-group"><label>Color</label><select data-field="color" data-i="' + i + '">' + colorOptionsHTML(bm.color) + '</select><span class="color-preview" style="background:' + colorHex + '" title="' + esc(bm.color) + '"></span></div>' +
       '<div class="input-group"><label>Ret</label><select data-field="returnColor" data-i="' + i + '">' + colorOptionsHTML(bm.returnColor) + '</select><span class="color-preview" style="background:' + retHex + '" title="' + esc(bm.returnColor) + '"></span></div>' +
       '<div class="input-group"><label>Wait</label><input type="number" value="' + esc(bm.wait) + '" data-field="wait" data-i="' + i + '" style="width:48px"></div>' +
-      '<button class="btn-danger btn-sm" data-remove="blink" data-i="' + i + '">&#10005;</button>';
+      '<span style="margin-left:auto;display:flex;gap:4px;"><button class="btn-danger btn-sm" data-remove="blink" data-i="' + i + '">&#10005;</button></span>';
     list.appendChild(div);
   });
   list.onclick = function(e) { if (e.target.dataset.remove === 'blink') { pushRgbUndo(); blinkMacros.splice(parseInt(e.target.dataset.i), 1); rgbRenderAll(); } };
@@ -3284,6 +3292,37 @@ function showBindingEditor(keyIdx) {
   renderKeyboardSvg('keyboardSvg');
 }
 
+// filterKeycodeGrid(query) â€” Filters all .keycode-btn elements in the
+// binding editor's keycode section. Buttons whose data-kc attribute
+// does not contain the query are hidden, and empty categories collapse.
+// Called when the user types in the keycode input field.
+function filterKeycodeGrid(q) {
+  q = (q || '').trim().toLowerCase();
+  document.querySelectorAll('#beKeycodeSection .keycode-btn').forEach(function(btn) {
+    var match = !q || btn.dataset.kc.toLowerCase().indexOf(q) >= 0;
+    btn.classList.toggle('hidden', !match);
+  });
+  document.querySelectorAll('#beKeycodeSection .keycode-category').forEach(function(det) {
+    var anyVisible = det.querySelectorAll('.keycode-btn:not(.hidden)').length > 0;
+    det.style.display = anyVisible ? '' : 'none';
+    if (q && anyVisible) det.open = true;
+    if (!q) det.removeAttribute('style');
+  });
+}
+
+// wireKeycodeSearchOnParam(inputId) â€” Attaches an input listener to
+// the specified parameter input (e.g. 'beParam1') so that typing in
+// the keycode field filters the keycode grid in real time.
+// This replaces the old separate search bar â€” the keycode input now
+// doubles as both the value field and the live-search filter.
+function wireKeycodeSearchOnParam(inputId) {
+  var el = document.getElementById(inputId);
+  if (!el) return;
+  el.addEventListener('input', function() { filterKeycodeGrid(this.value); });
+  // Reset grid filter when field is cleared or editor opens with existing value
+  filterKeycodeGrid(el.value);
+}
+
 function updateBindingEditorFields(behavior, params) {
   var p1Row = document.getElementById('beParam1Row');
   var p2Row = document.getElementById('beParam2Row');
@@ -3310,9 +3349,12 @@ function updateBindingEditorFields(behavior, params) {
     p1Label.textContent = 'Keycode';
     // Parse modifiers from existing keycode
     var parsed = parseModsFromKeycode(params.join(' '));
-    p1Container.innerHTML = '<input type="text" id="beParam1" value="' + esc(parsed.key) + '" style="width:160px;">';
+    // Keycode input doubles as search: typing filters the grid below.
+    // Placeholder tells user they can start typing to search.
+    p1Container.innerHTML = '<input type="text" id="beParam1" value="' + esc(parsed.key) + '" placeholder="Type to search\u2026" style="width:200px;" autocomplete="off">';
     kcSection.style.display = '';
     modSection.style.display = '';
+    wireKeycodeSearchOnParam('beParam1');
     // Set modifier checkboxes
     document.querySelectorAll('#beModCheckboxes input[type=checkbox]').forEach(function(cb) {
       cb.checked = parsed.mods.indexOf(cb.dataset.mod) >= 0;
@@ -3338,18 +3380,20 @@ function updateBindingEditorFields(behavior, params) {
     lhtml += '</select>';
     p1Container.innerHTML = lhtml;
     p2Label.textContent = 'Keycode';
-    p2Container.innerHTML = '<input type="text" id="beParam2" value="' + esc(params.slice(1).join(' ')) + '" style="width:160px;">';
+    p2Container.innerHTML = '<input type="text" id="beParam2" value="' + esc(params.slice(1).join(' ')) + '" placeholder="Type to search\u2026" style="width:200px;" autocomplete="off">';
     kcSection.style.display = '';
     modSection.style.display = '';
+    wireKeycodeSearchOnParam('beParam2');
   } else if (behavior === '&mt' || behavior === '&sk') {
     p1Label.textContent = behavior === '&mt' ? 'Modifier' : 'Keycode';
-    p1Container.innerHTML = '<input type="text" id="beParam1" value="' + esc(params[0] || '') + '" style="width:160px;">';
+    p1Container.innerHTML = '<input type="text" id="beParam1" value="' + esc(params[0] || '') + '" placeholder="Type to search\u2026" style="width:200px;" autocomplete="off">';
     if (behavior === '&mt') {
       p2Label.textContent = 'Keycode';
-      p2Container.innerHTML = '<input type="text" id="beParam2" value="' + esc(params.slice(1).join(' ')) + '" style="width:160px;">';
+      p2Container.innerHTML = '<input type="text" id="beParam2" value="' + esc(params.slice(1).join(' ')) + '" placeholder="Type to search\u2026" style="width:200px;" autocomplete="off">';
     }
     kcSection.style.display = '';
     modSection.style.display = '';
+    wireKeycodeSearchOnParam(behavior === '&mt' ? 'beParam2' : 'beParam1');
   } else if (behavior === '&bt') {
     p1Label.textContent = 'Action';
     var bhtml = '<select id="beParam1">';
@@ -6793,33 +6837,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // --- Keycode search ---
-  var kcSearchInput = document.getElementById('kcSearchInput');
-  var kcSearchClear = document.getElementById('kcSearchClear');
-  kcSearchInput.addEventListener('input', function() {
-    var q = this.value.trim().toLowerCase();
-    kcSearchClear.style.display = q ? '' : 'none';
-    document.querySelectorAll('#beKeycodeSection .keycode-btn').forEach(function(btn) {
-      var match = !q || btn.dataset.kc.toLowerCase().indexOf(q) >= 0;
-      btn.classList.toggle('hidden', !match);
-    });
-    document.querySelectorAll('#beKeycodeSection .keycode-category').forEach(function(det) {
-      var anyVisible = det.querySelectorAll('.keycode-btn:not(.hidden)').length > 0;
-      det.style.display = anyVisible ? '' : 'none';
-      if (q && anyVisible) det.open = true;
-      if (!q) det.removeAttribute('style');
-    });
-  });
-  kcSearchClear.addEventListener('click', function() {
-    kcSearchInput.value = '';
-    kcSearchClear.style.display = 'none';
-    document.querySelectorAll('#beKeycodeSection .keycode-btn').forEach(function(btn) {
-      btn.classList.remove('hidden');
-    });
-    document.querySelectorAll('#beKeycodeSection .keycode-category').forEach(function(det) {
-      det.removeAttribute('style');
-    });
-  });
+  // (Keycode search is now handled by wireKeycodeSearchOnParam() in
+  // updateBindingEditorFields â€” the keycode input field itself serves
+  // as the search field, so no separate search bar is needed.)
 
   // Keyboard SVG click â†’ opens binding editor popup
   document.getElementById('keyboardSvg').addEventListener('click', function(e) {
@@ -7995,6 +8015,177 @@ document.addEventListener('DOMContentLoaded', function() {
   renderKeymapBehaviorList();
   renderKeymapCondLayerList();
   renderKeymapSensorList();
+
+  // ---- Changelog popup wiring ----
+  // CHANGELOG_ENTRIES stores the tool's version history, sectioned by date.
+  // Each entry has date, title, and items[]. In a future version this could
+  // be loaded from an external file; for now it's embedded here so the
+  // single-file tool stays self-contained.
+  var CHANGELOG_ENTRIES = [
+    { date: '2026-04-07', title: 'UI Refresh, File Upload & Changelog',
+      items: [
+        'New "What\'s New" changelog popup with date navigation (you\'re looking at it!)',
+        'Keycode search merged into the Keycode input field â€” type to auto-filter keycodes',
+        'Layer delete button enlarged for easier clicking (wider hit area, red hover)',
+        'RGB tab: Edit/Delete buttons right-aligned in behavior, combo, and macro lists',
+        'File upload/save: Upload .dtsi or .keymap files directly and save changes back',
+        'QMK Configurator JSON import support (auto-generates grid layout from key count)',
+        'H/S/B number inputs widened from 52pxâ†’56px to prevent "100" from clipping'
+      ] },
+    { date: '2026-04-06', title: 'Mini Keyboard Physical Layout Fix',
+      items: [
+        'Quick-Assign mini keyboard now uses physical x/y positions for correct split-keyboard shape',
+        'Bounding box calculation accounts for rotated keys',
+        'Scale and sizing optimized for compact fit'
+      ] },
+    { date: '2026-03-29', title: 'Auto Homerow Mod Positions & Cleanup',
+      items: [
+        'Auto-generated hold-trigger-key-positions for hml/hmr built-in behaviors',
+        'Works with any loaded layout (Corne, Sofle, reviung41, etc.)',
+        'Removed "Clear other tab" sync buttons'
+      ] },
+    { date: '2026-03-27', title: 'Universal Layout JSON Support',
+      items: [
+        'loadLayout() rewritten to accept any keyboard .json format',
+        'Row/col inference from x/y positions when missing',
+        'Dynamic #include naming (sofleâ†’sofle-rgb.dtsi, etc.)'
+      ] },
+    { date: '2026-03-20', title: 'RGB_Code_Helper â€” Major Feature Wave',
+      items: [
+        'Two-tab architecture: RGB Generator + Keymap Editor',
+        'Full ZMK behavior support: hold-tap, tap-dance, mod-morph, sticky-key, more',
+        'Cross-tab sync model for RGBâ†”Keymap data',
+        'Value picker, quick-assign, layer management, undo/redo',
+        'SVG keyboard renderer with Corne and Lotus58 layouts'
+      ] },
+    { date: '2026-03-19', title: 'Tool Bootstrap',
+      items: ['First AI-generated HTML tool scaffold'] },
+    { date: '2026-03-18', title: 'Firmware & Layer Foundation',
+      items: [
+        'Custom game-layer functionality and sublayer LED toggles',
+        'RGB hold-tap and blink helper support'
+      ] }
+  ];
+
+  var clPage = 0; // current page index (0 = most recent)
+  var CL_PER_PAGE = 3; // how many date sections to show per page
+
+  // renderChangelog() â€” builds the HTML for the current page of changelog entries
+  // and updates the prev/next button states. Each date section is wrapped in
+  // .cl-date-section for sticky-header styling.
+  function renderChangelog() {
+    var start = clPage * CL_PER_PAGE;
+    var end = Math.min(start + CL_PER_PAGE, CHANGELOG_ENTRIES.length);
+    var totalPages = Math.ceil(CHANGELOG_ENTRIES.length / CL_PER_PAGE);
+    var html = '';
+    for (var i = start; i < end; i++) {
+      var e = CHANGELOG_ENTRIES[i];
+      html += '<div class="cl-date-section">';
+      html += '<div class="cl-date-heading">' + esc(e.date) + ' â€” ' + esc(e.title) + '</div>';
+      html += '<ul class="cl-list">';
+      e.items.forEach(function(item) { html += '<li>' + esc(item) + '</li>'; });
+      html += '</ul></div>';
+    }
+    document.getElementById('clBody').innerHTML = html;
+    document.getElementById('clPageInfo').textContent = 'Page ' + (clPage + 1) + ' of ' + totalPages;
+    document.getElementById('clPrevBtn').disabled = (clPage >= totalPages - 1);
+    document.getElementById('clNextBtn').disabled = (clPage <= 0);
+  }
+
+  document.getElementById('changelogBtn').onclick = function() {
+    clPage = 0;
+    renderChangelog();
+    document.getElementById('changelogOverlay').classList.add('open');
+  };
+  document.getElementById('clCloseBtn').onclick = function() {
+    document.getElementById('changelogOverlay').classList.remove('open');
+  };
+  document.getElementById('changelogOverlay').onclick = function(e) {
+    if (e.target === this) this.classList.remove('open');
+  };
+  // "Older" goes to a higher page index (older entries), "Newer" goes back
+  document.getElementById('clPrevBtn').onclick = function() { clPage++; renderChangelog(); };
+  document.getElementById('clNextBtn').onclick = function() { clPage--; renderChangelog(); };
+
+  // ---- File upload/save wiring ----
+  // Tracks file handles for the File System Access API (if supported).
+  // When a user uploads via the modern API they get a handle that lets
+  // us write back to the same file on "Save". The fallback path uses
+  // a classic <input type="file"> and downloads on save.
+  var rgbFileHandle = null;
+  var kmFileHandle = null;
+
+  // uploadFile(target, textareaId, parseClickId, handleKey) â€” Opens a file
+  // picker (modern API if available, hidden <input> fallback) and loads
+  // the file contents into the specified textarea, then auto-triggers parse.
+  // handleKey is 'rgb' or 'km' to track the file handle for saving later.
+  function uploadFile(textareaId, parseClickId, handleKey) {
+    // Try modern File System Access API first â€” gives us a writable handle
+    if (window.showOpenFilePicker) {
+      window.showOpenFilePicker({ multiple: false }).then(function(handles) {
+        var handle = handles[0];
+        if (handleKey === 'rgb') { rgbFileHandle = handle; document.getElementById('rgbSaveFileBtn').disabled = false; }
+        else { kmFileHandle = handle; document.getElementById('kmSaveFileBtn').disabled = false; }
+        return handle.getFile();
+      }).then(function(file) {
+        return file.text();
+      }).then(function(text) {
+        document.getElementById(textareaId).value = text;
+        document.getElementById(parseClickId).click();
+      }).catch(function() { /* user cancelled picker */ });
+    } else {
+      // Fallback: use the hidden <input type="file"> element
+      var inputId = (handleKey === 'rgb') ? 'rgbFileInput' : 'kmFileInput';
+      var inp = document.getElementById(inputId);
+      inp.value = '';
+      inp.onchange = function() {
+        if (!inp.files[0]) return;
+        var reader = new FileReader();
+        reader.onload = function() {
+          document.getElementById(textareaId).value = reader.result;
+          document.getElementById(parseClickId).click();
+          // Enable save button (will use download fallback)
+          if (handleKey === 'rgb') document.getElementById('rgbSaveFileBtn').disabled = false;
+          else document.getElementById('kmSaveFileBtn').disabled = false;
+        };
+        reader.readAsText(inp.files[0]);
+      };
+      inp.click();
+    }
+  }
+
+  // saveToFile(handleKey, outputTextareaId) â€” Saves the generated output
+  // back to the file the user uploaded from. Uses File System Access API
+  // if a handle exists, otherwise triggers a browser download.
+  function saveToFile(handleKey, outputTextareaId) {
+    var output = document.getElementById(outputTextareaId).value;
+    if (!output.trim()) { alert('No output to save. Generate output first.'); return; }
+
+    var handle = (handleKey === 'rgb') ? rgbFileHandle : kmFileHandle;
+    if (handle && handle.createWritable) {
+      // Modern API â€” write directly to the same file
+      handle.createWritable().then(function(writable) {
+        return writable.write(output).then(function() { return writable.close(); });
+      }).then(function() {
+        alert('File saved successfully.');
+      }).catch(function(err) {
+        alert('Save failed: ' + err.message);
+      });
+    } else {
+      // Fallback â€” download as a new file
+      var blob = new Blob([output], { type: 'text/plain' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = (handleKey === 'rgb') ? 'output.dtsi' : 'output.keymap';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+  }
+
+  document.getElementById('rgbUploadBtn').onclick = function() { uploadFile('userCodePaste', 'parseBtn', 'rgb'); };
+  document.getElementById('kmUploadBtn').onclick = function() { uploadFile('kmKeymapPaste', 'kmParseBtn', 'km'); };
+  document.getElementById('rgbSaveFileBtn').onclick = function() { saveToFile('rgb', 'rgbOutput'); };
+  document.getElementById('kmSaveFileBtn').onclick = function() { saveToFile('km', 'kmOutput'); };
 });
 
 function showStatus(elementId, msg) {
@@ -8003,4 +8194,3 @@ function showStatus(elementId, msg) {
   el.style.display = 'inline';
   setTimeout(function() { el.style.display = 'none'; }, 4000);
 }
-</script>

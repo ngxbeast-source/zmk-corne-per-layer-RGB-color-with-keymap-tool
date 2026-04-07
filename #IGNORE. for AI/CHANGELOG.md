@@ -4,6 +4,38 @@ This changelog combines:
 - Git commit history available in this repo (sampled from the oldest currently visible commits up to now)
 - Session memory from this workspace (design notes, bug hunts, and fix rounds)
 
+## 2026-04-07 (Session 2) — UI/UX Improvements, File Upload/Save & Bug Fixes
+
+### Major addition — Changelog popup with date navigation
+- New `CHANGELOG_ENTRIES` array (line 9448) stores structured changelog data (date, title, items[]).
+- New `renderChangelog()` function (line 9494) builds paginated HTML, 3 entries per page with Prev/Next navigation.
+- Changelog overlay (HTML line ~512) with dialog header, scrollable body, close button.
+- CSS classes `.changelog-overlay`, `.changelog-dialog`, `.cl-date-section`, etc. (lines ~487-510).
+- Topbar "📰 What's New" button opens the overlay.
+
+### Major addition — File Upload / Save feature
+- New `uploadFile()` function (line 9540) uses File System Access API (`showOpenFilePicker`) with `FileReader` fallback for older browsers. Loads file content into textarea and auto-triggers parse.
+- New `saveToFile()` function (line 9578) writes output back to the same file handle (modern API) or triggers a download (fallback).
+- Upload/Save buttons added next to both RGB and Keymap paste textareas.
+- File handles stored in `rgbFileHandle` / `kmFileHandle` variables.
+
+### Major change — Merged search + keycode into one input field
+- Removed separate `kc-search-wrap` div containing `kcSearchInput` and `kcSearchClear` from binding editor.
+- New `filterKeycodeGrid(q)` function (line 4717) filters `.keycode-btn` elements by data-kc attribute, collapses empty categories.
+- New `wireKeycodeSearchOnParam(inputId)` function (line 4736) attaches live-search filtering to keycode param inputs.
+- All keycode inputs in `updateBindingEditorFields()` now have `placeholder="Type to search…"` and call `wireKeycodeSearchOnParam()`.
+
+### UI improvements
+- Layer delete button enlarged: font-size 0.9→1.1em, padding 0 4px→2px 8px, added border-radius, red background on hover.
+- Edit/Delete buttons right-aligned in all RGB list renderers: `renderBehaviorList()`, `renderComboList()`, `renderMacroList()`, `renderBlinkMacroList()` — wrapped in flex span with `margin-left:auto`.
+- Combo layer badges right-aligned: tags + buttons grouped in single `margin-left:auto` flex container in `renderComboList()`.
+
+### Bug fix — RGB helper colors in layer dropdown
+- `layerOptionsHTML()` (line 2143) now filters out color-only entries (those with empty `index`), preventing RGB helper colors like `RGB_BLINK_ON`, `RGB_N_BLINK_ON`, `RGB_C_BLINK_ON` from appearing in the combos layer dropdown.
+
+### Version bump
+- v0.33 → v0.34
+
 ## 2026-04-07 — QMK JSON Support, CSS Fix & ZMK Studio Assessment
 
 ### Major addition — QMK Configurator JSON import (Format 4)
