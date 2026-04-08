@@ -8107,6 +8107,330 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('clPrevBtn').onclick = function() { clPage++; renderChangelog(); };
   document.getElementById('clNextBtn').onclick = function() { clPage--; renderChangelog(); };
 
+  // ---- How to Use guide wiring ----
+  // Embedded guide content (converted from .How_to_use_corne-rgb_dtsi.md)
+  // and two .dtsi file references the user can view in a code sub-popup.
+  // The guide renders as a styled HTML popup; two buttons inside it open
+  // a code viewer sub-popup showing the blank template or original .dtsi.
+  var GUIDE_HTML =
+    '<h1>RGB Layer Setup Guide</h1>' +
+    '<p><em>The new RGB tool helps a lot with this.</em></p>' +
+    '<p><strong>Any new layers get defined in <code>corne-rgb.dtsi</code>, along with an assigned color.</strong><br>' +
+    'New formats are defined below; we no longer have to use the &quot;standard&quot; ZMK formatting, and can add to the code much easier using these new syntaxes and variables.<br>' +
+    '<button class="guide-file-btn" data-view-code="blank">&#128196; View Blank Template (corne-rgb-blank.dtsi)</button></p>' +
+    '<hr>' +
+    '<h2>Order of Operations</h2>' +
+    '<ol>' +
+    '<li>Just <code>#define</code> a layer, the name doesn\'t matter. What\'s important is the number. This number is what ZMK relates the new variable (the new defined layer name) to the layers in the keymap.<br>' +
+    '1a. Then <code>#define</code> a color for the &quot;layer&quot; (we are using a &quot;new&quot; define, RGB_LAYER), these will be used for our &quot;new&quot; colors and &quot;return&quot; colors.</li>' +
+    '<li>Build your macros following the structure from the helpers, <strong>then</strong> build your hold-tap behavior if making a momentary layer.</li>' +
+    '<li>Then you can use these new behaviors in ZMK Studio</li>' +
+    '</ol>' +
+    '<hr>' +
+    '<h2>New Modular Structuring</h2>' +
+    '<ul>' +
+    '<li><code>#define MO_RGB_MACRO(node_name, node_label, layer, NEWCOLOR, RETURNCOLOR)</code><br><em>This macro defines the &quot;new&quot; momentary layer\'s color.</em></li>' +
+    '<li><code>#define HT_RGB(node_name, node_label, macro_ref)</code><br><em>This behavior defines the &quot;new&quot; momentary layer macro\'s function; used in conjunction with the above to get momentary LEDs. WITH a configurable keypress.</em></li>' +
+    '<li><code>#define TO_RGB_PRESS_MACRO(node_name, node_label, layer, NEWCOLOR)</code><br><em>This is used for our &quot;combo gateways&quot; to access new sub-base layers. We use the press function for proper RGB behavior.</em></li>' +
+    '<li><code>#define TO_RGB_MACRO(node_name, node_label, layer, NEWCOLOR)</code><br><em>This is for our subbase layers, OR our combos, and should be used for building the actual &quot;sub-base\'s&quot;, the layers we access from the &quot;gateway&quot;, color functions.</em></li>' +
+    '</ul>' +
+    '<p><strong>IF ANYTHING REMAINS UNCLEAR, ALWAYS REFER TO THE ORIGINAL <code>.dtsi</code> FOR CLARITY/IDEA OF THE CODE STRUCTURE.</strong><br>' +
+    '<button class="guide-file-btn" data-view-code="original">&#128196; View Original .dtsi (corne-rgb.dtsi)</button></p>' +
+    '<hr>' +
+    '<h3>Making a Momentary Layer</h3>' +
+    '<ol>' +
+    '<li>Define the layer</li>' +
+    '<li>Define the RGB color<br><em>Get color codes here: colorizer.org</em></li>' +
+    '<li>Build the MACRO using:<pre><code>MO_RGB_MACRO(node_name, "ZMK_Studio_Description", LAYER_, NEWCOLOR, DEFAULT_COLOR)</code></pre></li>' +
+    '<li>Build the BEHAVIOR using:<pre><code>RGB_HOLD_TAP(node_name, node_label, macro_ref)</code></pre></li>' +
+    '<li>Map the new BEHAVIOR <code>node_name</code> into your <code>.keymap</code> / or in ZMK.studio</li>' +
+    '</ol>' +
+    '<hr>' +
+    '<h3>Making a TOGGLED Layer (TGLR1 &amp; TGLR2)</h3>' +
+    '<p>Uses a similar approach (not to be confused with a &quot;ToggleLayer&quot; which is redefined as a &quot;menu/gateway&quot; to access a <em>TOGGLED LAYER</em>).</p>' +
+    '<pre><code>TO_RGB_MACRO(node_name, "ZMK_Studio_Description", LAYER_, NEWCOLOR)</code></pre>' +
+    '<p>Then map the new macro <code>node_name</code> to your keymap, either in your files or ZMK.Studio.</p>' +
+    '<hr>' +
+    '<h3>Making a ToggleLayer (GAMETGL &amp; TGL)</h3>' +
+    '<pre><code>TO_RGB_PRESS_MACRO(node_name, "ZMK_Studio_Description", LAYER_, NEWCOLOR)</code></pre>' +
+    '<p>This is used mostly exclusively for Gateways, since the RGB behaves differently on Gateways when switching to a TOGGLED LAYER.</p>' +
+    '<hr>' +
+    '<p>I personally use these on combos, allowing for a &quot;hidden&quot; out-of-the-way Gateway activation. This makes navigation between different BaseLayers much more accessible.</p>' +
+    '<p><em>I had issues making the <code>&amp;to</code> TOGGLE LAYER RGBs work properly, so I opted for a more direct approach.</em></p>' +
+    '<h4>Example Flow:</h4>' +
+    '<ul><li>COMBO \u2192 MENU \u2192 SELECTED LAYER</li><li>SAME COMBO \u2192 BACK MENU; or PRESS AGAIN \u2192 &quot;BASE&quot; LAYER</li></ul>' +
+    '<p>(In the BaseLayer there\'s a gameCombo to access our GameLayer; Pressing the gameCombo again, you can go back to the base layer, <strong>or</strong> press the GatewayLayer Combo to access the GAMEGatewayLayer.)</p>' +
+    '<p><em>This shows how the same combo can provide different functions depending on how you code the layer conditions for the combo.</em><br>' +
+    '<em>This is an important design for allowing the RGBs to change fluidly, without overcomplicating the keypresses. <strong>Path the combos CORRECTLY to fit your layouts!</strong></em></p>' +
+    '<hr>' +
+    '<h2>Layer Types</h2>' +
+    '<p>So now we can think about our layers in 3 ways:</p>' +
+    '<ul>' +
+    '<li><strong>BaseLayer:</strong> a layer that you want to &quot;stay on&quot;</li>' +
+    '<li><strong>Gateway:</strong> a layer whose only function is exclusively used as to &quot;toggle&quot; different BaseLayer(s)</li>' +
+    '<li><strong>MomentaryLayer:</strong> a layer that acts as &quot;sub-layout&quot; when a key press is held</li>' +
+    '</ul>' +
+    '<p>This will help you understand which <em>Macros</em>, <em>Behaviors</em>, and <em>Combos</em> to utilize when building your RGB Layers.</p>' +
+    '<hr>' +
+    '<h2>Blink Key (optional)</h2>' +
+    '<p>New visual macro to know if you toggled caps lock, or num lock (note: this isn\'t persistent, it just gives a quick flash as a visual cue).<br>' +
+    'Fairly simple; it\'s a <code>tap-dance</code> behavior with our chosen key(s) hard-coded into the macros.</p>' +
+    '<pre><code>#define BLINK_ON     RGB_COLOR_HSB(39,100,75) // BLINK Color</code></pre>' +
+    '<p>This is the &quot;color&quot; of your blink.</p>' +
+    '<pre><code>#define BLINK_OFF    RGB_COLOR_HSB(273,67,23) // Return Color</code></pre>' +
+    '<p>This is the &quot;return color&quot;; whatever you want the blink to &quot;go back to&quot;, after the macro has completed its sequence.</p>' +
+    '<p>You can make multiple of these to fit whatever key you want to press, or you can make a universal blink function that can be programmed in the ZMK tool.</p>' +
+    '<pre><code>blnk: blnk {\n    compatible = "zmk,behavior-macro-one-param";\n    label = "Configurable Blink Macro";\n    #binding-cells = &lt;1&gt;;\n    wait-ms = &lt;0&gt;;\n    tap-ms  = &lt;0&gt;;\n    bindings = &lt;\n        &amp;macro_param_1to1\n        &amp;macro_tap &amp;kp MACRO_PLACEHOLDER\n        BLINK_SEQ(BLINK_ON, RGB_XTRA, 80)\n    &gt;;\n};</code></pre>' +
+    '<hr>' +
+    '<h2>Notes</h2>' +
+    '<ul>' +
+    '<li>ToggleLayer shouldn\'t be confused with ZMK\'s <code>&amp;to</code> \u2013 we are redefining the definitions here</li>' +
+    '<li><strong>DO NOT</strong> have &quot;higher layers&quot; go to lower layers (i.e., <code>12 -&gt; 2</code>)</li>' +
+    '<li><strong>Even in your <code>.keymap</code></strong></li>' +
+    '<li>It\'s good practice to have &quot;sub-layouts&quot; below the &quot;base&quot; (e.g., <code>GAME -&gt; GFUN</code>)</li>' +
+    '</ul>';
+
+  // Embedded .dtsi file contents for the code viewer sub-popup.
+  // "blank" = the blank template; "original" = the completed example.
+  var GUIDE_CODE_FILES = {
+    blank: { title: 'corne-rgb-blank.dtsi (Blank Template)', code: '' },
+    original: { title: 'corne-rgb.dtsi (Completed Example)', code: '' }
+  };
+
+  GUIDE_CODE_FILES.blank.code =
+    '/*\n * Blank Modular RGB Layer Template for ZMK\n *\n' +
+    ' * Copy this file and fill in your own layers, colors, macros, and behaviors.\n' +
+    ' * All sections are commented for easy customization.\n */\n\n' +
+    '/* ---- STEP 1: DEFINE LAYERS ---- */\n' +
+    '// Example: #define LAYER_BASE 0\n// #define L_FN 1\n// #define ADJUST 2\n' +
+    '                /* ------- REMOVE & DEFINE HERE ------- */\n\n' +
+    '/* ---- STEP 1a: DEFINE COLORS ---- */\n' +
+    '// Example: #define RGB_BASE   RGB_COLOR_HSB(0,0,20)   // Dim White\n' +
+    '// #define RGB_FN     RGB_COLOR_HSB(200,100,60) // Cyan\n' +
+    '                /* ------- REMOVE & DEFINE HERE ------- */\n\n\n' +
+    '/* ---- (OPTIONAL) BLINK HELPERS ---- */\n' +
+    '// "flashes" LEDs a chosen color twice, blink speed adjustable via "wait".\n' +
+    '// UNCOMMENT to use. "BLINK" macros won\'t work without this.\n\n' +
+    '/* #define BLINK_ON     RGB_COLOR_HSB(39,100,75)\n' +
+    ' #define BLINK_OFF    RGB_COLOR_HSB(273,67,23)\n' +
+    ' #define BLINK_SEQ(ON, OFF, WAIT) \\\n' +
+    '     &macro_tap &rgb_ug ON \\\n' +
+    '     ... (toggle sequence) ... \\\n' +
+    '     &macro_tap &rgb_ug OFF\n\n' +
+    ' #define MO_BLINK(node_name, node_label, layer, blink_color, return_color, wait) \\\n' +
+    '         ZMK_MACRO(node_name, ...)\n\n' +
+    ' #define KP_BLINK(node_name, node_label, key, blink_color, return_color, wait) \\\n' +
+    '         ZMK_MACRO(node_name, ...) */\n\n' +
+    '/* ---- MACRO HELPERS ---- */\n' +
+    '#define MO_RGB_MACRO(node_name, node_label, layer, active_color, release_color) \\\n' +
+    '        ZMK_MACRO(node_name, \\\n' +
+    '            bindings = <&macro_press>, <&mo layer>, <&macro_tap>,\\\n' +
+    '            <&rgb_ug active_color>, <&macro_pause_for_release>,\\\n' +
+    '            <&macro_release>, <&mo layer>, <&macro_tap>,\\\n' +
+    '            <&rgb_ug release_color>; label = node_label; )\n\n' +
+    '#define TO_RGB_MACRO(node_name, node_label, layer, color) \\\n' +
+    '        ZMK_MACRO(node_name, ...)\n\n' +
+    '#define TO_RGB_PRESS_MACRO(node_name, node_label, layer, color) \\\n' +
+    '        ZMK_MACRO(node_name, ...)\n\n' +
+    '/* ---- HOLD-TAP BEHAVIOR HELPER ---- */\n' +
+    '#define RGB_HT(node_name, node_label, macro_ref) \\\n' +
+    '        node_name: node_name { compatible = "zmk,behavior-hold-tap"; ... };\n\n' +
+    '/* ---- COMBO HELPER ---- */\n' +
+    '#define CMB(name, bind, ..., ...) \\\n' +
+    '    name { bindings = <bind>; key-positions = <...>; layers = <...>; };\n\n\n' +
+    '/ {\n' +
+    '    macros {\n' +
+    '        /* ---- STEP 2+3: MACROS ---- */\n' +
+    '        /* ---- (OPTIONAL) BLINK/STATUS MACROS ---- */\n' +
+    '        /* ------- REMOVE & BUILD HERE ------- */\n' +
+    '    };\n\n' +
+    '    behaviors {\n' +
+    '        /* ---- STEP 4: BEHAVIORS - HOLD-TAP ---- */\n' +
+    '        /* ------- REMOVE & BUILD HERE ------- */\n' +
+    '    };\n\n' +
+    '    combos {\n' +
+    '        compatible = "zmk,combos";\n' +
+    '        /* ---- STEP 5: COMBOS ---- */\n' +
+    '        /* ------- REMOVE & BUILD HERE ------- */\n' +
+    '    };\n' +
+    '};';
+
+  GUIDE_CODE_FILES.original.code =
+    '/* ---- STEP 1: DEFINE LAYERS ---- */\n' +
+    '#define ABC 0\n#define NMRW 1\n#define FKEYS 2\n#define KPAD 3\n' +
+    '#define XTRA 4\n#define XTR2 5\n#define GAME 6\n#define GFUN 7\n' +
+    '#define GAMETGL 8\n#define GAME2 9\n#define GAME2_SUBLR1 10\n' +
+    '#define TGL 11\n#define TGLLR_1 12\n#define TGLLR_1_SUBLR_1 13\n' +
+    '#define TGLLR_2 14\n#define TGLLR_2_SUBLR_1 15\n\n' +
+    '/* ---- STEP 1a: DEFINE COLORS ---- */\n' +
+    '#define RGB_ABC         RGB_COLOR_HSB(19,100,17)      /* BASE        - Dim Yellow */\n' +
+    '#define RGB_NMRW        RGB_COLOR_HSB(183,45,18)      /* SUB-LAYOUT  - Teal */\n' +
+    '#define RGB_KPAD        RGB_COLOR_HSB(230,87,26)      /* SUB-LAYOUT  - Pale Blue */\n' +
+    '#define RGB_XTRA        RGB_COLOR_HSB(273,67,23)      /* SUB-LAYOUT  - Light Purple */\n' +
+    '#define RGB_GAME        RGB_COLOR_HSB(0,100,25)       /* SUB-BASE    - Red */\n' +
+    '#define RGB_GAMETGL     RGB_COLOR_HSB(200,100,60)     /* TOGGLE-LAYER- Cyan */\n' +
+    '#define RGB_GAME2       RGB_COLOR_HSB(73,67,15)       /* SUB-BASE    - Dim Emerald */\n' +
+    '#define RGB_GFUN        RGB_COLOR_HSB(116,67,50)      /* SUB-LAYOUT  - Bright Yellow */\n' +
+    '#define RGB_XTR2        RGB_COLOR_HSB(116,67,26)      /* SUB-LAYOUT  - Pale Green */\n' +
+    '#define RGB_TGL         RGB_COLOR_HSB(251,67,60)      /* TOGGLE-LAYER- Indigo */\n' +
+    '#define RGB_TGLLR_1     RGB_COLOR_HSB(40,100,12)      /* SUB-BASE    - Yellow */\n' +
+    '#define RGB_TGLLR_2     RGB_COLOR_HSB(85,100,15)      /* SUB-BASE    - Lime */\n' +
+    '#define RGB_TGLLR_2_SUBLR_1 RGB_COLOR_HSB(82,100,20) /* SUB-LAYOUT  - Bright Lime */\n' +
+    '#define RGB_TGLLR_1_SUBLR_1 RGB_COLOR_HSB(58,45,20)  /* SUB-LAYOUT */\n' +
+    '#define RGB_GAME2_SUBLR1 RGB_COLOR_HSB(67,55,20)      /* SUB-LAYOUT */\n\n' +
+    '/* ---- (OPTIONAL) BLINK HELPERS ---- */\n' +
+    '#define BLINK_ON     RGB_COLOR_HSB(39,100,75)    /* Blink On */\n' +
+    '#define N_BLINK_ON   RGB_COLOR_HSB(0,100,60)     /* Num On - Bright Red */\n' +
+    '#define C_BLINK_ON   RGB_COLOR_HSB(200,100,60)   /* Caps On - Cyan */\n' +
+    '#define F_BLINK_ON   RGB_COLOR_HSB(73,67,60)     /* Functions - Bright Emerald */\n\n' +
+    '#define BLINK_SEQ(ON, OFF, WAIT) \\\n' +
+    '    &macro_tap &rgb_ug ON \\\n' +
+    '    &macro_wait_time WAIT \\\n' +
+    '    &macro_tap &rgb_ug RGB_TOG \\\n' +
+    '    &macro_wait_time WAIT \\\n' +
+    '    &macro_tap &rgb_ug RGB_TOG \\\n' +
+    '    &macro_wait_time WAIT \\\n' +
+    '    &macro_tap &rgb_ug RGB_TOG \\\n' +
+    '    &macro_wait_time WAIT \\\n' +
+    '    &macro_tap &rgb_ug RGB_TOG \\\n' +
+    '    &macro_wait_time WAIT \\\n' +
+    '    &macro_tap &rgb_ug OFF\n\n' +
+    '/* ---- MACRO HELPERS ---- */\n' +
+    '#define MO_RGB(node_name, node_label, layer, active_color, release_color) \\\n' +
+    '        ZMK_MACRO(node_name, \\\n' +
+    '            bindings = <&macro_press>, <&mo layer>, <&macro_tap>,\\\n' +
+    '            <&rgb_ug active_color>, <&macro_pause_for_release>,\\\n' +
+    '            <&macro_release>, <&mo layer>, <&macro_tap>,\\\n' +
+    '            <&rgb_ug release_color>; label = node_label; )\n\n' +
+    '#define TO_RGB(node_name, node_label, layer, color) \\\n' +
+    '        ZMK_MACRO(node_name, bindings = <&macro_tap>, <&to layer>,\\\n' +
+    '            <&macro_tap>, <&rgb_ug color>; label = node_label; )\n\n' +
+    '#define TO_RGB_PRESS(node_name, node_label, layer, color) \\\n' +
+    '        ZMK_MACRO(node_name, bindings = <&macro_tap>, <&to layer>,\\\n' +
+    '            <&macro_press>, <&rgb_ug color>; label = node_label; )\n\n' +
+    '/* ---- HOLD-TAP BEHAVIOR TEMPLATE ---- */\n' +
+    '#define RGB_HT(node_name, node_label, macro_ref) \\\n' +
+    '        node_name: node_name { compatible = "zmk,behavior-hold-tap";\\\n' +
+    '        label = node_label; bindings = <&macro_ref>, <&kp>;\\\n' +
+    '        #binding-cells = <2>; tapping-term-ms = <200>;\\\n' +
+    '        flavor = "tap-preferred"; quick-tap-ms = <180>; global-quick-tap; };\n\n' +
+    '/* ---- COMBO HELPER ---- */\n' +
+    '#define CMB(name, bind, p1, p2, ...) \\\n' +
+    '    name { bindings = <bind>; key-positions = <p1 p2>;\\\n' +
+    '    layers = <__VA_ARGS__>; timeout-ms = <50>; }\n\n' +
+    ' / {\n' +
+    '    macros {\n' +
+    '        /* Momentary Layers */\n' +
+    '        MO_RGB(mo_rgb_xtra2, "xtra2Layer Momentary LED Macro", XTR2, RGB_XTR2, RGB_ABC)\n' +
+    '        MO_RGB(mo_rgb_kpad, "KeyPadLayer Momentary LED Macro", KPAD, RGB_KPAD, RGB_ABC)\n' +
+    '        MO_RGB(mo_rgb_xtra, "ExtraLayer Momentary LED Macro", XTRA, RGB_XTRA, RGB_ABC)\n' +
+    '        MO_RGB(mo_rgb_nmrw, "NumberRowLayer Momentary LED Macro", NMRW, RGB_NMRW, RGB_ABC)\n' +
+    '        MO_RGB(mo_rgb_gfun, "GameLayer Sublayer", GFUN, RGB_GFUN, RGB_GAME)\n' +
+    '        MO_RGB(mo_rgb_t2_s1, "ToggleLayer2 SubLayer1", TGLLR_2_SUBLR_1, RGB_TGLLR_2_SUBLR_1, RGB_TGLLR_2)\n' +
+    '        MO_RGB(mo_rgb_t1_s1, "ToggleLayer1 Sublayer1", TGLLR_1_SUBLR_1, RGB_TGLLR_1_SUBLR_1, RGB_TGLLR_1)\n' +
+    '        MO_RGB(mo_rgb_g2_s1, "GameLayer2 SubLayer1", GAME2_SUBLR1, RGB_GAME2_SUBLR1, RGB_GAME2)\n\n' +
+    '        /* Sub-Base Toggle Layers */\n' +
+    '        TO_RGB(to_rgb_default, "Base Layer LED", ABC, RGB_ABC)\n' +
+    '        TO_RGB(to_rgb_t1, "ToggleLayer1 LED", TGLLR_1, RGB_TGLLR_1)\n' +
+    '        TO_RGB(to_rgb_t2, "ToggleLayer2 LED", TGLLR_2, RGB_TGLLR_2)\n' +
+    '        TO_RGB(to_rgb_game, "GameLayer LED Macro", GAME, RGB_GAME)\n' +
+    '        TO_RGB(to_rgb_g2_s1, "Game2 SubLayer1 LED", GAME2_SUBLR1, RGB_GAME2_SUBLR1)\n' +
+    '        TO_RGB(to_rgb_g2, "Toggle Game2 LED", GAME2, RGB_GAME2)\n\n' +
+    '        /* Gateways */\n' +
+    '        TO_RGB_PRESS(top_rgb_toglayers, "ToggleLayer LED", TGL, RGB_TGL)\n' +
+    '        TO_RGB_PRESS(top_rgb_gtgl, "gametoggle LED Macro", GAMETGL, RGB_GAMETGL)\n' +
+    '    };\n\n' +
+    '    /* ---- BLINK/STATUS MACROS ---- */\n' +
+    '    blnk: blnk {\n' +
+    '        compatible = "zmk,behavior-macro-one-param";\n' +
+    '        label = "Configurable Blink Macro";\n' +
+    '        #binding-cells = <1>;\n' +
+    '        wait-ms = <0>; tap-ms = <0>;\n' +
+    '        bindings = <&macro_param_1to1 &macro_tap &kp MACRO_PLACEHOLDER\n' +
+    '            BLINK_SEQ(BLINK_ON, RGB_XTRA, 80)>;\n' +
+    '    };\n' +
+    '    KP_BLINK(c_blink, "CAPS LOCK + BLINK", CAPS, C_BLINK_ON, RGB_ABC, 80)\n' +
+    '    KP_BLINK(n_blink, "NUM LOCK + BLINK", KP_NUMLOCK, N_BLINK_ON, RGB_ABC, 80)\n' +
+    '    MO_BLINK(f_blink_sa, "F KEYS BLINK; STANDALONE", FKEYS, F_BLINK_ON, RGB_NMRW, 80)\n\n' +
+    '    /* ---- BEHAVIORS - HOLD-TAP ---- */\n' +
+    '    behaviors {\n' +
+    '        RGB_HT(RGB_ht_nmrw, "RGB HOLD_TAP_NMRW", mo_rgb_nmrw)\n' +
+    '        RGB_HT(RGB_ht_xtra2, "RGB HOLD_TAP_XTRA2", mo_rgb_xtra2)\n' +
+    '        RGB_HT(RGB_ht_kpad, "RGB HOLD_TAP_KPAD", mo_rgb_kpad)\n' +
+    '        RGB_HT(RGB_ht_xtra, "RGB HOLD_TAP_XTRA", mo_rgb_xtra)\n' +
+    '        RGB_HT(RGB_ht_gfun, "RGB HOLD_TAP_GFUN", mo_rgb_gfun)\n' +
+    '        RGB_HT(RGB_ht_t2_s1, "RGB HOLD_TAP_layer2_sublayer1", mo_rgb_t2_s1)\n' +
+    '        RGB_HT(RGB_ht_g2_s1, "RGB HOLD_TAP_GAME2_SUBLAYER1", mo_rgb_g2_s1)\n' +
+    '        RGB_HT(RGB_ht_t1_s1, "RGB HOLD_TAP_TOGGLELAYER1_SUBLAYER1", mo_rgb_t1_s1)\n' +
+    '        RGB_HT(BLINK_ht_f, "f blink test; &kp BINDABLE", f_blink_sa)\n\n' +
+    '        hm: homerow_mods { ... };\n' +
+    '        ltq: ltq { ... };\n' +
+    '        td_numcaps: td_numcapsBLINK { ... };\n' +
+    '        hml: hml { ... };\n' +
+    '        hmr: hmr { ... };\n' +
+    '    };\n\n' +
+    '    /* ---- COMBOS ---- */\n' +
+    '    combos {\n' +
+    '        compatible = "zmk,combos";\n' +
+    '        CMB(left_bkt,   &kp LEFT_BRACKET,   4, 3, ABC);\n' +
+    '        CMB(right_bkt,  &kp RBKT,           7, 8, ABC);\n' +
+    '        CMB(left_par,   &kp LEFT_PARENTHESIS,15,16, ABC);\n' +
+    '        CMB(right_par,  &kp RIGHT_PARENTHESIS,19,20, ABC);\n' +
+    '        CMB(left_brace, &kp LEFT_BRACE,     27,28, ABC);\n' +
+    '        CMB(right_brace,&kp RIGHT_BRACE,    32,31, ABC);\n' +
+    '        CMB(bac,        &kp BACKSLASH,      5, 6, ABC);\n' +
+    '        CMB(pipe,       &kp PIPE,           17,18, ABC);\n\n' +
+    '        /* Pathing - To Gateways */\n' +
+    '        CMB(toggleLayer,  &top_rgb_toglayers, 38,39, ABC TGLLR_1 TGLLR_2);\n' +
+    '        CMB(game_toggle,  &top_rgb_gtgl,      38,39, GAME GAME2);\n' +
+    '        /* To (Sub)Base */\n' +
+    '        CMB(gameLayer_2_BaseLayer, &to_rgb_default, 0,11, GAME);\n' +
+    '        CMB(gameLayer,  &to_rgb_game, 0,11, ABC TGL GAME2);\n' +
+    '        /* Exit Combos */\n' +
+    '        CMB(toggleLayer_2_BaseLayer, &to_rgb_default, 39,38, TGL);\n' +
+    '        CMB(game_toggle_2_game, &to_rgb_game, 38,39, GAMETGL);\n' +
+    '    };\n' +
+    ' };';
+
+  // renderGuide() â€” Populates the guide popup body with the embedded HTML
+  function renderGuide() {
+    document.getElementById('guideBody').innerHTML = GUIDE_HTML;
+  }
+
+  // openCodeViewer(fileKey) â€” Opens the code viewer sub-popup for a given
+  // file key ('blank' or 'original'). Shows the file title and content.
+  function openCodeViewer(fileKey) {
+    var f = GUIDE_CODE_FILES[fileKey];
+    if (!f) return;
+    document.getElementById('codeViewerTitle').textContent = f.title;
+    document.getElementById('codeViewerPre').textContent = f.code;
+    document.getElementById('codeViewerOverlay').classList.add('open');
+  }
+
+  // Guide button opens the popup
+  document.getElementById('guideBtn').onclick = function() {
+    renderGuide();
+    document.getElementById('guideOverlay').classList.add('open');
+  };
+  document.getElementById('guideCloseBtn').onclick = function() {
+    document.getElementById('guideOverlay').classList.remove('open');
+  };
+  document.getElementById('guideOverlay').onclick = function(e) {
+    if (e.target === this) this.classList.remove('open');
+  };
+  // Delegate clicks on "View Code" buttons inside the guide body
+  document.getElementById('guideBody').onclick = function(e) {
+    var key = e.target.dataset.viewCode;
+    if (key) openCodeViewer(key);
+  };
+  // Close code viewer sub-popup
+  document.getElementById('codeViewerCloseBtn').onclick = function() {
+    document.getElementById('codeViewerOverlay').classList.remove('open');
+  };
+  document.getElementById('codeViewerOverlay').onclick = function(e) {
+    if (e.target === this) this.classList.remove('open');
+  };
+
   // ---- File upload/save wiring ----
   // Tracks file handles for the File System Access API (if supported).
   // When a user uploads via the modern API they get a handle that lets
@@ -8194,3 +8518,4 @@ function showStatus(elementId, msg) {
   el.style.display = 'inline';
   setTimeout(function() { el.style.display = 'none'; }, 4000);
 }
+</script>

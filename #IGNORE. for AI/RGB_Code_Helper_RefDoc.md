@@ -10,7 +10,7 @@
 #       "More on this code can be found in 'RefDoc' line XXX"
 #   - That means you should come here and look at the line number XXX for more detail.
 #   - Similarly, this document says things like:
-#       "Ref. Line 1428 in code"
+#       "Ref. Line 1483 in code"
 #   - That means the actual code is on that line in RGB_Code_Helper.html.
 #
 # Lines referenced here match the file after the latest update.
@@ -53,6 +53,7 @@
 # Line 1154 — Section 32: Layout Switch & JSON Import #include Update
 # Line 1169 — Section 33: Keymap Editor Popup Overlays
 # Line 1349 — Section 34: Binding Picker Popup (visual binding chooser)
+# Line 1411 — Section 35: "How to Use" Guide Popup & Code Viewer
 
 # ============================================================
 # SECTION 1: WHAT THIS TOOL DOES (Overview)
@@ -82,11 +83,11 @@
 # ============================================================
 # SECTION 2: FILE STRUCTURE (HTML, CSS, JS)
 # ============================================================
-# Ref. Lines 1-9617 in code
+# Ref. Lines 1-9996 in code
 #
 # The file has three main parts:
 #
-#   1. CSS Styles (lines 7-485):
+#   1. CSS Styles (lines 7-550):
 #      These control how everything looks: colors, spacing, fonts,
 #      button styles, dark mode, etc. The tool uses CSS custom
 #      properties (variables like --bg, --fg) for dark/light theme.
@@ -94,16 +95,16 @@
 #      to prevent document-level scrolling from bleeding between tabs;
 #      each tab panel scrolls independently within its own container.
 #
-#   2. HTML Body (lines 486-1365):
+#   2. HTML Body (lines 551-1472):
 #      The page layout. All the buttons, text fields, dropdowns,
 #      and hidden panels (like the binding editor, overlays, etc.)
 #      are defined here as HTML elements. Each element has an "id"
 #      so the JavaScript can find and control it.
 #
-#   3. JavaScript (lines 1367-9371):
+#   3. JavaScript (lines 1474-9994):
 #      This is where all the logic lives. It starts with data
-#      variables (line 1376), then functions for parsing, rendering,
-#      and generating code, and ends with event wiring at line 7505
+#      variables (line 1483), then functions for parsing, rendering,
+#      and generating code, and ends with event wiring at line 7657
 #      inside a DOMContentLoaded block.
 #
 # Think of it like a building:
@@ -114,43 +115,43 @@
 # ============================================================
 # SECTION 3: GLOBAL DATA MODEL (the "memory" of the tool)
 # ============================================================
-# Ref. Lines 1428-1470 in code
+# Ref. Lines 1483-1525 in code
 #
 # The tool stores everything in JavaScript arrays and variables.
 # Think of each array as a "notebook" that holds a list of items.
 #
 # --- RGB Tab Data (used by the RGB Generator tab) ---
 #
-#   layers        (line 1376) — List of layers with names, index numbers,
+#   layers        (line 1483) — List of layers with names, index numbers,
 #                               and HSB color values. Example entry:
 #                               { name: "L_ABC", index: "0", h: "19",
 #                                 s: "100", b: "17", label: "ABC" }
 #
-#   macros        (line 1377) — RGB macros (like MO_RGB, TO_RGB).
-#   behaviors     (line 1378) — RGB tab behavior list.
-#   combos        (line 1379) — RGB tab combo definitions.
-#   blinkMacros   (line 1380) — Blink macros (LED blink sequences).
-#   colorValueMap (line 1382) — A lookup table: color name → HSB values.
-#   colorLabelMap (line 1383) — A lookup table: color name → display label.
+#   macros        (line 1484) — RGB macros (like MO_RGB, TO_RGB).
+#   behaviors     (line 1485) — RGB tab behavior list.
+#   combos        (line 1486) — RGB tab combo definitions.
+#   blinkMacros   (line 1487) — Blink macros (LED blink sequences).
+#   colorValueMap (line 1489) — A lookup table: color name → HSB values.
+#   colorLabelMap (line 1490) — A lookup table: color name → display label.
 #
 # --- Keymap Tab Data (used by the Keymap Editor tab) ---
 #
-#   keymapLayers            (line 1388) — Parsed keymap layers. Each has:
+#   keymapLayers            (line 1495) — Parsed keymap layers. Each has:
 #                                         { name, displayName, bindings[], status }
-#   keymapCombos            (line 1389) — Parsed combos from .keymap file.
-#   keymapMacros            (line 1390) — Parsed macros from .keymap file.
-#   keymapBehaviors         (line 1391) — Custom behaviors (hold-tap, etc).
-#   keymapConditionalLayers (line 1392) — Conditional layer rules.
-#   keymapSensorBindings    (line 1393) — Encoder rotation bindings per layer.
-#   keyboardLayout          (line 1394) — Physical key positions (from JSON).
+#   keymapCombos            (line 1496) — Parsed combos from .keymap file.
+#   keymapMacros            (line 1497) — Parsed macros from .keymap file.
+#   keymapBehaviors         (line 1498) — Custom behaviors (hold-tap, etc).
+#   keymapConditionalLayers (line 1499) — Conditional layer rules.
+#   keymapSensorBindings    (line 1500) — Encoder rotation bindings per layer.
+#   keyboardLayout          (line 1501) — Physical key positions (from JSON).
 #
 # --- State Variables ---
 #
-#   activeLayerIndex        (line 1398) — Which layer tab is selected right now.
-#   selectedKeyIndex        (line 1399) — Which key is being edited (-1 = none).
-#   editingComboIndex       (line 1400) — Which combo is being edited (-1 = none).
-#   editingMacroIndex       (line 1401) — Which macro is being edited (-1 = none).
-#   editingBehaviorIndex    (line 1402) — Which behavior is being edited (-1 = none).
+#   activeLayerIndex        (line 1505) — Which layer tab is selected right now.
+#   selectedKeyIndex        (line 1506) — Which key is being edited (-1 = none).
+#   editingComboIndex       (line 1507) — Which combo is being edited (-1 = none).
+#   editingMacroIndex       (line 1508) — Which macro is being edited (-1 = none).
+#   editingBehaviorIndex    (line 1509) — Which behavior is being edited (-1 = none).
 #
 # WHY TWO SETS OF DATA?
 #   The RGB tab and Keymap tab each have their own data because they
@@ -161,11 +162,11 @@
 # ============================================================
 # SECTION 4: UNDO/REDO SYSTEM
 # ============================================================
-# Ref. Lines 1474-1657 in code
+# Ref. Lines 1529-1712 in code
 #
 # The undo system works like a camera taking snapshots:
 #
-#   snapshotState() (line 1422) — Takes a "photo" of ALL data:
+#   snapshotState() (line 1529) — Takes a "photo" of ALL data:
 #     keymapLayers, keymapCombos, keymapMacros, keymapBehaviors,
 #     keymapConditionalLayers, keymapSensorBindings, and activeLayerIndex.
 #     It uses JSON.parse(JSON.stringify(...)) to make a deep copy.
@@ -173,45 +174,45 @@
 #     not just the array references. This way, changing the original data
 #     later won't affect the snapshot.
 #
-#   restoreState(snap) (line 1449) — Loads a snapshot back.
+#   restoreState(snap) (line 1556) — Loads a snapshot back.
 #     Replaces all data arrays with the saved copies.
 #
-#   pushUndo() (line 1476) — Saves current state BEFORE a change.
+#   pushUndo() (line 1583) — Saves current state BEFORE a change.
 #     Every time you edit something (add a layer, change a key, etc),
 #     the code calls pushUndo() first. This saves the "before" state
 #     so you can undo back to it. Keeps up to 50 entries (UNDO_LIMIT).
 #
-#   performUndo() (line 1510) — Goes back one step.
+#   performUndo() (line 1617) — Goes back one step.
 #     Moves current state to the redo stack, loads previous state.
 #
-#   performRedo() (line 1516) — Goes forward one step.
+#   performRedo() (line 1623) — Goes forward one step.
 #     Moves current state to undo stack, loads the redo state.
 #
-#   fullRender() (line 1485) — Refreshes the entire UI after undo/redo.
+#   fullRender() (line 1592) — Refreshes the entire UI after undo/redo.
 #     Without this, the screen would show old data.
 #
 # The keyboard shortcuts Ctrl+Z (undo) and Ctrl+Y (redo) trigger
-# these functions. See the DOMContentLoaded section (line 7505).
+# these functions. See the DOMContentLoaded section (line 7657).
 
 # ============================================================
 # SECTION 5: DEFAULT KEYBOARD LAYOUTS
 # ============================================================
-# Ref. Lines 1658-1736 in code
+# Ref. Lines 1713-1791 in code
 #
 # A "layout" describes the physical positions and sizes of every key
 # on the keyboard. The tool uses this to draw the SVG keyboard picture.
 #
-# DEFAULT_CORNE_LAYOUT (line 1606):
+# DEFAULT_CORNE_LAYOUT (line 1713):
 #   42 keys arranged in a split ergonomic layout.
 #   Each key has: x (horizontal position), y (vertical position),
 #   row, col (row/column indices for output formatting),
 #   and optionally r (rotation angle) and rx/ry (rotation center).
 #
-# DEFAULT_LOTUS58_LAYOUT (line 1639):
+# DEFAULT_LOTUS58_LAYOUT (line 1746):
 #   A larger 60-key layout with built-in encoders.
 #
 # These defaults are used when no custom layout JSON is imported.
-# The function loadLayout() (line 3466) applies the layout to
+# The function loadLayout() (line 3582) applies the layout to
 # the SVG renderer. See Section 13 (line 487 in this doc).
 #
 # Custom layouts (.json files from any keyboard) can be pasted via
@@ -221,29 +222,29 @@
 # ============================================================
 # SECTION 6: ZMK KEYCODES & BEHAVIOR REFERENCE TABLES
 # ============================================================
-# Ref. Lines 1737-1833 in code
+# Ref. Lines 1792-1888 in code
 #
-# ZMK_KEYCODES (line 1687):
+# ZMK_KEYCODES (line 1792):
 #   A big lookup table of every key the keyboard can send.
 #   Organized by category: Letters, Numbers, Punctuation, Modifiers,
 #   Navigation, Function keys, Keypad, Media, etc.
 #   Each entry has a display name (what you see on the button)
 #   and the ZMK code (what goes in the .keymap file).
 #
-# ZMK_BEHAVIORS (line 1706):
+# ZMK_BEHAVIORS (line 1811):
 #   A list of all built-in ZMK behaviors like &kp (key press),
 #   &mo (momentary layer), &bt (bluetooth), &rgb_ug (RGB controls).
 #   Each entry says how many parameters it takes.
-#   Used by the binding editor dropdown (see Section 17, line 593).
+#   Used by the binding editor dropdown (see Section 17, line 605).
 #
-# BT_ACTIONS, RGB_ACTIONS, OUT_ACTIONS, BL_ACTIONS, EP_ACTIONS (line 1743):
+# BT_ACTIONS, RGB_ACTIONS, OUT_ACTIONS, BL_ACTIONS, EP_ACTIONS (line 1848):
 #   Sub-lists of specific actions for behaviors that have sub-commands.
 #   Example: BT_ACTIONS has BT_CLR, BT_SEL, BT_NXT, etc.
 #
-# MOUSE_BUTTONS, MOUSE_MOVES, MOUSE_SCROLLS (line 1748):
+# MOUSE_BUTTONS, MOUSE_MOVES, MOUSE_SCROLLS (line 1853):
 #   Mouse emulation keycodes for &mkp, &mmv, and &msc behaviors.
 #
-# PARAM_DESCS (line 1752):
+# PARAM_DESCS (line 1857):
 #   A lookup object mapping parameter value names (e.g. "BT_CLR",
 #   "RGB_TOG", "EP_ON") to human-readable descriptions shown as
 #   hover tooltips on dropdown options in the binding editor.
@@ -254,42 +255,42 @@
 # ============================================================
 # SECTION 7: COLOR UTILITIES (HSB, Hex, RGB)
 # ============================================================
-# Ref. Lines 1906-1949 in code
+# Ref. Lines 1961-2004 in code
 #
 # These small functions convert colors between different formats.
 # Keyboards use HSB (Hue, Saturation, Brightness) for LED colors.
 # Web browsers use Hex (#FF0000) or RGB for display.
 #
-#   hsbToHex(h, s, b) (line 1854):
+#   hsbToHex(h, s, b) (line 1961):
 #     Converts HSB values to a hex color string like "#FF3300".
 #     Used to show color swatches in the layer list.
 #     h = 0-360 (color wheel position), s = 0-100, b = 0-100.
 #
-#   hasHsbVal(v) (line 1882):
+#   hasHsbVal(v) (line 1989):
 #     Checks if a value is a valid HSB number (not empty, not undefined).
 #     Returns true for 0 (which is a valid color value).
 #     This is important because in JavaScript, 0 is "falsy" —
 #     a simple `if (v)` check would wrongly treat 0 as empty.
 #
-#   baseKey(name) (line 1883):
+#   baseKey(name) (line 1990):
 #     Strips "L_" or "RGB_" prefix from a layer name and
 #     converts to uppercase. Example: "L_ABC" → "ABC".
 #     Used for matching layers between RGB and Keymap tabs.
 #
-#   esc(str) (line 1884):
+#   esc(str) (line 1991):
 #     Escapes HTML characters to prevent injection.
 #     Converts < > & " ' into safe HTML entities.
 
 # ============================================================
 # SECTION 8: HSB COLOR PICKER
 # ============================================================
-# Ref. Lines 1950-2142 in code
+# Ref. Lines 2005-2197 in code
 #
 # This is the floating color picker popup that appears when you
 # click a color swatch in the layer list.
 #
 # It's "lazy loaded" — the HTML elements for the picker are only
-# created the first time you open it (ensureHsbPicker, line 1898).
+# created the first time you open it (ensureHsbPicker, line 2005).
 # This is a common technique to avoid slowing down the initial page load.
 #
 # The picker shows:
@@ -309,23 +310,23 @@
 # ============================================================
 # SECTION 9: RGB TAB HELPER FUNCTIONS
 # ============================================================
-# Ref. Lines 2143-2317 in code
+# Ref. Lines 2198-2372 in code
 #
 # Small functions used by other parts of the RGB tab.
 #
-#   layerOptionsHTML(selected) (line 2091):
+#   layerOptionsHTML(selected) (line 2198):
 #     Builds the <option> tags for a layer dropdown menu.
 #     Sorts layers by index so they appear in sequential order
 #     (0, 1, 2, ...). The "selected" parameter pre-selects one.
 #
-#   colorOptionsHTML(selected) (line 2104):
+#   colorOptionsHTML(selected) (line 2213):
 #     Builds <option> tags for a color dropdown (only layers
 #     that have HSB values assigned).
 #
-#   macroRefOptionsHTML(selected) (line 2129):
+#   macroRefOptionsHTML(selected) (line 2238):
 #     Builds <option> tags for a macro reference dropdown.
 #
-#   updateHeaderDropdowns() (line 2944):
+#   updateHeaderDropdowns() (line 3071):
 #     Refreshes all dropdown menus in the RGB macro and combo editors
 #     with the latest layer and color lists.
 #     Also populates the combo layer picker dropdown (comboLayerPicker).
@@ -358,7 +359,7 @@
 # ============================================================
 # SECTION 10: .dtsi CODE PARSER (parseUserCode)
 # ============================================================
-# Ref. Lines 2318-2695 in code
+# Ref. Lines 2373-2750 in code
 #
 # This is the parser for the RGB Generator tab. When you paste
 # .dtsi code and click "Parse Imported Code", this function runs.
@@ -417,16 +418,16 @@
 # ============================================================
 # SECTION 11: RGB TAB RENDERING (Lists, Dropdowns, UI)
 # ============================================================
-# Ref. Lines 2696-3227 in code
+# Ref. Lines 2751-3282 in code
 #
 # These functions draw the RGB tab's visual elements.
 #
-#   rgbRenderAll() (line 2642):
+#   rgbRenderAll() (line 2751):
 #     Master function that refreshes everything in the RGB tab.
 #     Calls renderLayerList, updateHeaderDropdowns, updateRgbOutput,
 #     renderLayerTabs (to update keymap tab's layer color dots).
 #
-#   renderLayerList() (line 2656):
+#   renderLayerList() (line 2765):
 #     Draws the rows in the "Layers & Colors" section.
 #     For each layer, it creates input fields for Index, H, S, B,
 #     Label, plus a color swatch and a delete button.
@@ -438,50 +439,50 @@
 #   renderBlinkMacroList():
 #     Similar rendering functions for other RGB tab sections.
 #
-#   updateHeaderDropdowns() (line 2955):
+#   updateHeaderDropdowns() (line 3071):
 #     Fills the macro's Layer and Color dropdown menus.
 #     Uses layerOptionsHTML() and colorOptionsHTML() to build options.
 
 # ============================================================
 # SECTION 12: RGB OUTPUT GENERATION (updateRgbOutput)
 # ============================================================
-# Ref. Lines 3228-3526 in code
+# Ref. Lines 3283-3581 in code
 #
 # This is the function that generates the .dtsi output text shown
 # in the "Generated Output" pane of the RGB tab.
 #
 # How it works step by step:
 #
-#   1. MERGE layers (lines 3114-3134):
+#   1. MERGE layers (lines 3286-3308):
 #      Combines layers that refer to the same thing (by name or index).
 #      This prevents duplicate #define lines in the output.
 #      Uses two lookup tables: "merged" (by name) and "mergedByIndex" (by index).
 #
-#   2. SORT by index (lines 3144-3150):
+#   2. SORT by index (lines 3317-3323):
 #      After merging, sorts layers by their index number (0, 1, 2, 3...).
 #      Layers without an index go to the end.
 #      This ensures the output shows #define lines in sequential order.
 #
-#   3. WRITE LAYER DEFINES (lines 3152-3158):
+#   3. WRITE LAYER DEFINES (lines 3325-3331):
 #      Outputs lines like: #define ABC 0
 #      Uses the layer's original parsed name directly (no prefix added).
 #      If a layer was parsed with L_ prefix, it keeps L_. If not, it
 #      outputs the bare name (e.g., ABC, NMRW, FKEYS).
 #
-#   4. WRITE COLOR DEFINES (lines 3160-3171):
+#   4. WRITE COLOR DEFINES (lines 3333-3344):
 #      Outputs lines like: #define RGB_ABC RGB_COLOR_HSB(19,100,17)
 #      Only for layers that have all three H, S, B values set.
 #
-#   5. WRITE HELPER MACROS (lines ~2961-3001):
+#   5. WRITE HELPER MACROS (lines ~3345-3392):
 #      Outputs BLINK_SEQ, MO_RGB, TO_RGB, TO_RGB_PRESS, RGB_HT,
 #      MO_BLINK (conditional — only if MO_BLINK macros exist), and C
 #      helper definitions.
 #
-#   6. WRITE MACRO INVOCATIONS (lines ~3001-3021):
+#   6. WRITE MACRO INVOCATIONS (lines ~3392-3412):
 #      Outputs macro entries using the helper templates. MO_BLINK macros
 #      output as: MO_BLINK(name, "label", layer, blinkColor, returnColor, wait)
 #
-#   7. WRITE COMBOS (lines ~3021-3031):
+#   7. WRITE COMBOS (lines ~3412-3422):
 #      Outputs combo definitions using key positions and bindings.
 #
 # The final string is placed in the output textarea and also rendered
@@ -490,12 +491,12 @@
 # ============================================================
 # SECTION 13: SVG KEYBOARD RENDERER
 # ============================================================
-# Ref. Lines 3527-3705 in code
+# Ref. Lines 3582-3760 in code
 #
 # These functions draw the keyboard picture using SVG (Scalable
 # Vector Graphics — a way to draw shapes in HTML).
 #
-#   loadLayout(layoutObj) (line 3466):
+#   loadLayout(layoutObj) (line 3582):
 #     Takes a keyboard layout JSON and extracts the key position array.
 #     Accepts four formats:
 #       1. { layouts: { "<name>": { layout: [...] } } } — standard .json
@@ -507,9 +508,9 @@
 #     like Sofle, reviung41, etc.), they are inferred from x/y positions:
 #     a new row starts when x drops by more than 2 from the previous key.
 #     The keyboard name from the layout key (e.g. "Sofle") is stored in
-#     currentLayoutId (line 1395) for use in #include "-rgb.dtsi" output.
+#     currentLayoutId (line 1502) for use in #include "-rgb.dtsi" output.
 #
-#   generateGridLayout(keyCount) (line 3428):
+#   generateGridLayout(keyCount) (line 3544):
 #     Creates a generic split-keyboard grid when no physical positions
 #     are available (QMK exports). Splits keys into two halves of 6
 #     columns each with a 2-unit gap.  Used by loadLayout() Format 4.
@@ -530,9 +531,9 @@
 # ============================================================
 # SECTION 14: BINDING LABELS (how keys show text)
 # ============================================================
-# Ref. Lines 3706-3823 in code
+# Ref. Lines 3761-3878 in code
 #
-#   bindingToLabels(binding) (line 3645):
+#   bindingToLabels(binding) (line 3761):
 #     Converts a binding string like "&kp A" into display labels
 #     for the SVG key. Returns { top, bottom, full } where:
 #       - top = short behavior name (e.g., "A")
@@ -541,27 +542,27 @@
 #     Handles special cases: &trans shows "▽", &none shows "✕",
 #     &mo shows "MO 2", &lt shows "LT 3 SPC", etc.
 #
-#   simplifyKeycode(kc) (line 3705):
+#   simplifyKeycode(kc) (line 3821):
 #     Shortens keycode names for display: ESCAPE→ESC, DELETE→DEL, etc.
 #
-#   simplifyMod(mod) (line 3730):
+#   simplifyMod(mod) (line 3846):
 #     Shortens modifier names: LEFT_CONTROL→LCTL, RIGHT_SHIFT→RSFT, etc.
 #
-#   getLayerLabel(idx) (line 3741):
+#   getLayerLabel(idx) (line 3857):
 #     Returns a display name for a layer index number.
 #     Looks at keymapLayers and layers arrays for a matching name.
 
 # ============================================================
 # SECTION 15: .keymap FILE PARSER (parseKeymap)
 # ============================================================
-# Ref. Lines 3824-4172 in code
+# Ref. Lines 3879-4227 in code
 #
 # This is the parser for the Keymap Editor tab. When you paste a
 # .keymap file and click "Parse .keymap", this function runs.
 #
 # What it does:
-#   1. Extracts #include lines (line 3781) for output preservation.
-#   2. Finds the "keymap {" block (line 3791).
+#   1. Extracts #include lines (line 3891) for output preservation.
+#   2. Finds the "keymap {" block (line 3901).
 #   3. Extracts "raw blocks" — any devicetree blocks BEFORE the keymap
 #      (combos, behaviors, macros) so they can be preserved in output.
 #   4. For each layer inside the keymap block:
@@ -589,96 +590,96 @@
 # ============================================================
 # SECTION 16: LAYER TABS & MANAGEMENT
 # ============================================================
-# Ref. Lines 4173-4492 in code
+# Ref. Lines 4228-4547 in code
 #
-#   renderLayerTabs() (line 4112):
+#   renderLayerTabs() (line 4228):
 #     Draws the layer sidebar on the left side of the Keymap tab.
 #     Each layer gets a tab showing its name, index number, and
 #     (optionally) a colored dot from the RGB tab.
 #     Active (selected) layer is highlighted. Reserved layers are hidden.
 #
-#   updateLayerHeader() (line 4148):
+#   updateLayerHeader() (line 4264):
 #     Updates the layer name displayed above the keyboard SVG.
 #
-#   showLayerContextMenu() (line 4178):
+#   showLayerContextMenu() (line 4294):
 #     Shows a right-click menu with options like "Add Layer Above",
 #     "Move Up", "Rename", "Delete", etc.
 #
-#   handleCtxAction(action) (line 4218):
+#   handleCtxAction(action) (line 4334):
 #     Executes the chosen context menu option. Uses pushUndo()
 #     before making changes so you can undo them.
 
 # ============================================================
 # SECTION 17: BINDING EDITOR (how you change a key)
 # ============================================================
-# Ref. Lines 4493-5051 in code
+# Ref. Lines 4548-5106 in code
 #
 # When you click a key on the SVG keyboard, the binding editor opens.
 #
-#   populateKeycodeGrids() (line 4432):
+#   populateKeycodeGrids() (line 4548):
 #     Fills the keycode button grid using ZMK_KEYCODES data.
 #     Creates clickable buttons organized by category.
 #
-#   populateBehaviorDropdown() (line 4453):
+#   populateBehaviorDropdown() (line 4569):
 #     Fills the behavior dropdown with ZMK_BEHAVIORS entries plus
 #     any custom behaviors defined in the keymap.
 #
-#   showBindingEditor(keyIdx) (line 4624):
+#   showBindingEditor(keyIdx) (line 4740):
 #     Opens the editor panel for a specific key. Reads the current
 #     binding and fills in the behavior, parameters, and modifiers.
 #
-#   updateBindingEditorFields(behavior, params) (line 4652):
+#   updateBindingEditorFields(behavior, params) (line 4799):
 #     Adjusts the editor UI based on the selected behavior.
 #     Different behaviors need different input fields.
 #     Example: &kp needs a keycode, &bt needs a BT action, etc.
 #
-#   applyBinding() (line 4892):
+#   applyBinding() (line 5044):
 #     Saves the edited binding back to the layer data.
 #     Calls pushUndo() first, then updates keymapLayers.
 #
-#   cancelBindingEditor() (line 4939):
+#   cancelBindingEditor() (line 5091):
 #     Closes the editor without saving.
 
 # ============================================================
 # SECTION 18: COMBO, MACRO, BEHAVIOR & BUILT-IN BEHAVIOR EDITORS
 # ============================================================
-# Ref. Lines 5052-6198 in code
+# Ref. Lines 5107-6253 in code
 #
 # These render and manage the combo, macro, and behavior lists
 # in the Keymap Editor tab.
 #
-#   renderComboMiniKb() (line 4955):
+#   renderComboMiniKb() (line 5107):
 #     Draws a small keyboard picture for selecting combo key positions.
 #     You click keys on the mini-keyboard to choose which keys
 #     trigger the combo.
 #
-#   renderKeymapComboList() (line 4992):
+#   renderKeymapComboList() (line 5144):
 #     Displays the list of combos with their names, bindings, and
 #     key positions. Includes edit and delete buttons.
 #
-#   renderKeymapMacroList() (line 5020):
+#   renderKeymapMacroList() (line 5172):
 #     Displays the list of macros with names and step previews.
 #
-#   renderKeymapBehaviorList() (line 5449):
+#   renderKeymapBehaviorList() (line 5601):
 #     Displays custom behaviors with type, name, and config summary.
 #     Built-in behaviors (those with `_builtin` flag) are skipped here —
 #     they are shown in the Built-in Behaviors toggle section instead.
 #
-#   renderBuiltinBehaviorToggles() (line 5471):
+#   renderBuiltinBehaviorToggles() (line 5623):
 #     Renders the Built-in Behaviors section — a list of checkbox toggles
-#     for preset ZMK behaviors defined in BUILTIN_BEHAVIORS (line 1782).
+#     for preset ZMK behaviors defined in BUILTIN_BEHAVIORS (line 1889).
 #     Each toggle shows the behavior name, type, and description.
 #     Checkbox state syncs with keymapBehaviors (checked = behavior exists
 #     in the array with matching `_builtin` id).
 #
-#   toggleBuiltinBehavior(presetId, enable) (line 5488):
+#   toggleBuiltinBehavior(presetId, enable) (line 5640):
 #     Called when a built-in behavior checkbox changes. When enabled:
 #     removes any parsed behavior with the same name (dedup), then adds
 #     a deep copy of the preset config to keymapBehaviors with _builtin
 #     and _fromEditor flags. When disabled: filters out by _builtin id.
 #     Then re-renders toggles, behavior list, dropdown, and output.
 #
-#   showBehaviorConfig(type) (line 5947):
+#   showBehaviorConfig(type) (line 6099):
 #     When you select a behavior type (hold-tap, tap-dance, etc),
 #     this shows the appropriate configuration fields.
 #     Different types need different settings:
@@ -696,7 +697,7 @@
 # ============================================================
 # SECTION 19: QUICK-ASSIGN SYSTEM
 # ============================================================
-# Ref. Lines 6198-6575 in code
+# Ref. Lines 6253-6630 in code
 #
 # Quick-assign lets you rapidly assign keycodes to every key
 # by pressing keys on your physical keyboard.
@@ -711,16 +712,16 @@
 # The on-screen keyboard (rendered by renderQaOnScreenKb) provides
 # a visual alternative for keys not on your physical keyboard.
 #
-# renderQaMiniKeyboard() (line 6245) draws a compact mini version
+# renderQaMiniKeyboard() (line 6397) draws a compact mini version
 # of the keyboard inside the Quick Assign panel. It uses x/y physical
-# positions from keyboardLayout (same as renderKeyboardSvg, line 3545)
+# positions from keyboardLayout (same as renderKeyboardSvg, line 3661)
 # so the shape matches the actual keyboard layout (split gap, thumb
 # key rotation, etc.). Scale is 28px per unit (vs 56 in the main SVG).
 
 # ============================================================
 # SECTION 20: KEYMAP OUTPUT GENERATION (updateKeymapOutput)
 # ============================================================
-# Ref. Lines 6576-7066 in code
+# Ref. Lines 6631-7121 in code
 #
 # This is the biggest output function. It generates the complete
 # .keymap file text from all the parsed/edited data.
@@ -730,7 +731,7 @@
 #      The RGB dtsi #include uses currentLayoutId dynamically:
 #      `#include "<currentLayoutId>-rgb.dtsi"` — e.g. "corne-rgb.dtsi",
 #      "sofle-rgb.dtsi", "reviung41-rgb.dtsi", depending on which layout
-#      JSON was loaded. This name is set by loadLayout() (line 3466).
+#      JSON was loaded. This name is set by loadLayout() (line 3582).
 #   2. #define macros for enabled built-in behaviors (e.g.,
 #      `#define AS(keycode) &as LS(keycode) keycode` for autoshift,
 #      `#define MO_TOG(layer) &mo_tog layer layer` for mo_tog).
@@ -756,16 +757,16 @@
 # ============================================================
 # SECTION 21: BEHAVIOR CODE GENERATION
 # ============================================================
-# Ref. Lines 7067-7158 in code
+# Ref. Lines 7122-7213 in code
 #
-#   getKeyPositionsForSide(side) (line 6934):
+#   getKeyPositionsForSide(side) (line 7086):
 #     Returns a space-separated string of key indices for the 'left'
 #     or 'right' side of a split keyboard. Uses the same split detection
 #     as updateKeymapOutput(): finds the largest x-position gap to
 #     determine where left ends and right begins. Called by
 #     generateBehaviorCode() to auto-fill hold-trigger-key-positions.
 #
-#   generateBehaviorCode(b) (line 6970):
+#   generateBehaviorCode(b) (line 7122):
 #     Takes a behavior object ({name, type, label, config}) and
 #     generates the devicetree code for it.
 #     Each behavior type has a different "compatible" string and
@@ -778,24 +779,24 @@
 #         properties: tapping-term-ms, bindings
 #     For hml/hmr built-in behaviors, hold-trigger-key-positions are
 #     auto-generated: hml gets right-side keys, hmr gets left-side keys.
-#     This function is called by updateKeymapOutput() (line 6479)
+#     This function is called by updateKeymapOutput() (line 6631)
 #     when generating the behavior section of the .keymap file.
 
 # ============================================================
 # SECTION 22: CROSS-TAB SYNC (how RGB & Keymap tabs talk)
 # ============================================================
-# Ref. Lines ~7159-7321 in code
+# Ref. Lines ~7214-7376 in code
 #
 # The two tabs have separate data, but they need to stay in agreement.
 #
-#   syncCrossTabData() (line 7062):
+#   syncCrossTabData() (line 7214):
 #     Called when switching TO the RGB tab.
 #     Goes through every keymapLayer and adds matching entries to
 #     the RGB layers[] array (if they don't already exist).
 #     Matching is done by: index first, then by name.
 #     After syncing, sorts layers by index so they appear in order.
 #
-#   syncRgbToKeymap() (line 7112):
+#   syncRgbToKeymap() (line 7264):
 #     Called when switching TO the Keymap tab.
 #     Syncs ALL RGB data into keymap arrays with _fromRgb flag:
 #       - macros[] → keymapMacros (as paramType 0 with empty steps)
@@ -845,7 +846,7 @@
 #   Unlike the automatic tab-switch sync above, layer NAME synchronization
 #   only happens when the user explicitly parses code:
 #
-#   RGB "Parse & Reflect" (in parseUserCode, ~line 2545):
+#   RGB "Parse & Reflect" (in parseUserCode, ~line 2600):
 #     After the .dtsi is parsed, if keymapLayers already exist, the code
 #     walks all parsed RGB layers by index. For each:
 #       - If a keymap layer exists at that index → its displayName and
@@ -858,7 +859,7 @@
 #         more layers than the current keymap has.
 #     Status message shows sync + new layer counts.
 #
-#   Keymap "Parse Keymap" (in kmParseBtn handler, ~line 7612):
+#   Keymap "Parse Keymap" (in kmParseBtn handler, ~line 7765):
 #     After the .keymap is parsed, if RGB layers already exist, the code
 #     walks all keymap layers by index. For each matching RGB layer:
 #       - The RGB layer's name is overwritten using the keymap layer's
@@ -874,7 +875,7 @@
 # ============================================================
 # SECTION 23: VALUE PICKER (floating search widget)
 # ============================================================
-# Ref. Lines 7424-7549 in code
+# Ref. Lines 7479-7604 in code
 #
 # The value picker is a floating search box that appears when you
 # need to choose a parameter value (like a keycode or layer number).
@@ -890,32 +891,32 @@
 #
 # KEYBOARD NAVIGATION:
 #   Arrow Up/Down moves the highlight, Enter selects, Escape closes.
-#   This is wired in the DOMContentLoaded block (line 7505).
+#   This is wired in the DOMContentLoaded block (line 7657).
 
 # ============================================================
 # SECTION 24: TAB SWITCHING & DARK MODE
 # ============================================================
-# Ref. Lines 7550-7601 in code
+# Ref. Lines 7605-7656 in code
 #
-#   switchTab(tabId) (line 7453):
+#   switchTab(tabId) (line 7605):
 #     Switches between the RGB Generator and Keymap Editor tabs.
 #     Hides one tab panel, shows the other.
 #     When switching to Keymap: calls syncRgbToKeymap().
 #     When switching to RGB: calls syncCrossTabData() and rgbRenderAll().
 #
-#   toggleDarkMode() (line 7479):
+#   toggleDarkMode() (line 7631):
 #     Switches between light and dark color themes.
 #     Sets the "data-theme" attribute on the <html> element.
 #     The CSS uses this attribute to apply different colors.
 #
-#   loadTheme() (line 7487):
+#   loadTheme() (line 7639):
 #     Checks localStorage for a saved theme preference.
 #     localStorage is like a tiny file that the browser remembers.
 
 # ============================================================
 # SECTION 25: DOMContentLoaded (wiring everything up)
 # ============================================================
-# Ref. Lines 7602-9615 in code
+# Ref. Lines 7657-9994 in code
 #
 # This is the longest section. It runs once when the page finishes
 # loading. Its job is to connect HTML elements to JavaScript functions.
@@ -928,7 +929,7 @@
 #   — means "when the user types in this field, run this function."
 #
 # This section wires up:
-#   - Tab buttons (lines 7270-7274)
+#   - Tab buttons (lines 7670-7674)
 #   - RGB parse button, Add buttons for layers/macros/etc.
 #   - Macro editor open/close/save/delete
 #   - Keymap parse button, layout import
@@ -952,7 +953,7 @@
 # The pattern is always: find the HTML element by id, then attach
 # a function that runs when the user interacts with it.
 #
-# initSubtabs(container) (line 2203):
+# initSubtabs(container) (line 2310):
 #   A utility that sets up sub-tab switching within a container.
 #   It finds elements with class "km-subtab-btn" and wires click
 #   handlers to toggle visibility of matching "km-subtab-content"
@@ -974,18 +975,18 @@
 #
 # THE SOLUTION (three places):
 #
-#   1. syncCrossTabData() — Ref. Line 7159 in code
+#   1. syncCrossTabData() — Ref. Line 7214 in code
 #      After adding keymap layers to the RGB list, sorts the
 #      entire layers[] array by index number. Layers without
 #      an index (orphans) go to the end. This makes the layer
 #      list in the RGB editor display in sequential order.
 #
-#   2. updateRgbOutput() — Ref. Line 3228 in code
+#   2. updateRgbOutput() — Ref. Line 3283 in code
 #      After merging duplicate layers, sorts the merged array
 #      by index before generating output. This makes the
 #      #define L_xxx lines appear in sequential order.
 #
-#   3. layerOptionsHTML() — Ref. Line 2143 in code
+#   3. layerOptionsHTML() — Ref. Line 2198 in code
 #      When building dropdown menus, sorts layers by index
 #      before creating the <option> tags. This makes the
 #      dropdown show layers in sequential order.
@@ -1002,7 +1003,7 @@
 # ============================================================
 # SECTION 27: MACRO PARAM CONTROLS (context-aware editing)
 # ============================================================
-# Ref. Lines ~5035-5360 in code
+# Ref. Lines ~5208-5532 in code
 #
 # When editing macro steps, each step has a behavior (like &kp, &mo,
 # &lt) and parameters. The editor provides context-aware controls
@@ -1037,7 +1038,7 @@
 # ============================================================
 # SECTION 28: COMMENT PRESERVATION (.dtsi round-trip)
 # ============================================================
-# Ref. Lines ~2342-2416 (parser) and ~3282-3364 (output) in code
+# Ref. Lines ~2397-2471 (parser) and ~3337-3419 (output) in code
 #
 # When you paste a .dtsi file and the tool regenerates it, comments
 # from the original code are now preserved:
@@ -1074,7 +1075,7 @@
 # ============================================================
 # SECTION 29: CLEAR LAYER FEATURE
 # ============================================================
-# Ref. Lines ~4239-4275 (context menu) and ~4279-4353 (handler) in code
+# Ref. Lines ~4348-4408 (context menu) and ~4409-4527 (handler) in code
 #
 # The layer context menu (right-click a layer tab) now includes two
 # "Clear Layer" options:
@@ -1095,7 +1096,7 @@
 # ============================================================
 # SECTION 30: POPUP EDITOR OVERLAYS (Combo & Behavior)
 # ============================================================
-# Ref. Lines ~2855-2913 (JS functions) and ~648-706 (HTML) in code
+# Ref. Lines ~2910-2968 (JS functions) and ~713-771 (HTML) in code
 #
 # COMBO EDITOR POPUP:
 #   triggerered by clicking "Edit" on a combo row in renderComboList().
@@ -1131,7 +1132,7 @@
 # ============================================================
 # SECTION 31: RGB OUTPUT STRUCTURE (/ { ... }; wrapper)
 # ============================================================
-# Ref. Lines ~3336-3416 in updateRgbOutput() in code
+# Ref. Lines ~3390-3470 in updateRgbOutput() in code
 #
 # The RGB output is now wrapped in a root devicetree block:
 #
@@ -1160,7 +1161,7 @@
 # ============================================================
 # SECTION 32: LAYOUT SWITCH & JSON IMPORT #INCLUDE UPDATE
 # ============================================================
-# Ref. Lines ~7817-7847 in DOMContentLoaded in code
+# Ref. Lines ~7970-8000 in DOMContentLoaded in code
 #
 # When the user clicks "Use Corne", "Use Lotus58", or "Apply Layout"
 # (for a custom JSON), the handlers update keymapParsedIncludes[] by
@@ -1169,13 +1170,13 @@
 # The regex /[a-z0-9_]+-rgb\.dtsi/gi matches any keyboard prefix.
 # Then updateKeymapOutput() is called to regenerate with correct path.
 #
-# The JSON Apply handler (line ~7726) also saves oldId before calling
+# The JSON Apply handler (line ~7880) also saves oldId before calling
 # loadLayout(), then compares to detect a name change and updates includes.
 
 # ============================================================
 # SECTION 33: KEYMAP EDITOR POPUP OVERLAYS
 # ============================================================
-# Ref. Lines ~1000-1310 (HTML) and ~8606-8906 (JS handlers) in code
+# Ref. Lines ~1065-1375 (HTML) and ~8759-9059 (JS handlers) in code
 #
 # All keymap tab editors (combo, macro, behavior, conditional layers)
 # now use popup overlay dialogs instead of inline collapsible panels.
@@ -1258,7 +1259,7 @@
 #   a full-screen popup overlay (#bindingPickerOverlay) where the user
 #   can browse categorized bindings, search keycodes, or type raw code.
 #
-#   CSS (Ref. Lines ~330-334 for .beh-binding-wrap, ~292-325 for .behp-* in code):
+#   CSS (Ref. Lines ~388-392 for .beh-binding-wrap, ~350-383 for .behp-* in code):
 #     .beh-binding-wrap — inline-flex column wrapper with trigger button
 #     .bp-overlay — fixed full-screen backdrop (z-index 400)
 #     .bp-dialog — centered modal (540px, themed, rounded, shadowed)
@@ -1268,7 +1269,7 @@
 #     .bp-btn — individual binding choice buttons
 #     .bp-raw-row — "Or type raw code" input at the bottom
 #
-#   HTML popup (Ref. Line 930 in code):
+#   HTML popup (Ref. Line 995 in code):
 #     #bindingPickerOverlay contains a .bp-dialog with:
 #       - #bpTitle (header), #bpCloseBtn (dismiss)
 #       - #bpSections (main categorized binding list)
@@ -1277,20 +1278,20 @@
 #
 #   Binding picker functions (Ref. Lines ~5654-5956 in code):
 #
-#     openBindingPicker(targetId, optType) — (line 5654)
+#     openBindingPicker(targetId, optType) — (line 5709)
 #       Opens the picker popup. Sets bpTargetId to the caller's element id.
 #       Calls renderBindingPickerSections() to populate the category grid.
 #       optType = 'binding' (default) or 'mods' for modifier selection.
 #
-#     closeBindingPicker() — (line 5674)
+#     closeBindingPicker() — (line 5729)
 #       Hides the popup overlay. Resets bpTargetId.
 #
-#     selectBindingPickerValue(val) — (line 5680)
+#     selectBindingPickerValue(val) — (line 5735)
 #       Called when the user clicks a binding button. Writes the chosen
 #       value into the target element identified by bpTargetId, then
 #       closes the picker. For trigger buttons, updates the displayed text.
 #
-#     renderBindingPickerSections() — (line 5697)
+#     renderBindingPickerSections() — (line 5752)
 #       Builds the categorized binding list inside #bpSections.
 #       Categories: Complete Bindings (0-param like &trans, &none, &gresc),
 #       Layer Actions (&mo, &tog, &to, &sl with layer names/numbers),
@@ -1298,36 +1299,36 @@
 #       Custom Behaviors, Macros.
 #       Each section is collapsible (click title to expand/collapse).
 #
-#     showBindingPickerSubPanel(prefix) — (line 5851)
+#     showBindingPickerSubPanel(prefix) — (line 5906)
 #       Switches from the main sections view to a keycode search panel.
 #       Shows a search bar + keycode grid for the given behavior prefix
 #       (e.g., "&kp"). Clicking a keycode button calls selectBindingPickerValue
 #       with the full binding string (e.g., "&kp A").
 #
-#     hideBindingPickerSubPanel() — (line 5956)
+#     hideBindingPickerSubPanel() — (line 6011)
 #       Returns from the keycode sub-panel to the main sections view.
 #
-#     populatePickerKeycodeGrids(container) — (line 5964)
+#     populatePickerKeycodeGrids(container) — (line 6019)
 #       Fills the sub-panel's keycode grid using ZMK_KEYCODES data.
 #       Creates clickable buttons organized by category. Also appends
 #       special action lists (BT_ACTIONS, RGB_ACTIONS, etc.) when the
 #       behavior prefix requires them.
 #
-#   Remaining helper functions (Ref. Lines ~5988-6020 in code):
+#   Remaining helper functions (Ref. Lines ~6043-6075 in code):
 #
-#     bindingSelectHTML(id, selected, optType, width) — (line 5988)
+#     bindingSelectHTML(id, selected, optType, width) — (line 6043)
 #       Returns HTML for a .bp-trigger button that opens the picker.
 #       Displays the current binding value; clicking calls openBindingPicker().
 #
-#     getBehBindingValue(id) — (line 6002)
+#     getBehBindingValue(id) — (line 6057)
 #       Reads the effective value from a trigger button's data-value attribute
 #       or falls back to its text content.
 #
-#     setBehBindingValue(id, val) — (line 6008)
+#     setBehBindingValue(id, val) — (line 6063)
 #       Sets the trigger button's data-value and displayed text.
 #       Used by edit handlers when populating forms.
 #
-#   Event wiring (Ref. Lines ~7368-7385 in DOMContentLoaded):
+#   Event wiring (Ref. Lines ~7521-7538 in DOMContentLoaded):
 #     - Backdrop click on #bindingPickerOverlay → closeBindingPicker()
 #     - #bpCloseBtn click → closeBindingPicker()
 #     - #bpSubBack click → hideBindingPickerSubPanel()
@@ -1335,11 +1336,11 @@
 #     - #bpKcSearch input → filters keycode buttons in sub-panel
 #     - #bpKcSearchClear → clears search
 #
-#   Fields using the picker (in showBehaviorConfig, Ref. Line 6044):
+#   Fields using the picker (in showBehaviorConfig, Ref. Line 6099):
 #     Binding type triggers: kmBehHoldBinding, kmBehTapBinding, kmBehMmNormal,
 #       kmBehMmMorphed, kmBehSkBinding, kmBehSensorCW, kmBehSensorCCW.
 #     Modifier type triggers: kmBehMmMods, kmBehCwMods.
-#     Combo binding: kmComboBind (inside #kmComboBindWrap container, line 848).
+#     Combo binding: kmComboBind (inside #kmComboBindWrap container, line 913).
 #   Fields kept as plain text inputs (complex syntax):
 #     kmBehTdBindings (tap-dance), kmBehMacroBindings (macro),
 #     kmBehCwContinueList (caps-word continue list).
@@ -1347,15 +1348,15 @@
 #   Positional Hold Mini Keyboard (Ref. Lines ~5059-5069):
 #     The hold-tap "hold-trigger-key-positions" field uses a visual SVG
 #     mini keyboard picker (same pattern as combo position picker).
-#     Global: behPositionalSelectedPositions[] (line 4844) holds selected position indices.
-#     renderBehPositionalMiniKb() (line 5060) renders the SVG in #behPositionalMiniKb,
+#     Global: behPositionalSelectedPositions[] (line 5114) holds selected position indices.
+#     renderBehPositionalMiniKb() (line 5115) renders the SVG in #behPositionalMiniKb,
 #     syncs the hidden #kmBehHoldTriggerPositions input.
 #     Click handler via event delegation on #kmBehaviorConfig.
 
 # ============================================================
 # SECTION 34: BINDING PICKER POPUP (visual binding chooser)
 # ============================================================
-# Ref. Lines 5654-5988 (JS), 930-967 (HTML), 292-325 (CSS) in code
+# Ref. Lines 5709-6043 (JS), 995-1032 (HTML), 350-383 (CSS) in code
 #
 # The binding picker is a modal popup that replaces the old
 # behBindingOptionsHTML() <select> approach. Instead of a dropdown,
@@ -1387,7 +1388,7 @@
 #   bpTargetId — the id of the trigger button that opened the picker
 #   bpOptType — 'binding' or 'mods' (determines what sections show)
 #
-# kcDescs (line 4249):
+# kcDescs (line 4363):
 #   A global lookup table extracted from populateKeycodeGrids() that maps
 #   keycode names to human-readable descriptions (e.g., 'A' → 'Letter A').
 #   Used by the picker and sub-panel to show helpful descriptions on buttons.
@@ -1407,3 +1408,59 @@
 # MACRO STYLING:
 #   Macro buttons use .bp-btn-macro class, with .bp-btn-name colored #9cc
 #   (light-blue) matching the macro/behavior label convention elsewhere.
+
+# ============================================================
+# SECTION 35: "HOW TO USE" GUIDE POPUP & CODE VIEWER
+# ============================================================
+# Ref. Lines 9869-9918 (JS), ~514-551 (CSS), topbar HTML in code
+#
+# The "How to Use" guide is a popup overlay showing step-by-step
+# instructions for using the RGB helper tool, with embedded links
+# to view raw .dtsi file content in a secondary code viewer popup.
+#
+# GUIDE POPUP:
+#   Button: "📖 How to Use" in the RGB tab topbar-right area (reuses
+#   .changelog-btn class, placed before the What's New button).
+#   Overlay: .guide-overlay / .guide-dialog (z-index 600), same
+#   pattern as the changelog popup (.changelog-overlay).
+#   Content: GUIDE_HTML constant stores pre-rendered HTML converted
+#   from the .How_to_use_corne-rgb_dtsi.md markdown file.
+#
+#   renderGuide() (line 9869):
+#     Sets #guideBody innerHTML to GUIDE_HTML. Called once when the
+#     guide button is first clicked.
+#
+#   GUIDE_CODE_FILES (near line 9869):
+#     Object with two keys: "blank" and "original". Each has:
+#       { title: "<display filename>", code: "<raw .dtsi content>" }
+#     "blank" holds the corne-rgb-blank.dtsi blank template.
+#     "original" holds the full corne-rgb.dtsi completed example.
+#
+# CODE VIEWER SUB-POPUP:
+#   Overlay: .code-viewer-overlay / .code-viewer-dialog (z-index 700,
+#   above the guide's 600 so it layers on top).
+#   Contains a header (#codeViewerTitle), close button, and a <pre>
+#   element (#codeViewerPre) for displaying raw .dtsi code.
+#
+#   openCodeViewer(fileKey) (line 9875):
+#     Takes "blank" or "original" as fileKey. Sets the title and
+#     pre text content from GUIDE_CODE_FILES[fileKey], then adds
+#     'open' class to show the code viewer overlay.
+#
+# EVENT WIRING (in DOMContentLoaded):
+#   - #guideBtn click → renderGuide() + add 'open' class
+#   - #guideCloseBtn click → remove 'open' class
+#   - #guideOverlay backdrop click → close
+#   - #guideBody delegated click for [data-view-code] buttons → openCodeViewer()
+#   - #codeViewerCloseBtn click → close code viewer
+#   - #codeViewerOverlay backdrop click → close code viewer
+#
+# CSS CLASSES:
+#   .guide-overlay, .guide-overlay.open — fixed overlay (display:none/flex)
+#   .guide-dialog — 800px max-width, 85vh max-height, flex column
+#   .guide-dialog-header — flex row with h3 title + close button
+#   .guide-dialog-body — scrollable content, typography for h1-h4, p, ul,
+#     ol, li, code, pre, hr, em, strong
+#   .guide-file-btn — accent-colored inline button for "View Code" links
+#   .code-viewer-overlay, .code-viewer-dialog, .code-viewer-header,
+#     .code-viewer-body, .code-viewer-body pre — code viewer sub-popup

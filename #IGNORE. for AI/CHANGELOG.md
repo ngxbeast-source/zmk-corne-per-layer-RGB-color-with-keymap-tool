@@ -4,6 +4,36 @@ This changelog combines:
 - Git commit history available in this repo (sampled from the oldest currently visible commits up to now)
 - Session memory from this workspace (design notes, bug hunts, and fix rounds)
 
+## 2026-04-08 — "How to Use" Guide Popup & Code Viewer
+
+### Major addition — How to Use guide popup
+- New "📖 How to Use" button in the RGB tab topbar (reuses `.changelog-btn` class, placed before the What's New button).
+- Guide overlay (`.guide-overlay`, `.guide-dialog`) follows the same pattern as the changelog popup — full-screen overlay with scrollable dialog body.
+- `GUIDE_HTML` constant (line ~9869) stores pre-rendered HTML converted from the `.How_to_use_corne-rgb_dtsi.md` markdown file. Content includes step-by-step instructions for using the RGB helper tool.
+- `renderGuide()` function (line 9869) populates `#guideBody` with the pre-rendered HTML.
+- Two embedded "View Code" buttons inside the guide content:
+  - **"View Blank Template"** — opens the `corne-rgb-blank.dtsi` blank template in a code viewer sub-popup.
+  - **"View Original .dtsi"** — opens the full `corne-rgb.dtsi` completed example in a code viewer sub-popup.
+
+### Major addition — Code viewer sub-popup
+- Secondary overlay (`.code-viewer-overlay`, `.code-viewer-dialog`) at z-index 700 (above guide's 600) for viewing raw `.dtsi` file content.
+- `GUIDE_CODE_FILES` object stores `{title, code}` for both blank and original `.dtsi` files.
+- `openCodeViewer(fileKey)` function (line 9875) sets the title and `<pre>` content from `GUIDE_CODE_FILES`.
+- Event delegation on `#guideBody` handles `data-view-code` button clicks.
+- Close via button or backdrop click, same as other overlays.
+
+### New CSS (lines ~514-551)
+- `.guide-overlay`, `.guide-dialog`, `.guide-dialog-header`, `.guide-dialog-body` — styled guide popup with typography for h1-h4, p, ul, ol, li, code, pre, hr, em, strong.
+- `.guide-file-btn` — accent-colored inline button for "View Code" links.
+- `.code-viewer-overlay`, `.code-viewer-dialog`, `.code-viewer-header`, `.code-viewer-body` — code viewer sub-popup styling.
+
+### New JS functions
+- `renderGuide()` (line 9869) — populates guide dialog body.
+- `openCodeViewer(fileKey)` (line 9875) — opens code viewer sub-popup with file content.
+
+### File size
+- 9617 → 9996 lines (+379 lines)
+
 ## 2026-04-07 (Session 2) — UI/UX Improvements, File Upload/Save & Bug Fixes
 
 ### Major addition — Changelog popup with date navigation

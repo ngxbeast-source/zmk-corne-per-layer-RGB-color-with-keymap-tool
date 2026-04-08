@@ -30,7 +30,7 @@
                 /* -------------------REMOVE & DEFINE HERE------------------- */
 
 
-            /* -------------------DEFINE ENDS; BUILD CONTINUES AT LINE 129------------------- */
+            /* -------------------DEFINE ENDS; BUILD CONTINUES AT LINE 131------------------- */
 /* USE THE HELPERS FOR REFERENCE TO BUILD YOUR MACROS AND/OR BEHAVIORS. NOTHING HAS TO BE CHANGED HERE */
 /* ---- (OPTIONAL) BLINK HELPERS ---- */
 // "flashes" LEDs a chosen color twice, blink speed can be adjusted with the "wait" modifier.
