@@ -97,7 +97,7 @@
 
     .color-swatch { position: relative; display: inline-block; width: 28px; height: 28px; border-radius: 6px; border: 2px solid var(--border); cursor: pointer; vertical-align: middle; transition: border-color 0.15s; flex-shrink: 0; }
     .color-swatch:hover { border-color: var(--accent); }
-    .color-swatch input[type="color"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: none; padding: 0; }
+
     #hsbPickerPopup { position: fixed; z-index: 10000; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.45); display: none; width: 232px; user-select: none; }
     .hsbp-header { display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 0.82em; margin-bottom: 8px; color: var(--text); }
     .hsbp-close { cursor: pointer; font-size: 1.3em; color: var(--muted); line-height: 1; }
@@ -111,7 +111,7 @@
     .hsbp-row { display: flex; align-items: center; gap: 6px; }
     .hsbp-row .input-group { margin: 0; }
     .hsbp-row .input-group label { font-size: 0.78em; font-weight: 600; min-width: 10px; }
-    .hsbp-row .input-group input { width: 46px; }
+    .hsbp-row .input-group input { width: 40px; }
     .hsbp-preview { width: 32px; height: 32px; border-radius: 5px; border: 1px solid var(--border); margin-left: auto; flex-shrink: 0; }
     .item-list { margin-top: 0.3em; }
     .item { background: var(--item-bg); border-radius: 6px; padding: 0.4em 0.7em; margin-bottom: 0.35em; border: 1px solid var(--border); display: flex; flex-wrap: wrap; align-items: center; gap: 0.4em; font-size: 0.86em; transition: border-color 0.15s, box-shadow 0.15s; }
@@ -580,7 +580,7 @@
           <textarea id="userCodePaste" rows="6" placeholder="Paste your .dtsi code here (layers, colors, macros, behaviors, combos, blink macros)..."></textarea>
           <div style="margin-top:0.4em;display:flex;align-items:center;gap:0.5em;flex-wrap:wrap;">
             <button id="parseBtn">Parse &amp; Reflect</button>
-            <button class="file-upload-link" id="rgbUploadBtn" title="Upload a .dtsi file from disk">&#128193; Upload file</button>
+            <button class="file-upload-link" id="rgbUploadBtn" title="Upload a .dtsi file from disk; Make a Backup!">&#128193; Upload file</button>
             <button class="file-save-btn" id="rgbSaveFileBtn" title="Save output back to the uploaded file" disabled>&#128190; Save to file</button>
             <button id="rgbSyncNamesBtn" title="Overwrite Keymap tab layer names with RGB layer names (by index)" style="background:#2a4a5a;color:#cde;border:1px solid #5a8a9a;font-size:0.85em;padding:0.25em 0.7em;border-radius:4px;cursor:pointer;">Sync Names → Keymap</button>
             <span id="userCodeStatus" class="status-msg" style="display:none;"></span>
@@ -603,9 +603,8 @@
             <div class="input-group"><label>H</label><input type="range" id="hue" min="0" max="360" value="0"><input type="number" id="hueNum" min="0" max="360" value="0" style="width:56px;"></div>
             <div class="input-group"><label>S</label><input type="range" id="sat" min="0" max="100" value="100"><input type="number" id="satNum" min="0" max="100" value="100" style="width:56px;"></div>
             <div class="input-group"><label>B</label><input type="range" id="bri" min="0" max="100" value="50"><input type="number" id="briNum" min="0" max="100" value="50" style="width:56px;"></div>
-            <div class="color-swatch" id="colorPreview">
-              <input type="color" id="colorWheel" value="#ff0000" title="Pick a color">
-            </div>
+            <div class="input-group" style="align-items:center;margin:0 6px;"><label style="white-space:nowrap;cursor:pointer;"><input type="checkbox" id="noColorToggle"> No color</label></div>
+            <div class="color-swatch" id="colorPreview" title="Color preview"></div>
             <div class="input-group"><label>Label</label><input type="text" id="layerLabel" placeholder="Color label" style="width:100px;"></div>
             <button id="addLayerBtn">+ Add</button>
           </div>
@@ -808,7 +807,7 @@
           <textarea id="kmKeymapPaste" rows="6" placeholder="Paste your .keymap file content here..."></textarea>
           <div style="margin-top:0.4em;display:flex;align-items:center;gap:0.5em;flex-wrap:wrap;">
             <button id="kmParseBtn">Parse Keymap</button>
-            <button class="file-upload-link" id="kmUploadBtn" title="Upload a .keymap file from disk">&#128193; Upload file</button>
+            <button class="file-upload-link" id="kmUploadBtn" title="Upload a .keymap file from disk; Make a Backup!">&#128193; Upload file</button>
             <button class="file-save-btn" id="kmSaveFileBtn" title="Save output back to the uploaded file" disabled>&#128190; Save to file</button>
             <button id="kmSyncNamesBtn" title="Overwrite RGB tab layer names with Keymap layer names (by index)" style="background:#2a4a5a;color:#cde;border:1px solid #5a8a9a;font-size:0.85em;padding:0.25em 0.7em;border-radius:4px;cursor:pointer;">Sync Names → RGB</button>
             <span id="kmParseStatus" class="status-msg" style="display:none;"></span>
@@ -2121,6 +2120,20 @@ function updateHsbPickerUI(h, s, b) {
 }
 
 function applyHsbPickerValue(h, s, b) {
+  // Special mode: hsbPickerLayerIdx === -2 means editing the add-layer row inputs
+  if (hsbPickerLayerIdx === -2) {
+    var hueEl = document.getElementById('hue'), hueNumEl = document.getElementById('hueNum');
+    var satEl = document.getElementById('sat'), satNumEl = document.getElementById('satNum');
+    var briEl = document.getElementById('bri'), briNumEl = document.getElementById('briNum');
+    if (h !== null) { hueEl.value = h; hueNumEl.value = h; }
+    if (s !== null) { satEl.value = s; satNumEl.value = s; }
+    if (b !== null) { briEl.value = b; briNumEl.value = b; }
+    var ch = parseInt(hueEl.value) || 0, cs = parseInt(satEl.value) || 0, cb = parseInt(briEl.value) || 0;
+    if (h !== null) drawSvCanvas(ch);
+    updateHsbPickerUI(ch, cs, cb);
+    document.getElementById('colorPreview').style.background = hsbToHex(ch, cs, cb);
+    return;
+  }
   if (hsbPickerLayerIdx < 0 || hsbPickerLayerIdx >= layers.length) return;
   var l = layers[hsbPickerLayerIdx];
   if (h !== null) l.h = String(h);
@@ -2158,14 +2171,22 @@ function applyHsbPickerValue(h, s, b) {
 }
 
 function openHsbPicker(layerIdx, anchorEl) {
-  pushRgbUndo();
+  if (layerIdx !== -2) pushRgbUndo(); // skip undo push for add-layer preview mode
   ensureHsbPicker();
   hsbPickerLayerIdx = layerIdx;
   var popup = document.getElementById('hsbPickerPopup');
-  var l = layers[layerIdx];
-  var h = parseInt(l.h) || 0, s = parseInt(l.s) || 0, b = parseInt(l.b) || 0;
-  // Commit resolved values so all three h/s/b are populated (not left as '')
-  l.h = String(h); l.s = String(s); l.b = String(b);
+  // Special mode: layerIdx === -2 means editing the add-layer row inputs (not a saved layer)
+  var h, s, b;
+  if (layerIdx === -2) {
+    h = parseInt(document.getElementById('hue').value) || 0;
+    s = parseInt(document.getElementById('sat').value) || 0;
+    b = parseInt(document.getElementById('bri').value) || 0;
+  } else {
+    var l = layers[layerIdx];
+    h = parseInt(l.h) || 0; s = parseInt(l.s) || 0; b = parseInt(l.b) || 0;
+    // Commit resolved values so all three h/s/b are populated (not left as '')
+    l.h = String(h); l.s = String(s); l.b = String(b);
+  }
   // Position near the swatch
   var rect = anchorEl.getBoundingClientRect();
   var pw = 232, ph = 290;
@@ -2278,21 +2299,25 @@ function syncColorInputs() {
   var hue = document.getElementById('hue'), hueNum = document.getElementById('hueNum');
   var sat = document.getElementById('sat'), satNum = document.getElementById('satNum');
   var bri = document.getElementById('bri'), briNum = document.getElementById('briNum');
-  var wheel = document.getElementById('colorWheel'), preview = document.getElementById('colorPreview');
+  var preview = document.getElementById('colorPreview');
+  var noColorCb = document.getElementById('noColorToggle');
+  // Updates the swatch preview color (or grays it out when "No color" is checked)
   function syncDisplay() {
-    var hex = hsbToHex(hue.value, sat.value, bri.value);
-    wheel.value = hex; preview.style.background = hex;
+    if (noColorCb.checked) { preview.style.background = '#555'; return; }
+    preview.style.background = hsbToHex(hue.value, sat.value, bri.value);
+  }
+  // Dims or enables the HSB sliders/inputs when "No color" is toggled
+  function setColorControlsEnabled(enabled) {
+    var opacity = enabled ? '1' : '0.3';
+    var pe = enabled ? '' : 'none';
+    [hue, hueNum, sat, satNum, bri, briNum].forEach(function(el) { el.style.opacity = opacity; el.style.pointerEvents = pe; });
+    preview.style.opacity = enabled ? '1' : '0.4';
   }
   function fromSliders() { hueNum.value = hue.value; satNum.value = sat.value; briNum.value = bri.value; syncDisplay(); }
   function fromNums() { hue.value = hueNum.value; sat.value = satNum.value; bri.value = briNum.value; syncDisplay(); }
-  function fromWheel() {
-    var rgb = hexToRgb(wheel.value), hsb = rgbToHsb(rgb.r, rgb.g, rgb.b);
-    hue.value = hueNum.value = hsb.h; sat.value = satNum.value = hsb.s; bri.value = briNum.value = hsb.b;
-    preview.style.background = wheel.value;
-  }
+  noColorCb.onchange = function() { setColorControlsEnabled(!this.checked); syncDisplay(); };
   hue.oninput = sat.oninput = bri.oninput = fromSliders;
   hueNum.oninput = satNum.oninput = briNum.oninput = fromNums;
-  wheel.oninput = fromWheel;
   fromSliders();
 }
 
@@ -3110,7 +3135,9 @@ function addLayer() {
   pushRgbUndo();
   var name = document.getElementById('layerName').value.trim() || 'NEW_COLOR';
   var idxVal = document.getElementById('layerIndex').value;
-  layers.push({ name: name, index: idxVal, h: document.getElementById('hue').value, s: document.getElementById('sat').value, b: document.getElementById('bri').value, label: document.getElementById('layerLabel').value });
+  // "No color" toggle: when checked, add the layer with no HSB values (layer-only define, like FKEYS)
+  var noColor = document.getElementById('noColorToggle').checked;
+  layers.push({ name: name, index: idxVal, h: noColor ? '' : document.getElementById('hue').value, s: noColor ? '' : document.getElementById('sat').value, b: noColor ? '' : document.getElementById('bri').value, label: document.getElementById('layerLabel').value });
   rgbRenderAll();
 }
 function autoPrefix(name, type) {
@@ -3352,26 +3379,42 @@ function updateRgbOutput() {
 
   var mergedBKs = {};
   mergedArr.forEach(function(l) { if (l.index !== '' && l.index !== undefined) mergedBKs[l.bk] = true; });
-  var orphanColors = [];
+  // Orphan colors: layers with NO index but valid HSB values (color-only defines like blink helpers)
+  // We check the merged layer data directly instead of relying on colorValueMap,
+  // which may not be in sync if layers were added via the UI without editing.
+  var orphanEntries = [];
+  var orphanSeen = {};
+  mergedArr.forEach(function(l) {
+    if (l.index !== '' && l.index !== undefined) return;
+    if (!hasHsbVal(l.h) || !hasHsbVal(l.s) || !hasHsbVal(l.b)) return;
+    var colorName = l.name.startsWith('RGB_') ? l.name : 'RGB_' + l.bk;
+    if (orphanSeen[colorName]) return;
+    orphanSeen[colorName] = true;
+    orphanEntries.push({ name: colorName, h: parseInt(l.h) || 0, s: parseInt(l.s) || 0, b: parseInt(l.b) || 0, label: l.label || '' });
+  });
+  // Also pick up any colorValueMap entries that aren't covered by merged layers
+  // (e.g. parsed blink colors stored under original names)
   Object.keys(colorValueMap).forEach(function(ck) {
-    if (!mergedBKs[baseKey(ck)] && !colorValueMap[ck]._autoSync) orphanColors.push(ck);
+    if (mergedBKs[baseKey(ck)] || colorValueMap[ck]._autoSync || orphanSeen[ck]) return;
+    var v = colorValueMap[ck];
+    orphanEntries.push({ name: ck, h: v.h, s: v.s, b: v.b, label: colorLabelMap[ck] || '' });
+    orphanSeen[ck] = true;
   });
   // Build a lookup for disabled orphans from the layers array
   var disabledOrphans = {};
   layers.forEach(function(l) {
     if ((l.index === '' || l.index === undefined) && l.enabled === false) {
-      disabledOrphans[l.name] = true;
+      var disabledKey = l.name.startsWith('RGB_') ? l.name : 'RGB_' + baseKey(l.name);
+      disabledOrphans[disabledKey] = true;
     }
   });
-  if (orphanColors.length) {
-    var enabledOrphans = orphanColors.filter(function(ck) { return !disabledOrphans[ck]; });
+  if (orphanEntries.length) {
+    var enabledOrphans = orphanEntries.filter(function(oe) { return !disabledOrphans[oe.name]; });
     if (enabledOrphans.length) {
       out += '\n/* ---- (OPTIONAL) BLINK HELPERS ---- */\n';
-      enabledOrphans.forEach(function(ck) {
-        var v = colorValueMap[ck];
-        var olbl = colorLabelMap[ck] || '';
-        var ocmt = olbl ? '      /* ' + olbl + ' */' : '';
-        out += '#define ' + ck + ' RGB_COLOR_HSB(' + v.h + ',' + v.s + ',' + v.b + ')' + ocmt + '\n';
+      enabledOrphans.forEach(function(oe) {
+        var ocmt = oe.label ? '      /* ' + oe.label + ' */' : '';
+        out += '#define ' + oe.name + ' RGB_COLOR_HSB(' + oe.h + ',' + oe.s + ',' + oe.b + ')' + ocmt + '\n';
       });
     }
   }
@@ -8021,6 +8064,11 @@ document.addEventListener('DOMContentLoaded', function() {
   };
 
   document.getElementById('showOrphans').onchange = function() { renderLayerList(); updateRgbOutput(); };
+  // Clicking the add-layer color swatch opens the HSB picker in "add-layer" mode (index -2)
+  document.getElementById('colorPreview').onclick = function() {
+    if (document.getElementById('noColorToggle').checked) return; // no-op when "No color" is on
+    openHsbPicker(-2, this);
+  };
   syncColorInputs();
   initCollapsible();
   initSubtabs();

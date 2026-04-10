@@ -4,6 +4,36 @@ This changelog combines:
 - Git commit history available in this repo (sampled from the oldest currently visible commits up to now)
 - Session memory from this workspace (design notes, bug hunts, and fix rounds)
 
+## 2026-04-10 — RGB Output Fixes & HSB-Only Color Picker
+
+### Bug fix — Orphan color-only defines missing from output (Fix 1)
+- `updateRgbOutput()` orphan detection rewritten: now iterates `mergedArr` directly for entries with no index but valid HSB values instead of relying on `colorValueMap` (which wasn't always in sync when layers were added via +Add).
+- `disabledOrphans` key mismatch fixed: now uses `'RGB_' + baseKey(l.name)` instead of bare `l.name`.
+- Fallback still checks `colorValueMap` for any parsed entries not covered by merged layers.
+
+### New feature — "No color" toggle for colorless layers (Fix 2)
+- New `<input type="checkbox" id="noColorToggle">` added to the add-layer input row (line 606).
+- When checked, H/S/B sliders and number inputs are dimmed/disabled, swatch turns gray.
+- `addLayer()` (line 3134) pushes layer with empty h/s/b, producing only `#define FKEYS 2` with no `RGB_FKEYS` color define — matching the ZMK pattern for layers without RGB.
+- `syncColorInputs()` (line 2298) updated with `setColorControlsEnabled()` helper and `noColorToggle.onchange` handler.
+
+### Bug fix — Color picker was RGB, now HSB-only (Fix 3)
+- Removed native `<input type="color" id="colorWheel">` from the add-layer swatch.
+- Removed `fromWheel()` function and all `wheel.oninput` wiring from `syncColorInputs()`.
+- Removed CSS rule `.color-swatch input[type="color"]` (no longer needed).
+- `colorPreview` swatch now clickable — opens the existing HSB picker popup in "add-layer" mode (index -2).
+- `applyHsbPickerValue()` (line 2122) updated to handle index -2: writes H/S/B directly to the add-layer slider/number inputs and updates the preview swatch.
+- `openHsbPicker()` (line 2173) updated to support index -2: reads initial H/S/B from add-layer inputs instead of `layers[idx]`.
+- Click handler wired on `colorPreview` in DOMContentLoaded (line 8057).
+
+### Previously in this session (April 8-10)
+- Made `HELPER_MO_BLINK` and `HELPER_KP_BLINK` always included in output when "Include Helpers" is checked (previously conditional on having matching blink macros).
+- Updated `GUIDE_HTML` with BLINK_SEQ description and MO_BLINK section.
+- Updated `GUIDE_CODE_FILES.blank` and `GUIDE_CODE_FILES.original` with current .dtsi files.
+
+### File size
+- 9996 → 10302 lines (+306 lines)
+
 ## 2026-04-08 — "How to Use" Guide Popup & Code Viewer
 
 ### Major addition — How to Use guide popup
