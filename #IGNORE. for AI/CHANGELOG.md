@@ -641,6 +641,25 @@ Coverage note: this reflects everything I can reliably reconstruct from availabl
 - **Macro step param controls**: `renderParamControl()` direction and enum dropdown options also get `title` attributes.
 - **Search picker descriptions**: `vpBuildChoices()` now uses `PARAM_DESCS` for detailed descriptions instead of generic category labels (e.g., "Toggle external power on/off" instead of "Power").
 
+## 2026-03-26 (Session 11, Continued) — Binding Picker Hover Descriptions, HSB Color Wheel, Blink Key Picker, Guide Update
+
+### New feature — Binding picker hover descriptions
+- Sticky bottom bar `#bpHoverDesc` added to binding picker dialog; shows description text when hovering over any `.behp-btn` or `.bp-sub-btn` button.
+- Action buttons in sub-panel now show inline description text via `.bp-action-desc` span and `title` attribute from `PARAM_DESCS`.
+
+### New feature — HSB color wheel in binding picker
+- When `&rgb_ug` actions are shown, a special **🎨 RGB_COLOR_HSB** button renders with `data-bp-hsb-pick` attribute instead of a normal action.
+- Clicking it reveals `#bpHsbInline` — an inline HSB color picker with SV canvas, hue bar, H/S/B numeric inputs, preview swatch, and Apply button.
+- New functions: `drawBpHsbSvCanvas()`, `updateBpHsbUI()`, `initBpHsbPicker()` (mirroring the existing HSB picker pattern but self-contained for the binding picker).
+- Apply button constructs `RGB_COLOR_HSB(h,s,b)` value and passes it to `selectBindingPickerValue()`.
+
+### New feature — Blink key picker dropdown
+- `#blinkKey` text input now accompanied by `#blinkKeyPicker` `<select>` dropdown pre-populated from `ZMK_KEYCODES` (letters, numbers, modifiers, navigation, control, locks, symbols, fkeys, numpad, media, editing, misc categories).
+- Selecting from dropdown auto-fills the text input; text input still accepts manual entry.
+
+### Guide update
+- Added "Tool Features" section to `GUIDE_HTML` before the Notes section, documenting: binding picker hover descriptions, HSB color wheel, blink key picker, and dtsi behavior editing.
+
 ## 2026-03-26 (Session 11)
 
 ### Bug fix — dtsi behaviors now editable

@@ -303,6 +303,9 @@
     .behp-btn:hover .behp-label { color: inherit; }
     .behp-btn.active .behp-label { color: rgba(255,255,255,0.85); }
     .behp-btn.hidden { display: none; }
+    .behp-hover-desc { position: sticky; bottom: 0; background: var(--bg); border-top: 1px solid var(--border); padding: 0.3em 0.6em; font-size: 0.78em; color: var(--accent2); min-height: 1.6em; line-height: 1.4; pointer-events: none; z-index: 2; }
+    .bp-sub-btn[data-bp-action] { position: relative; }
+    .bp-action-desc { display: block; font-size: 0.8em; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
 
     /* Multi-param sub-panel in binding picker */
     .bp-multi-row { display: flex; flex-wrap: wrap; gap: 0.5em; align-items: center; margin-bottom: 0.5em; }
@@ -689,7 +692,12 @@
             </div>
             <div class="input-group"><label>Name</label><input type="text" id="blinkName" placeholder="blink_macro" style="width:110px;"></div>
             <div class="input-group"><label>Label</label><input type="text" id="blinkLabel" placeholder="optional label" style="width:110px;"></div>
-            <div class="input-group" id="blinkKeyGroup"><label>Key</label><input type="text" id="blinkKey" placeholder="CAPS" style="width:80px;"></div>
+            <div class="input-group" id="blinkKeyGroup"><label>Key</label>
+              <div style="display:flex;gap:2px;align-items:center;">
+                <select id="blinkKeyPicker" style="width:100px;" title="Pick a ZMK keycode"><option value="">-- pick --</option></select>
+                <input type="text" id="blinkKey" placeholder="CAPS" style="width:80px;" title="Or type a keycode directly">
+              </div>
+            </div>
             <div class="input-group" id="blinkLayerGroup" style="display:none;"><label>Layer</label><select id="blinkLayer"></select></div>
             <div class="input-group"><label>Color</label><select id="blinkColor"></select></div>
             <div class="input-group"><label>Return</label><select id="blinkReturnColor"></select></div>
@@ -991,6 +999,7 @@
               <button class="search-clear" id="bpSearchClear" style="display:none;">&times;</button>
             </div>
             <div id="bpSections"></div>
+            <div class="behp-hover-desc" id="bpHoverDesc">&nbsp;</div>
             <div id="bpSubPanel" style="display:none;">
               <div style="display:flex;align-items:center;gap:0.5em;margin-bottom:0.5em;">
                 <button id="bpSubBack" style="font-size:0.82em;padding:2px 10px;cursor:pointer;background:var(--item-bg);border:1px solid var(--border);border-radius:4px;color:var(--text);">&larr; Back</button>
@@ -2097,6 +2106,118 @@ function drawSvCanvas(hue) {
   gradV.addColorStop(1, 'rgba(0,0,0,1)');
   ctx.fillStyle = gradV;
   ctx.fillRect(0, 0, w, h);
+}
+
+/* ---------- Inline HSB picker for binding picker ---------- */
+var bpHsbDragging = null; // 'sv' | 'hue' | null
+var bpHsbInited = false;
+
+function drawBpHsbSvCanvas(hue) {
+  var wrap = document.getElementById('bpHsbSvWrap');
+  if (!wrap) return;
+  var canvas = wrap.querySelector('canvas');
+  var ctx = canvas.getContext('2d');
+  var w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  var gradH = ctx.createLinearGradient(0, 0, w, 0);
+  gradH.addColorStop(0, '#ffffff');
+  gradH.addColorStop(1, 'hsl(' + hue + ',100%,50%)');
+  ctx.fillStyle = gradH;
+  ctx.fillRect(0, 0, w, h);
+  var gradV = ctx.createLinearGradient(0, 0, 0, h);
+  gradV.addColorStop(0, 'rgba(0,0,0,0)');
+  gradV.addColorStop(1, 'rgba(0,0,0,1)');
+  ctx.fillStyle = gradV;
+  ctx.fillRect(0, 0, w, h);
+}
+
+function updateBpHsbUI(h, s, b) {
+  var hIn = document.getElementById('bpHsbH');
+  var sIn = document.getElementById('bpHsbS');
+  var bIn = document.getElementById('bpHsbB');
+  if (hIn) hIn.value = h;
+  if (sIn) sIn.value = s;
+  if (bIn) bIn.value = b;
+  var preview = document.getElementById('bpHsbPreview');
+  if (preview) preview.style.background = hsbToHex(h, s, b);
+  var svWrap = document.getElementById('bpHsbSvWrap');
+  if (svWrap) {
+    var cur = svWrap.querySelector('.hsbp-sv-cursor');
+    cur.style.left = (s / 100 * svWrap.offsetWidth) + 'px';
+    cur.style.top = ((1 - b / 100) * svWrap.offsetHeight) + 'px';
+  }
+  var hueWrap = document.getElementById('bpHsbHueWrap');
+  if (hueWrap) {
+    var hCur = hueWrap.querySelector('.hsbp-hue-cursor');
+    hCur.style.left = (h / 360 * hueWrap.offsetWidth) + 'px';
+  }
+}
+
+function initBpHsbPicker() {
+  var svWrap = document.getElementById('bpHsbSvWrap');
+  var hueWrap = document.getElementById('bpHsbHueWrap');
+  if (!svWrap || !hueWrap) return;
+
+  // Draw hue bar
+  var hueCanvas = hueWrap.querySelector('canvas');
+  var hctx = hueCanvas.getContext('2d');
+  var hGrad = hctx.createLinearGradient(0, 0, hueCanvas.width, 0);
+  for (var i = 0; i <= 6; i++) hGrad.addColorStop(i / 6, 'hsl(' + (i * 60) + ',100%,50%)');
+  hctx.fillStyle = hGrad;
+  hctx.fillRect(0, 0, hueCanvas.width, hueCanvas.height);
+
+  // Draw initial SV canvas
+  var curH = parseInt(document.getElementById('bpHsbH').value) || 0;
+  drawBpHsbSvCanvas(curH);
+
+  function handleSv(e) {
+    var rect = svWrap.getBoundingClientRect();
+    var x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+    var y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
+    var s = Math.round(x / rect.width * 100);
+    var b = Math.round((1 - y / rect.height) * 100);
+    var h = parseInt(document.getElementById('bpHsbH').value) || 0;
+    updateBpHsbUI(h, s, b);
+  }
+  function handleHue(e) {
+    var rect = hueWrap.getBoundingClientRect();
+    var x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+    var h = Math.round(x / rect.width * 360);
+    var s = parseInt(document.getElementById('bpHsbS').value) || 0;
+    var b = parseInt(document.getElementById('bpHsbB').value) || 0;
+    drawBpHsbSvCanvas(h);
+    updateBpHsbUI(h, s, b);
+  }
+
+  svWrap.onmousedown = function(e) { bpHsbDragging = 'sv'; handleSv(e); e.preventDefault(); };
+  hueWrap.onmousedown = function(e) { bpHsbDragging = 'hue'; handleHue(e); e.preventDefault(); };
+
+  // Attach global handlers only once
+  if (!bpHsbInited) {
+    bpHsbInited = true;
+    document.addEventListener('mousemove', function(e) {
+      if (!bpHsbDragging) return;
+      if (bpHsbDragging === 'sv') handleSv(e);
+      else if (bpHsbDragging === 'hue') handleHue(e);
+    });
+    document.addEventListener('mouseup', function() { bpHsbDragging = null; });
+  }
+
+  // Numeric inputs
+  var hIn = document.getElementById('bpHsbH');
+  var sIn = document.getElementById('bpHsbS');
+  var bIn = document.getElementById('bpHsbB');
+  function handleNum() {
+    var h = parseInt(hIn.value) || 0, s = parseInt(sIn.value) || 0, bv = parseInt(bIn.value) || 0;
+    drawBpHsbSvCanvas(h);
+    updateBpHsbUI(h, s, bv);
+  }
+  hIn.oninput = hIn.onchange = handleNum;
+  sIn.oninput = sIn.onchange = handleNum;
+  bIn.oninput = bIn.onchange = handleNum;
+
+  // Init UI
+  updateBpHsbUI(curH, parseInt(sIn.value) || 0, parseInt(bIn.value) || 0);
 }
 
 function updateHsbPickerUI(h, s, b) {
@@ -6029,8 +6150,30 @@ function showBindingPickerSubPanel(prefix) {
     searchWrap.style.display = 'none';
     var actions = BP_ACTION_MAP[prefix].list();
     scroll.innerHTML = '<div class="keycode-grid">' + actions.map(function(a) {
-      return '<button class="keycode-btn bp-sub-btn" data-bp-action="' + esc(a) + '">' + esc(a) + '</button>';
+      var desc = PARAM_DESCS[a] || '';
+      if (a.indexOf('RGB_COLOR_HSB') === 0) {
+        return '<button class="keycode-btn bp-sub-btn" data-bp-hsb-pick="1" title="' + esc(desc || 'Pick a custom HSB color') + '" style="flex-direction:column;text-align:center;border-color:var(--accent);">' +
+          '&#127912; RGB_COLOR_HSB</button>';
+      }
+      return '<button class="keycode-btn bp-sub-btn" data-bp-action="' + esc(a) + '" title="' + esc(desc) + '" style="flex-direction:column;text-align:center;">' +
+        esc(a) + '</button>';
     }).join('') + '</div>';
+    // If this is RGB actions, append inline HSB picker (hidden until triggered)
+    if (prefix === '&rgb_ug') {
+      scroll.innerHTML +=
+        '<div id="bpHsbInline" style="display:none;margin-top:0.5em;padding:0.5em;border:1px solid var(--border);border-radius:6px;background:var(--item-bg);">' +
+        '<div style="font-weight:600;font-size:0.82em;color:var(--accent2);margin-bottom:0.3em;">&#127912; Pick HSB Color</div>' +
+        '<div class="hsbp-sv-wrap" id="bpHsbSvWrap"><canvas width="208" height="150"></canvas><div class="hsbp-sv-cursor"></div></div>' +
+        '<div class="hsbp-hue-wrap" id="bpHsbHueWrap"><canvas width="208" height="18"></canvas><div class="hsbp-hue-cursor"></div></div>' +
+        '<div class="hsbp-row" style="margin-top:0.3em;">' +
+          '<div class="input-group"><label>H</label><input type="number" min="0" max="360" id="bpHsbH" value="0"></div>' +
+          '<div class="input-group"><label>S</label><input type="number" min="0" max="100" id="bpHsbS" value="100"></div>' +
+          '<div class="input-group"><label>B</label><input type="number" min="0" max="100" id="bpHsbB" value="50"></div>' +
+          '<div class="hsbp-preview" id="bpHsbPreview" style="width:32px;height:32px;border-radius:4px;border:1px solid var(--border);"></div>' +
+        '</div>' +
+        '<button id="bpHsbApply" style="margin-top:0.4em;font-size:0.85em;padding:0.35em 1.2em;cursor:pointer;background:var(--accent);color:#fff;border:1px solid var(--accent);border-radius:4px;">\u2713 Apply Color</button>' +
+        '</div>';
+    }
   } else if (BP_KC_BEHAVIORS.indexOf(prefix) > -1) {
     // Single keycode behaviors (kp, kt, sk)
     title.textContent = prefix + ' \u2014 Select Keycode';
@@ -7706,6 +7849,21 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('darkToggle').onclick = toggleDarkMode;
 
   // --- Binding picker popup event handlers ---
+  // Hover description bar: show title/desc on hover over any behp-btn or bp-sub-btn
+  (function() {
+    var descBar = document.getElementById('bpHoverDesc');
+    document.getElementById('bindingPickerOverlay').addEventListener('mouseover', function(e) {
+      var btn = e.target.closest('.behp-btn') || e.target.closest('.bp-sub-btn');
+      if (btn && descBar) {
+        var desc = btn.getAttribute('title') || btn.dataset.bpVal || btn.dataset.bpParam || btn.dataset.bpAction || btn.dataset.bpKc || '';
+        descBar.textContent = desc || '\u00a0';
+      }
+    });
+    document.getElementById('bindingPickerOverlay').addEventListener('mouseout', function(e) {
+      var btn = e.target.closest('.behp-btn') || e.target.closest('.bp-sub-btn');
+      if (btn && descBar) descBar.textContent = '\u00a0';
+    });
+  })();
   // Open picker on trigger button click
   document.addEventListener('click', function(e) {
     var trigger = e.target.closest('.bp-trigger');
@@ -7761,6 +7919,24 @@ document.addEventListener('DOMContentLoaded', function() {
     // Sub-panel action click
     var actBtn = e.target.closest('.bp-sub-btn[data-bp-action]');
     if (actBtn) { selectBindingPickerValue(bpKeycodePrefix + ' ' + actBtn.dataset.bpAction); return; }
+    // HSB color pick button → show inline picker
+    var hsbBtn = e.target.closest('[data-bp-hsb-pick]');
+    if (hsbBtn) {
+      var hsbPanel = document.getElementById('bpHsbInline');
+      if (hsbPanel) {
+        hsbPanel.style.display = '';
+        initBpHsbPicker();
+      }
+      return;
+    }
+    // HSB Apply button → build RGB_COLOR_HSB(h,s,b) value
+    if (e.target.id === 'bpHsbApply' || e.target.closest('#bpHsbApply')) {
+      var h = parseInt(document.getElementById('bpHsbH').value) || 0;
+      var s = parseInt(document.getElementById('bpHsbS').value) || 0;
+      var b = parseInt(document.getElementById('bpHsbB').value) || 0;
+      selectBindingPickerValue(bpKeycodePrefix + ' RGB_COLOR_HSB(' + h + ',' + s + ',' + b + ')');
+      return;
+    }
     // Multi-param Apply button
     if (e.target.id === 'bpMultiApply' || e.target.closest('#bpMultiApply')) {
       var mpConfig = getBpMultiParamConfig(bpKeycodePrefix);
@@ -7978,6 +8154,27 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('blinkLayerGroup').style.display = isMo ? '' : 'none';
     document.getElementById('blinkExperimentalNote').style.display = isMo ? '' : 'none';
   };
+
+  // Populate blink key picker dropdown from ZMK_KEYCODES
+  (function() {
+    var sel = document.getElementById('blinkKeyPicker');
+    if (!sel) return;
+    var cats = ['letters','numbers','modifiers','navigation','control','locks','symbols','fkeys','numpad','media','editing','misc'];
+    cats.forEach(function(cat) {
+      if (!ZMK_KEYCODES[cat]) return;
+      var grp = document.createElement('optgroup');
+      grp.label = cat.charAt(0).toUpperCase() + cat.slice(1);
+      ZMK_KEYCODES[cat].forEach(function(k) {
+        var o = document.createElement('option');
+        o.value = k; o.textContent = k;
+        grp.appendChild(o);
+      });
+      sel.appendChild(grp);
+    });
+    sel.onchange = function() {
+      if (this.value) document.getElementById('blinkKey').value = this.value;
+    };
+  })();
 
   // Macro editor sub-window wiring
   document.getElementById('meditType').onchange = function() {
@@ -9638,6 +9835,7 @@ document.addEventListener('DOMContentLoaded', function() {
     '<p><button class="guide-file-btn" data-view-code="blank">&#128196; View Blank Template (corne-rgb-blank.dtsi)</button></p>' +
     '<hr>' +
     '<h2>Order of Operations</h2>' +
+    '<p><strong>IMPORTANT:</strong> In your <code>.keymap</code> add <code>#include keyboard_rgb.dtsi</code> to the top of the file; where all the other <code>#include</code>s are.</p>' +
     '<ol>' +
     '<li>Just <code>#define</code> a layer, the name doesn\'t matter. What\'s important is the number. This number is what ZMK relates the new variable (the new defined layer name) to the layers in the keymap.<br>' +
     '1a. Then <code>#define</code> a color for the &quot;layer&quot; (we are using a &quot;new&quot; define, RGB_LAYER), these will be used for our &quot;new&quot; colors and &quot;return&quot; colors.</li>' +
@@ -9705,6 +9903,16 @@ document.addEventListener('DOMContentLoaded', function() {
     '<pre><code>#define BLINK_ON     RGB_COLOR_HSB(39,100,75) // BLINK Color\n\n    blnk: blnk {\n        compatible = &quot;zmk,behavior-macro-one-param&quot;;\n        label = &quot;Configurable Blink Macro&quot;;\n        #binding-cells = &lt;1&gt;;\n        wait-ms = &lt;0&gt;;\n        tap-ms  = &lt;0&gt;;\n        bindings = &lt;\n            &amp;macro_param_1to1\n            &amp;macro_tap &amp;kp MACRO_PLACEHOLDER\n            BLINK_SEQ(BLINK_ON, RGB_XTRA, 80)\n        &gt;;</code></pre>' +
     '<p>Last we have a momentary blink macro that I use for &quot;temp layers&quot;, you could probably bind this with a &quot;&amp;to&quot; function but I haven\'t messed around too much with it. I use this only for my function keys. Still experimental, sometimes LEDs dont &quot;change back&quot; when you press the layer too quickly; Potential fix? might be to add a &quot;return&quot; color at the end of the macro.</p>' +
     '<pre><code>#define MO_BLINK(node_name, node_label, layer, blink_color, return_color, wait) \\\n        ZMK_MACRO(node_name, \\\n            label = node_label; \\\n            bindings = &lt;&amp;macro_press &amp;mo layer BLINK_SEQ(blink_color, return_color, wait)&gt;, \\\n                       &lt;&amp;macro_pause_for_release&gt;, \\\n                       &lt;&amp;macro_release &amp;mo layer&gt;; \\\n        )</code></pre>' +
+    '<hr>' +
+    '<h2>Tool Features</h2>' +
+    '<h3>Keymap Binding Picker</h3>' +
+    '<p>Click any key slot in the <strong>Keymap Editor</strong> to open the binding picker. Each behavior category shows action buttons with <strong>hover descriptions</strong> &mdash; hold your cursor over any option to see what it does in the description bar at the bottom of the picker.</p>' +
+    '<h3>HSB Color Wheel (Binding Picker)</h3>' +
+    '<p>When adding an <code>&amp;rgb_ug</code> binding, clicking <strong>&#127912; RGB_COLOR_HSB</strong> opens an inline color wheel. Drag the saturation/brightness canvas and hue bar to pick a color visually, or type exact H/S/B values. Press <strong>Apply Color</strong> to insert the binding.</p>' +
+    '<h3>Blink Key Picker</h3>' +
+    '<p>In the <strong>Blink / Status Macros</strong> section, the Key field now includes a <strong>dropdown picker</strong> of valid ZMK keycodes (letters, modifiers, navigation, function keys, etc.) alongside the text input. Pick from the dropdown or type directly.</p>' +
+    '<h3>Editing .dtsi Behaviors</h3>' +
+    '<p>Behaviors parsed from your <code>.dtsi</code> file now appear in the Behaviors list with a <em>dtsi</em> badge. You can <strong>edit</strong> them (including <code>hold-trigger-key-positions</code> and all hold-tap properties). Saving promotes the behavior to <code>.keymap</code> output.</p>' +
     '<hr>' +
     '<h2>Notes</h2>' +
     '<ul>' +
