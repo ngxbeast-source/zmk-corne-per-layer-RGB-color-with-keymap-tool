@@ -15,6 +15,7 @@
  * DONT! DELETE };, {, >;, ) SYMBOLS!
  * REFER TO THE ORIGINAL .dtsi FOR REFERENCE
  * VIEW THIS IN VSCODE IN THE DEVICETREE LANGUAGE MODE FOR BETTER READABILITY
+ * IF NEEDED refer to the "completed" corne-rgb.dtsi for reference. 
  */
 
 /* ---- STEP 1: DEFINE LAYERS ---- */
@@ -34,7 +35,7 @@
 /* USE THE HELPERS FOR REFERENCE TO BUILD YOUR MACROS AND/OR BEHAVIORS. NOTHING HAS TO BE CHANGED HERE */
 /* ---- (OPTIONAL) BLINK HELPERS ---- */
 // "flashes" LEDs a chosen color twice, blink speed can be adjusted with the "wait" modifier.
-// UNCOMMENT /*...*/ (Lines 40 & 70) TO USE. "BLINK" macros won't work without this.  
+// UNCOMMENT /*...*/ (Lines 41 & 71) TO USE. "BLINK" macros won't work without this.  
 
 // Multiple Color definitions can be made as needed. Names are arbitary as long as the name relates to the the color make it whatever you want. 
 /* #define BLINK_ON     RGB_COLOR_HSB(39,100,75) // BLINK Color
@@ -126,9 +127,9 @@
 
 
 
-                /* -------------------END DEFINES------------------- */
+                /* -------------------END of DEFINES------------------- */
 
-                /* -------------------MACRO BUILD START------------------- */
+                /* -------------------vvvMACRO BUILD STARTvvv------------------- */
 
 
 
@@ -138,7 +139,7 @@
 / {
     macros {
     /* ---- (OPTIONAL) BLINK/STATUS MACROS ---- 
-     * UNCOMMENT (lines 142 & 157) IF YOU WANT TO USE. */
+     * UNCOMMENT (lines 143 & 158) IF YOU WANT TO USE. COLORS AND LAYERS MUST BE ASSIGNED IN THE DEFINE SECTION*/
 /*  // "Unviversal BLINK" can be bound to any key in ZMK.Studio (EXPERIMENTAL, assigned key will "blink")
     blnk: blnk {
         compatible = "zmk,behavior-macro-one-param";
@@ -152,7 +153,7 @@
             BLINK_SEQ(BLINK_ON, BLINK_OFF, 80)
         >;
     }; 
-    // For Our "Tap-Dance"
+    // EXPERIMENTAL TAP-DANCE BLINK(STANDALONE)
     KP_BLINK(c_blink, "CAPS LOCK + BLINK", CAPS, C_BLINK_ON, RGB_ABC, 80)
     KP_BLINK(n_blink, "NUM LOCK + BLINK", KP_NUMLOCK, N_BLINK_ON, RGB_ABC, 80) */
 
@@ -165,7 +166,7 @@
     behaviors {
     /* ---- (OPTIONAL) Tap dance ---- */
     /* Define tap dance behaviors here if needed
-        //UNCOMMENT (lines 170 & 175) TO USE 
+        //UNCOMMENT (lines 171 & 176) TO USE 
         //TAP DANCE FOR SHIFT CAPS AND NUMLOCK; DIFFERENT COLOR BLINK FOR WHEN EACH IS TOGGLED.
 /*        td_numcaps: td_numcapsBLINK {
         compatible = "zmk,behavior-tap-dance";
@@ -185,7 +186,6 @@
         // Example:
         // COMBO(my_combo, &kp ESC, 0, 1, LAYER_BASE)
                 /* -------------------REMOVE & BUILD HERE------------------- */
-    };
     };
 };
                 /* -------------------.DTSI BUILD END------------------- */

@@ -116,21 +116,24 @@
 #define CMB(name, bind, p1, p2, ...) \
     name { bindings = <bind>; key-positions = <p1 p2>; layers = <__VA_ARGS__>; timeout-ms = <50>; }
  /{
+                /* -------------------END of DEFINES------------------- */
+
+                /* -------------------vvvMACRO BUILD STARTvvv------------------- */
     /* ---- STEP 2+3: MACROS (build macros for all needed behaviors/layers) ---- */
     macros {
         /* Toggled and momentary macros for RGB layers */
         /* Momentary Layers:
         These are bound to a hold-tap behavior for full effect */
-        MO_RGB(mo_rgb_xtra2, "xtra2Layer Momentary LED Macro", XTR2, RGB_XTR2, RGB_ABC)
-        MO_RGB(mo_rgb_kpad, "KeyPadLayer Momentary LED Macro", KPAD, RGB_KPAD, RGB_ABC)
-        MO_RGB(mo_rgb_xtra, "ExtraLayer Momentary LED Macro", XTRA, RGB_XTRA, RGB_ABC)
-        MO_RGB(mo_rgb_nmrw, "NumberRowLayer Momentary LED Macro", NMRW, RGB_NMRW, RGB_ABC)
-        MO_RGB(mo_rgb_gfun, "GameLayer Sublayer Momentary LED Macro", GFUN, RGB_GFUN, RGB_GAME)
-        MO_RGB(mo_rgb_t2_s1, "ToggleLayer2 SubLayer1 Momentary LED Macro", TGLLR_2_SUBLR_1, RGB_TGLLR_2_SUBLR_1, RGB_TGLLR_2)
-        MO_RGB(mo_rgb_t1_s1, "ToggleLayer1 Sublayer1 Momentary LED Macro", TGLLR_1_SUBLR_1, RGB_TGLLR_1_SUBLR_1, RGB_TGLLR_1)
-        MO_RGB(mo_rgb_g2_s1, "GameLayer2 SubLayer1 Momentary LED Macro", GAME2_SUBLR1, RGB_GAME2_SUBLR1, RGB_GAME2) 
+        MO_RGB(mo_rgb_xtra2, "xtra2Layer Momentary LED", XTR2, RGB_XTR2, RGB_ABC)
+        MO_RGB(mo_rgb_kpad, "KeyPadLayer Momentary LED", KPAD, RGB_KPAD, RGB_ABC)
+        MO_RGB(mo_rgb_xtra, "ExtraLayer Momentary LED", XTRA, RGB_XTRA, RGB_ABC)
+        MO_RGB(mo_rgb_nmrw, "NumberRowLayer Momentary LED", NMRW, RGB_NMRW, RGB_ABC)
+        MO_RGB(mo_rgb_gfun, "GameLayer Sublayer Momentary LED", GFUN, RGB_GFUN, RGB_GAME)
+        MO_RGB(mo_rgb_t2_s1, "ToggleLayer2 SubLayer1 Momentary LED", TGLLR_2_SUBLR_1, RGB_TGLLR_2_SUBLR_1, RGB_TGLLR_2)
+        MO_RGB(mo_rgb_t1_s1, "ToggleLayer1 Sublayer1 Momentary LED", TGLLR_1_SUBLR_1, RGB_TGLLR_1_SUBLR_1, RGB_TGLLR_1)
+        MO_RGB(mo_rgb_g2_s1, "GameLayer2 SubLayer1 Momentary LED", GAME2_SUBLR1, RGB_GAME2_SUBLR1, RGB_GAME2) 
 
-        /* Sub-Base Toggle Layers::
+        /* Sub-Base Toggle Layers:
         These are bound straight to the keymap, OR to a combo. */
         TO_RGB(to_rgb_default, "Base Layer LED", ABC, RGB_ABC)
         TO_RGB(to_rgb_t1, "ToggleLayer1 LED", TGLLR_1, RGB_TGLLR_1)
@@ -140,8 +143,8 @@
         TO_RGB(to_rgb_g2, "Toggle Game2 LED", GAME2, RGB_GAME2)
 
         //Gateways
-        TO_RGB_PRESS(top_rgb_toglayers, "ToggleLayer LED", TGL, RGB_TGL)
-        TO_RGB_PRESS(top_rgb_gtgl, "gametoggle LED Macro", GAMETGL, RGB_GAMETGL)
+        TO_RGB_PRESS(top_rgb_toglayers, "ToggleLayer Gateway", TGL, RGB_TGL)
+        TO_RGB_PRESS(top_rgb_gtgl, "Game Gateway", GAMETGL, RGB_GAMETGL)
     };
     /* ---- (optional) BLINK/STATUS MACROS ---- */
     blnk: blnk {
@@ -156,7 +159,7 @@
             BLINK_SEQ(BLINK_ON, RGB_XTRA, 80)
         >;
     };
-    // EXPERIMENTAL (STANDALONE)
+        // EXPERIMENTAL TAP-DANCE BLINK(STANDALONE)
         KP_BLINK(c_blink, "CAPS LOCK + BLINK", CAPS, C_BLINK_ON, RGB_ABC, 80)
         KP_BLINK(n_blink, "NUM LOCK + BLINK", KP_NUMLOCK, N_BLINK_ON, RGB_ABC, 80)
 
@@ -179,6 +182,14 @@
 
         RGB_HT(BLINK_ht_f, "f blink test; &kp BINDABEL", f_blink_sa)
 
+        // EXPERIMENTAL TAP-DANCE BLINK(STANDALONE)
+        td_numcaps: td_numcapsBLINK {
+            compatible = "zmk,behavior-tap-dance";
+            #binding-cells = <0>;
+            tapping-term-ms = <300>;
+            bindings = <&kp LSFT>, <&c_blink>, <&n_blink>;
+        };
+        // ZMK BEHAVIORS
         hm: homerow_mods {
             compatible = "zmk,behavior-hold-tap";
             label = "HOMEROW_MODS";
@@ -198,13 +209,6 @@
             tapping-term-ms = <600>;
             global-quick-tap;
             quick-tap-ms = <400>;
-        };
-        /* BLINK Tap dance */
-        td_numcaps: td_numcapsBLINK {
-            compatible = "zmk,behavior-tap-dance";
-            #binding-cells = <0>;
-            tapping-term-ms = <300>;
-            bindings = <&kp LSFT>, <&c_blink>, <&n_blink>;
         };
          hml: hml {
             compatible = "zmk,behavior-hold-tap";

@@ -18,7 +18,7 @@
         abc_0 {
             display-name = "ABC";
             bindings = <
-&kp ESC      &kp Q  &kp W           &kp E        &kp R                     &kp T                     &kp Y                 &kp U                   &kp I          &kp O            &kp P               &kp BSPC
+&kp ESC      &kp Q  &kp W           &kp E        &kp R                   &kp T                     &kp Y                 &kp U                   &kp I          &kp O            &kp P               &kp BSPC
 &td_numcaps  &kp A  &hm LEFT_ALT S  &hm LCTRL D  &hm LEFT_SHIFT F        &kp G                     &kp H                 &hm RSHIFT J            &hm RCTRL K    &hm RIGHT_ALT L  &hm RGUI SEMICOLON  &kp SQT
 &kp LCTRL    &kp Z  &kp X           &kp C        &kp V                   &kp B                     &kp N                 &kp M                   &kp COMMA      &kp DOT          &kp FSLH            &kp ESC
                                     &kp TAB      &RGB_ht_nmrw 0 SPACE  &RGB_ht_kpad 0 ENTER    &RGB_ht_xtra 0 DEL  &RGB_ht_xtra2 0 LEFT  &hm F11 RIGHT
@@ -28,7 +28,7 @@
         nmrw_1 {
             display-name = "NMRW";
             bindings = <
-&BLINK_ht_f 0 ESC  &kp N1  &kp N2         &kp N3       &kp N4       &kp N5    &kp N6     &kp N7        &kp N8         &kp N9         &kp N0    &kp BSPC
+&BLINK_ht_f 0 ESC    &kp N1  &kp N2         &kp N3       &kp N4       &kp N5    &kp N6     &kp N7        &kp N8         &kp N9         &kp N0    &kp BSPC
 &trans               &none   &kp PAGE_DOWN  &kp UP       &kp PAGE_UP  &none     &kp MINUS  &kp EQUAL     &none          &none          &kp SQT   &kp GRAVE
 &trans               &none   &kp LEFT       &kp DOWN     &kp RIGHT    &none     &kp LBKT   &kp RBKT      &kp RS(PG_UP)  &kp RS(PG_DN)  &kp BSLH  &kp DEL
                                             &bootloader  &none        &none     &trans     &kp LC(LEFT)  &kp LC(RIGHT)
@@ -82,20 +82,20 @@
         game_6 {
             display-name = "GAME";
             bindings = <
-                &hm TAB ESCAPE  &kp Q  &kp W  &kp E         &kp R      &kp T                   &kp Y     &kp U    &kp I            &kp O              &kp P     &kp BSPC
-                &kp LSHFT       &kp A  &kp S  &kp D         &kp F      &kp G                   &kp H     &kp J    &kp K            &kp L              &kp SEMI  &kp SQT
-                &kp LCTRL       &kp Z  &kp X  &kp C         &kp V      &kp B                   &kp N     &kp M    &kp RS(PAGE_UP)  &kp RS(PAGE_DOWN)  &kp FSLH  &kp ESC
-                                              &kp LEFT_ALT  &kp SPACE  &RGB_ht_gfun 0 ENTER    &kp LALT  &kp TAB  &kp LEFT
+&hm TAB ESCAPE  &kp Q  &kp W  &kp E         &kp R      &kp T                   &kp Y     &kp U    &kp I            &kp O              &kp P     &kp BSPC
+&kp LSHFT       &kp A  &kp S  &kp D         &kp F      &kp G                   &kp H     &kp J    &kp K            &kp L              &kp SEMI  &kp SQT
+&kp LCTRL       &kp Z  &kp X  &kp C         &kp V      &kp B                   &kp N     &kp M    &kp RS(PAGE_UP)  &kp RS(PAGE_DOWN)  &kp FSLH  &kp ESC
+                              &kp LEFT_ALT  &kp SPACE  &RGB_ht_gfun 0 ENTER    &kp LALT  &kp TAB  &kp LEFT
             >;
         };
 
         gfun_7 {
             display-name = "GFUN";
             bindings = <
-&trans         &kp N1  &kp W   &kp N2      &kp N3  &none    &kp KP_N7   &kp KP_N8  &kp KP_N9     &kp KP_DIVIDE  &kp KP_MULTIPLY  &kp KP_MINUS
-&kp LS(GRAVE)  &kp A   &kp S   &kp D       &kp N4  &none    &kp KP_N4   &kp KP_N5  &kp KP_N6     &none          &none            &kp KP_PLUS
-&none          &kp F1  &kp F2  &kp F3      &kp F4  &none    &kp KP_N1   &kp KP_N2  &none         &none          &out OUT_TOG     &kp PAGE_UP
-                               &kp LA(F4)  &none   &none    &kp KP_DOT  &kp KP_N3  &kp KP_ENTER
+&kp LS(GRAVE)   &kp N1  &kp W   &kp N2      &kp N3  &none    &kp KP_N7   &kp KP_N8  &kp KP_N9         &kp KP_DIVIDE            &kp KP_MULTIPLY  &kp KP_MINUS
+&trans          &kp A   &kp S   &kp D       &kp N4  &none    &kp KP_N4   &kp KP_N5  &kp KP_N6         &none                    &none            &kp KP_PLUS
+&trans          &kp F1  &kp F2  &kp F3      &kp F4  &none    &kp KP_N1   &kp KP_N2  &kp C_VOLUME_DOWN &kp C_VOLUME_UP          &out OUT_TOG     &kp PAGE_UP
+                                &kp LA(F4)  &none   &none    &kp KP_DOT  &kp KP_N3  &kp KP_ENTER
             >;
         };
 
@@ -103,9 +103,9 @@
             display-name = "GTGL";
             bindings = <
 &to_rgb_g2  &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
-&none    &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
-&none    &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
-                       &none  &none  &none    &none  &none  &none
+&none       &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
+&none       &none  &none  &none  &none  &none    &none  &none  &none  &none  &none  &none
+                          &none  &none  &none    &none  &none  &none
             >;
 
             label = "GTGL";
@@ -125,10 +125,10 @@
 
         game2_sublayer1_10 {
             bindings = <
-&kp ESC  &kp Q  &kp W  &kp E  &kp R      &kp T         &kp Y      &kp U  &kp I      &kp O    &kp P     &kp BSPC
-&trans   &kp A  &kp S  &kp D  &kp F      &kp G         &kp H      &kp J  &kp K      &kp L    &kp SEMI  &kp APOS
-&none    &kp Z  &kp X  &kp C  &kp V      &kp B         &kp N      &kp M  &kp COMMA  &kp DOT  &none     &none
-                       &none  &kp SPACE  &to_rgb_g2_s1    &kp ENTER  &none  &none
+&kp ESC  &kp Q  &kp W  &kp E  &kp R      &kp T            &kp Y      &kp U  &kp I      &kp O    &kp P     &kp BSPC
+&trans   &kp A  &kp S  &kp D  &kp F      &kp G            &kp H      &kp J  &kp K      &kp L    &kp SEMI  &kp APOS
+&none    &kp Z  &kp X  &kp C  &kp V      &kp B            &kp N      &kp M  &kp COMMA  &kp DOT  &none     &none
+                       &none  &kp SPACE  &none            &kp ENTER  &none  &to_rgb_g2
             >;
 
             label = "G2.1";
