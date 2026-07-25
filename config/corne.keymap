@@ -21,7 +21,7 @@
 &kp ESC      &kp Q  &kp W           &kp E        &kp R                   &kp T                     &kp Y                 &kp U                   &kp I          &kp O            &kp P               &kp BSPC
 &td_numcaps  &kp A  &hm LEFT_ALT S  &hm LCTRL D  &hm LEFT_SHIFT F        &kp G                     &kp H                 &hm RSHIFT J            &hm RCTRL K    &hm RIGHT_ALT L  &hm RGUI SEMICOLON  &kp SQT
 &kp LCTRL    &kp Z  &kp X           &kp C        &kp V                   &kp B                     &kp N                 &kp M                   &kp COMMA      &kp DOT          &kp FSLH            &kp ESC
-                                    &kp TAB      &RGB_ht_nmrw 0 SPACE  &RGB_ht_kpad 0 ENTER    &RGB_ht_xtra 0 DEL  &RGB_ht_xtra2 0 LEFT  &hm F11 RIGHT
+                                    &kp TAB      &RGB_ht_nmrw 0 SPACE    &RGB_ht_kpad 0 ENTER      &RGB_ht_xtra 0 DEL    &RGB_ht_xtra2 0 LEFT    &hm F11 RIGHT
             >;
         };
 
@@ -30,7 +30,7 @@
             bindings = <
 &BLINK_ht_f 0 ESC    &kp N1  &kp N2         &kp N3       &kp N4       &kp N5    &kp N6     &kp N7        &kp N8         &kp N9         &kp N0    &kp BSPC
 &trans               &none   &kp PAGE_DOWN  &kp UP       &kp PAGE_UP  &none     &kp MINUS  &kp EQUAL     &none          &none          &kp SQT   &kp GRAVE
-&trans               &none   &kp LEFT       &kp DOWN     &kp RIGHT    &none     &kp LBKT   &kp RBKT      &kp RS(PG_UP)  &kp RS(PG_DN)  &kp BSLH  &kp DEL
+&trans               &none   &kp LEFT       &kp DOWN     &kp RIGHT    &none     &none      &none         &kp RS(PG_UP)  &kp RS(PG_DN)  &kp BSLH  &kp DEL
                                             &bootloader  &none        &none     &trans     &kp LC(LEFT)  &kp LC(RIGHT)
             >;
         };
@@ -38,10 +38,10 @@
         FKEY_2 {
             display-name = "FKEY";
             bindings = <
-&trans  &kp F1  &kp F2  &kp F3  &kp F4  &kp F5    &kp F6  &kp F7  &kp F8  &kp F9  &kp F10  &kp F11
-&trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans   &trans
-&trans  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans   &trans
-                        &none   &trans  &trans    &trans  &trans  &trans
+&trans  &kp F1  &kp F2       &kp F3    &kp F4           &kp F5   &kp F6  &kp F7     &kp F8     &kp F9        &kp F10   &kp F11
+&trans  &trans  &kp LEFT_ALT &kp LCTRL &kp LEFT_SHIFT   &trans   &trans  &kp RSHIFT &kp RCTRL  &kp RIGHT_ALT &kp RGUI  &trans
+&trans  &trans  &trans       &trans    &trans           &trans   &trans  &trans     &trans     &trans        &trans    &trans
+                             &none     &trans           &trans   &trans  &trans     &trans
             >;
 
             label = "FKEY";
@@ -50,9 +50,9 @@
         k_pd_3 {
             display-name = "KPAD";
             bindings = <
-&kp ESCAPE         &none      &kp F2            &none       &none              &kp F5           &kp KP_N7     &kp KP_N8  &kp KP_N9   &none     &none     &kp BSPC
-&trans             &none      &kp HOME          &kp UP      &kp END            &kp BACKSPACE    &kp KP_N4     &kp KP_N5  &kp KP_N6   &none     &kp UP    &none
-&hm (LC(X)) LC(C)  &kp LC(V)  &kp LC(LS(LEFT))  &kp DOWN    &kp LC(LS(RIGHT))  &kp RET          &kp KP_N1     &kp KP_N2  &kp KP_N3   &kp LEFT  &kp DOWN  &kp RIGHT
+&kp ESCAPE         &none      &kp F2            &none       &kp DEL            &kp F5           &kp KP_N7     &kp KP_N8  &kp KP_N9   &none     &none     &kp BSPC
+&trans             &none      &kp HOME          &kp UP      &kp END            &kp RET          &kp KP_N4     &kp KP_N5  &kp KP_N6   &none     &kp UP    &none
+&hm (LC(X)) LC(C)  &kp LC(V)  &kp LC(LS(LEFT))  &kp DOWN    &kp LC(LS(RIGHT))  &kp BACKSPACE    &kp KP_N1     &kp KP_N2  &kp KP_N3   &kp LEFT  &kp DOWN  &kp RIGHT
                                                 &kp LA(F4)  &none              &none            &kp KP_ENTER  &kp KP_N0  &kp KP_DOT
             >;
         };
