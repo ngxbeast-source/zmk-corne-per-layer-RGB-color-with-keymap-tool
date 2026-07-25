@@ -28,10 +28,10 @@
         nmrw_1 {
             display-name = "NMRW";
             bindings = <
-&BLINK_ht_f 0 ESC    &kp N1  &kp N2         &kp N3       &kp N4       &kp N5    &kp N6     &kp N7        &kp N8         &kp N9         &kp N0    &kp BSPC
-&trans               &none   &kp PAGE_DOWN  &kp UP       &kp PAGE_UP  &none     &kp MINUS  &kp EQUAL     &none          &none          &kp SQT   &kp GRAVE
-&trans               &none   &kp LEFT       &kp DOWN     &kp RIGHT    &none     &none      &none         &kp RS(PG_UP)  &kp RS(PG_DN)  &kp BSLH  &kp DEL
-                                            &bootloader  &none        &none     &trans     &kp LC(LEFT)  &kp LC(RIGHT)
+&BLINK_ht_f 0 ESC    &kp N1  &kp N2         &kp N3       &kp N4       &kp N5         &kp N6     &kp N7        &kp N8         &kp N9         &kp N0    &kp BSPC
+&trans               &none   &kp PAGE_DOWN  &kp UP       &kp PAGE_UP  &kp DEL        &kp MINUS  &kp EQUAL     &none          &none          &kp SQT   &kp GRAVE
+&trans               &none   &kp LEFT       &kp DOWN     &kp RIGHT    &kp BACKSPACE  &none      &none         &kp RS(PG_UP)  &kp RS(PG_DN)  &kp BSLH  &kp DEL
+                                            &bootloader  &none        &none          &trans     &kp LC(LEFT)  &kp LC(RIGHT)
             >;
         };
 
@@ -50,8 +50,8 @@
         k_pd_3 {
             display-name = "KPAD";
             bindings = <
-&kp ESCAPE         &none      &kp F2            &none       &kp DEL            &kp F5           &kp KP_N7     &kp KP_N8  &kp KP_N9   &none     &none     &kp BSPC
-&trans             &none      &kp HOME          &kp UP      &kp END            &kp RET          &kp KP_N4     &kp KP_N5  &kp KP_N6   &none     &kp UP    &none
+&kp ESCAPE         &none      &kp F2            &none       &none              &kp F5           &kp KP_N7     &kp KP_N8  &kp KP_N9   &none     &none     &kp BSPC
+&trans             &none      &kp HOME          &kp UP      &kp END            &kp DEL          &kp KP_N4     &kp KP_N5  &kp KP_N6   &none     &kp UP    &none
 &hm (LC(X)) LC(C)  &kp LC(V)  &kp LC(LS(LEFT))  &kp DOWN    &kp LC(LS(RIGHT))  &kp BACKSPACE    &kp KP_N1     &kp KP_N2  &kp KP_N3   &kp LEFT  &kp DOWN  &kp RIGHT
                                                 &kp LA(F4)  &none              &none            &kp KP_ENTER  &kp KP_N0  &kp KP_DOT
             >;
